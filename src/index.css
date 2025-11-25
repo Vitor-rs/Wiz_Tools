@@ -1,3 +1,79 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+    --font-sans: 'Inter', system-ui, sans-serif;
+}
+
+@layer base {
+    body {
+        @apply font-sans bg-gray-100 text-gray-900;
+    }
+}
+
+@layer utilities {
+    .custom-scrollbar::-webkit-scrollbar {
+        height: 10px;
+        width: 0px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 4px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+
+    .fixed-col-shadow {
+        box-shadow: 4px 0 6px -2px rgba(0, 0, 0, 0.1);
+    }
+
+    .tooltip-animate {
+        animation: fadeIn 0.15s ease-out forwards;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(2px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-flip-2 {
+        animation: flash-locate 2.5s ease-out forwards;
+    }
+
+    @keyframes flash-locate {
+        0% {
+            stroke: #3b82f6;
+            stroke-width: 4px;
+            transform: scale(1);
+            fill: #eff6ff;
+        }
+
+        15% {
+            stroke: #2563eb;
+            stroke-width: 6px;
+            transform: scale(1.15);
+            fill: #dbeafe;
+        }
+
+        30% {
+            transform: scale(1);
+        }
+
+        100% {
+            stroke-width: 0;
+        }
+    }
+}
