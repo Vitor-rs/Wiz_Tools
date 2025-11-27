@@ -1,0 +1,18 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "dev",
+			"path": "hori-web",
+			"problemMatcher": [],
+			"label": "npm: dev - hori-web",
+			"detail": "vite",
+			"presentation": {
+				"group": "dashboard",
+				"reveal": "always"
+			},
+			"isBackground": true
+		}
+	]
+}
