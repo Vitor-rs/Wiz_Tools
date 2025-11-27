@@ -1,9 +1,10 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { calculateContractClasses } from '../utils/simulation';
 import type { SimulationResult } from '../utils/simulation';
-import type { Config, SpecialDate, Tag } from '../types';
+import type { Config, SpecialDate, Tag, CalendarEvent } from '../types';
+import { parseISO, isBefore } from 'date-fns';
 
 interface SimulationContextType {
     config: Config;
@@ -12,33 +13,40 @@ interface SimulationContextType {
     specialDates: SpecialDate[];
     addSpecialDate: (date: SpecialDate) => void;
     removeSpecialDate: (id: string) => void;
-    updateSpecialDate: (date: SpecialDate) => void;
+    updateSpecialDate: (id: string, updates: Partial<SpecialDate>) => void;
     tags: Tag[];
     addTag: (tag: Tag) => void;
+    generatedClasses: CalendarEvent[];
+    generateMockedClasses: () => void;
 }
 
 const SimulationContext = createContext<SimulationContextType | undefined>(undefined);
 
 const DEFAULT_TAGS: Tag[] = [
-    { id: 'feriado', label: 'Feriado', color: '#ef4444' }, // red
-    { id: 'ferias', label: 'Férias', color: '#3b82f6' },   // blue
-    { id: 'recesso', label: 'Recesso', color: '#f59e0b' }, // amber
+    { id: 'feriado', label: 'Feriado', color: '#ef4444' },
+    { id: 'ferias', label: 'Férias', color: '#3b82f6' },
+    { id: 'recesso', label: 'Recesso', color: '#f59e0b' },
 ];
 
 export const SimulationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [config, setConfig] = useState<Config>({
+        studentName: '',
         startDate: '2025-03-01',
         contractDuration: 12,
         monthsDuration: 12,
-        days: [2, 4], // Default Tue/Thu
-        time: '00:00'
+        days: [2, 4],
+        time: '00:00',
+        daySchedules: [
+            { dayOfWeek: 2, startTime: '13:00', endTime: '14:00' },
+            { dayOfWeek: 4, startTime: '13:00', endTime: '14:00' },
+        ]
     });
 
     const [specialDates, setSpecialDates] = useState<SpecialDate[]>([]);
     const [tags, setTags] = useState<Tag[]>(DEFAULT_TAGS);
+    const [generatedClasses, setGeneratedClasses] = useState<CalendarEvent[]>([]);
 
-    // Calculate simulation whenever config changes (using useMemo instead of useEffect)
-    const simulationResult = React.useMemo(() => {
+    const simulationResult = useMemo(() => {
         if (config.startDate && config.days.length > 0) {
             return calculateContractClasses(config.startDate, config.days);
         }
@@ -57,12 +65,55 @@ export const SimulationProvider: React.FC<{ children: ReactNode }> = ({ children
         setSpecialDates(prev => prev.filter(d => d.id !== id));
     };
 
-    const updateSpecialDate = (updatedDate: SpecialDate) => {
-        setSpecialDates(prev => prev.map(d => d.id === updatedDate.id ? updatedDate : d));
+    const updateSpecialDate = (id: string, updates: Partial<SpecialDate>) => {
+        setSpecialDates(prev => prev.map(d => d.id === id ? { ...d, ...updates } : d));
     };
 
     const addTag = (tag: Tag) => {
         setTags(prev => [...prev, tag]);
+    };
+
+    const generateMockedClasses = () => {
+        if (!simulationResult) return;
+
+        const today = new Date();
+        const events: CalendarEvent[] = [];
+
+        simulationResult.validDates.forEach(dateStr => {
+            const classDate = parseISO(dateStr);
+            const isPast = isBefore(classDate, today);
+
+            if (isPast) {
+                const rand = Math.random();
+                if (rand < 0.85) {
+                    events.push({
+                        id: crypto.randomUUID(),
+                        date: dateStr,
+                        type: 'Normal',
+                        attended: true,
+                        late: Math.random() < 0.1,
+                        differentTime: false
+                    });
+                } else {
+                    events.push({
+                        id: crypto.randomUUID(),
+                        date: dateStr,
+                        type: 'Falta',
+                        attended: false
+                    });
+                }
+            } else {
+                events.push({
+                    id: crypto.randomUUID(),
+                    date: dateStr,
+                    type: 'Futuro',
+                    attended: false,
+                    differentTime: false
+                });
+            }
+        });
+
+        setGeneratedClasses(events);
     };
 
     return (
@@ -75,7 +126,9 @@ export const SimulationProvider: React.FC<{ children: ReactNode }> = ({ children
             removeSpecialDate,
             updateSpecialDate,
             tags,
-            addTag
+            addTag,
+            generatedClasses,
+            generateMockedClasses
         }}>
             {children}
         </SimulationContext.Provider>

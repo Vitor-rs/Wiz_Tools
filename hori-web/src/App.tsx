@@ -8,9 +8,6 @@ import { SimulationProvider, useSimulation } from "./context/SimulationContext";
 import type { CalendarEvent, Holiday } from "./types/index";
 import { IMMUTABLE_RULES } from "./config/rules";
 
-// Mock Data (can be replaced or merged with simulation)
-const MOCK_DATA: CalendarEvent[] = [];
-
 const AppContent: React.FC = () => {
   const [year, setYear] = useState(2025);
   const [hoveredData, setHoveredData] = useState<{ monthIndex: number; columnIndex: number } | null>(null);
@@ -18,7 +15,7 @@ const AppContent: React.FC = () => {
   const [flashingCell, setFlashingCell] = useState<string | null>(null);
   const [activePage, setActivePage] = useState("calendar");
 
-  const { config, simulationResult } = useSimulation();
+  const { config, simulationResult, generatedClasses, specialDates } = useSimulation();
 
   // Use holidays from rules
   const holidays: Holiday[] = IMMUTABLE_RULES.holidays.map(h => ({
@@ -50,7 +47,7 @@ const AppContent: React.FC = () => {
   };
 
   const handleMonthClick = (monthIndex: number) => {
-    const dateStr = `${ year } -${ String(monthIndex + 1).padStart(2, '0') }-01`;
+    const dateStr = `${year} -${String(monthIndex + 1).padStart(2, '0')}-01`;
     setFlashingCell(dateStr);
     setTimeout(() => setFlashingCell(null), 1000);
   };
@@ -72,17 +69,17 @@ const AppContent: React.FC = () => {
           <div className="flex flex-1 overflow-hidden relative bg-gray-50">
             {/* Months Sidebar (Fixed Left) */}
             <div className="flex-shrink-0 z-10 bg-white border-r border-gray-200 h-full">
-                <MonthsSidebar
-                    year={year}
-                    hoveredMonth={hoveredData?.monthIndex ?? null}
-                    onMonthClick={handleMonthClick}
-                />
+              <MonthsSidebar
+                year={year}
+                hoveredMonth={hoveredData?.monthIndex ?? null}
+                onMonthClick={handleMonthClick}
+              />
             </div>
 
             {/* Calendar Grid (Scrollable) */}
             <div className="flex-1 overflow-hidden relative">
               <CalendarGrid
-                data={MOCK_DATA}
+                data={generatedClasses}
                 year={year}
                 config={config}
                 holidays={holidays}
@@ -93,6 +90,7 @@ const AppContent: React.FC = () => {
                 onHolidayHover={handleHolidayHover}
                 onHolidayLeave={() => setTooltipData(null)}
                 simulationResult={simulationResult}
+                specialDates={specialDates}
               />
             </div>
           </div>

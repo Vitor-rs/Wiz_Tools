@@ -1,9 +1,17 @@
+export interface DaySchedule {
+  dayOfWeek: number; // 1=Monday, 2=Tuesday, etc.
+  startTime: string; // HH:mm
+  endTime: string; // HH:mm
+}
+
 export interface Config {
+  studentName?: string;
   startDate: string;
   contractDuration: number;
   monthsDuration: number;
   days: number[];
   time: string;
+  daySchedules?: DaySchedule[]; // Flexible schedules per day
 }
 
 export interface Holiday {

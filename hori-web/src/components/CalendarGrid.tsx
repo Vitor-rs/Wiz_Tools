@@ -1,7 +1,7 @@
 import React, { useMemo, useEffect, useRef, useCallback } from "react";
 import { format, getDaysInMonth, addMonths } from "date-fns";
 import { FILL_COLORS } from "../utils/logic";
-import type { CalendarEvent, Holiday, Config } from "../types";
+import type { CalendarEvent, Holiday, Config, SpecialDate } from "../types";
 
 interface CalendarGridProps {
     data: CalendarEvent[];
@@ -23,6 +23,7 @@ interface CalendarGridProps {
         pos: { x: number; y: number }
     ) => void;
     onHolidayLeave: () => void;
+    specialDates: SpecialDate[];
 }
 
 const MARGIN = { top: 40, right: 20, bottom: 20, left: 10 };
@@ -67,6 +68,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = React.memo(({
     flashingCell,
     onHolidayHover,
     onHolidayLeave,
+    specialDates,
 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -201,7 +203,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = React.memo(({
             currentRenderDate = addMonths(currentRenderDate, 1);
         }
         return months;
-    }, [year, data, holidays, config.startDate, getVisualX]);
+    }, [year, data, holidays, specialDates, config.startDate, getVisualX]);
 
     // Render Helpers
     const barHeight = (CELL_SIZE + CELL_GAP) * TOTAL_MONTHS + 30; // Extra height for crosshair

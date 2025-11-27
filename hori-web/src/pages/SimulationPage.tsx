@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSimulation } from '../context/SimulationContext';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Plus, Tag as TagIcon, Trash2 } from 'lucide-react';
+import { Plus, Tag as TagIcon, Trash2, Play } from 'lucide-react';
+import { IMMUTABLE_RULES } from '../config/rules';
 
 const DAYS = [
     { label: 'Seg', value: 1 },
@@ -22,25 +23,45 @@ const SimulationPage: React.FC = () => {
         addSpecialDate,
         removeSpecialDate,
         tags,
-        addTag
+        addTag,
+        generateMockedClasses
     } = useSimulation();
 
-    // Local state for new special date form
     const [newDate, setNewDate] = useState('');
     const [newDesc, setNewDesc] = useState('');
     const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
-
-    // Local state for new tag form
     const [isTagModalOpen, setIsTagModalOpen] = useState(false);
     const [newTagName, setNewTagName] = useState('');
     const [newTagColor, setNewTagColor] = useState('#3b82f6');
+
+    useEffect(() => {
+        if (specialDates.length === 0) {
+            IMMUTABLE_RULES.holidays.forEach(holiday => {
+                addSpecialDate({
+                    id: crypto.randomUUID(),
+                    date: holiday.date,
+                    description: holiday.name,
+                    tagIds: ['feriado']
+                });
+            });
+        }
+    }, [addSpecialDate, specialDates.length]);
 
     const handleDayToggle = (day: number) => {
         const currentDays = config.days || [];
         const newDays = currentDays.includes(day)
             ? currentDays.filter(d => d !== day)
             : [...currentDays, day].sort();
-        updateConfig({ days: newDays });
+
+        const newSchedules = [...(config.daySchedules || [])];
+
+        if (!currentDays.includes(day)) {
+            newSchedules.push({ dayOfWeek: day, startTime: '13:00', endTime: '14:00' });
+            updateConfig({ days: newDays, daySchedules: newSchedules });
+        } else {
+            const filtered = newSchedules.filter(s => s.dayOfWeek !== day);
+            updateConfig({ days: newDays, daySchedules: filtered });
+        }
     };
 
     const handleAddSpecialDate = () => {
@@ -83,12 +104,22 @@ const SimulationPage: React.FC = () => {
             </h1>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Left Column: Contract Config */}
                 <div className="lg:col-span-1 space-y-6">
                     <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                         <h2 className="text-lg font-bold text-slate-800 mb-4 border-b pb-2">Configuração do Contrato</h2>
 
                         <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-600 mb-1">Nome do Aluno</label>
+                                <input
+                                    type="text"
+                                    value={config.studentName || ''}
+                                    onChange={(e) => updateConfig({ studentName: e.target.value })}
+                                    placeholder="Ex: João Silva"
+                                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                />
+                            </div>
+
                             <div>
                                 <label className="block text-sm font-medium text-slate-600 mb-1">Início do Contrato</label>
                                 <input
@@ -107,8 +138,8 @@ const SimulationPage: React.FC = () => {
                                             key={day.value}
                                             onClick={() => handleDayToggle(day.value)}
                                             className={`w-10 h-10 rounded-full text-sm font-bold transition-all ${config.days.includes(day.value)
-                                                ? 'bg-blue-600 text-white shadow-md scale-105'
-                                                : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                                                    ? 'bg-blue-600 text-white shadow-md scale-105'
+                                                    : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                                                 }`}
                                         >
                                             {day.label}
@@ -116,9 +147,79 @@ const SimulationPage: React.FC = () => {
                                     ))}
                                 </div>
                             </div>
+
+                            {config.days.length > 0 && (
+                                <div className="border-t pt-4 space-y-2">
+                                    <button
+                                        onClick={() => updateConfig({ days: [...config.days] })}
+                                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                                    >
+                                        <Play size={20} />
+                                        Gerar Aulas do Contrato
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            updateConfig({ days: [...config.days] });
+                                            setTimeout(() => generateMockedClasses(), 100);
+                                        }}
+                                        className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 px-4 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-sm"
+                                    >
+                                        🎲 Gerar Dados Mocados
+                                    </button>
+
+                                    <label className="block text-sm font-medium text-slate-600 mb-3 mt-4">Horários das Aulas</label>
+                                    <div className="space-y-3">
+                                        {config.days.map(dayValue => {
+                                            const dayLabel = DAYS.find(d => d.value === dayValue)?.label || '';
+                                            const schedule = config.daySchedules?.find(s => s.dayOfWeek === dayValue);
+
+                                            return (
+                                                <div key={dayValue} className="bg-slate-50 p-3 rounded-lg">
+                                                    <div className="text-xs font-bold text-slate-700 mb-2">{dayLabel}</div>
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        <div>
+                                                            <label className="block text-[10px] text-slate-500 mb-1">Início</label>
+                                                            <input
+                                                                type="time"
+                                                                value={schedule?.startTime || '13:00'}
+                                                                onChange={(e) => {
+                                                                    const newSchedules = config.daySchedules?.filter(s => s.dayOfWeek !== dayValue) || [];
+                                                                    newSchedules.push({
+                                                                        dayOfWeek: dayValue,
+                                                                        startTime: e.target.value,
+                                                                        endTime: schedule?.endTime || '14:00'
+                                                                    });
+                                                                    updateConfig({ daySchedules: newSchedules });
+                                                                }}
+                                                                className="w-full border border-slate-300 rounded px-2 py-1 text-xs"
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-[10px] text-slate-500 mb-1">Término</label>
+                                                            <input
+                                                                type="time"
+                                                                value={schedule?.endTime || '14:00'}
+                                                                onChange={(e) => {
+                                                                    const newSchedules = config.daySchedules?.filter(s => s.dayOfWeek !== dayValue) || [];
+                                                                    newSchedules.push({
+                                                                        dayOfWeek: dayValue,
+                                                                        startTime: schedule?.startTime || '13:00',
+                                                                        endTime: e.target.value
+                                                                    });
+                                                                    updateConfig({ daySchedules: newSchedules });
+                                                                }}
+                                                                className="w-full border border-slate-300 rounded px-2 py-1 text-xs"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
-                        {/* Results Summary */}
                         {simulationResult && (
                             <div className="mt-6 bg-slate-50 rounded-lg p-4 border border-slate-200">
                                 <div className="flex justify-between items-center mb-2">
@@ -128,12 +229,16 @@ const SimulationPage: React.FC = () => {
                                 <div className="text-xs text-slate-500">
                                     Término: {format(new Date(simulationResult.endDate), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
                                 </div>
+                                {config.studentName && (
+                                    <div className="text-xs text-slate-600 mt-2 font-medium">
+                                        Aluno: {config.studentName}
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
                 </div>
 
-                {/* Right Column: Special Dates Manager */}
                 <div className="lg:col-span-2 space-y-6">
                     <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                         <div className="flex justify-between items-center mb-6">
@@ -146,7 +251,6 @@ const SimulationPage: React.FC = () => {
                             </button>
                         </div>
 
-                        {/* Add New Date Form */}
                         <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 mb-6">
                             <h3 className="text-sm font-bold text-slate-700 mb-3">Adicionar Nova Data</h3>
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
@@ -180,15 +284,14 @@ const SimulationPage: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* Tag Selection */}
                             <div className="mt-3 flex flex-wrap gap-2">
                                 {tags.map(tag => (
                                     <button
                                         key={tag.id}
                                         onClick={() => toggleTagSelection(tag.id)}
                                         className={`px-2 py-1 rounded-md text-xs font-medium border transition-all flex items-center gap-1 ${selectedTagIds.includes(tag.id)
-                                            ? 'bg-white border-blue-500 shadow-sm ring-1 ring-blue-500'
-                                            : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
+                                                ? 'bg-white border-blue-500 shadow-sm ring-1 ring-blue-500'
+                                                : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
                                             }`}
                                     >
                                         <span className="w-2 h-2 rounded-full" style={{ backgroundColor: tag.color }}></span>
@@ -198,7 +301,6 @@ const SimulationPage: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Dates Table */}
                         <div className="overflow-hidden rounded-lg border border-slate-200">
                             <table className="w-full text-sm text-left">
                                 <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
@@ -259,7 +361,6 @@ const SimulationPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* Tag Creation Modal (Simple inline implementation for now) */}
             {isTagModalOpen && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
                     <div className="bg-white p-6 rounded-xl shadow-2xl w-80 animate-scale-in">
