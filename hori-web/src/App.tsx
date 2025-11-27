@@ -1,4 +1,3 @@
-```typescript
 import React, { useState, useCallback } from "react";
 import CalendarGrid from "./components/CalendarGrid";
 import MonthsSidebar from "./components/MonthsSidebar";
@@ -123,4 +122,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-```

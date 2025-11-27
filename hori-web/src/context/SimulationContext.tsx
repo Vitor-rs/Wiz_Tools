@@ -1,6 +1,9 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { calculateContractClasses, SimulationResult } from '../utils/simulation';
-import { Config, SpecialDate, Tag } from '../types';
+/* eslint-disable react-refresh/only-export-components */
+import React, { createContext, useContext, useState } from 'react';
+import type { ReactNode } from 'react';
+import { calculateContractClasses } from '../utils/simulation';
+import type { SimulationResult } from '../utils/simulation';
+import type { Config, SpecialDate, Tag } from '../types';
 
 interface SimulationContextType {
     config: Config;
@@ -31,18 +34,15 @@ export const SimulationProvider: React.FC<{ children: ReactNode }> = ({ children
         time: '00:00'
     });
 
-    const [simulationResult, setSimulationResult] = useState<SimulationResult | null>(null);
     const [specialDates, setSpecialDates] = useState<SpecialDate[]>([]);
     const [tags, setTags] = useState<Tag[]>(DEFAULT_TAGS);
 
-    // Calculate simulation whenever config changes
-    useEffect(() => {
+    // Calculate simulation whenever config changes (using useMemo instead of useEffect)
+    const simulationResult = React.useMemo(() => {
         if (config.startDate && config.days.length > 0) {
-            const result = calculateContractClasses(config.startDate, config.days);
-            setSimulationResult(result);
-        } else {
-            setSimulationResult(null);
+            return calculateContractClasses(config.startDate, config.days);
         }
+        return null;
     }, [config]);
 
     const updateConfig = (newConfig: Partial<Config>) => {

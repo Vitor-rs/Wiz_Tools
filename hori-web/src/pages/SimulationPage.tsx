@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { useSimulation } from '../context/SimulationContext';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Plus, X, Tag as TagIcon, Trash2 } from 'lucide-react';
-import { Tag } from '../types';
+import { Plus, Tag as TagIcon, Trash2 } from 'lucide-react';
 
 const DAYS = [
     { label: 'Seg', value: 1 },
@@ -108,8 +107,8 @@ const SimulationPage: React.FC = () => {
                                             key={day.value}
                                             onClick={() => handleDayToggle(day.value)}
                                             className={`w-10 h-10 rounded-full text-sm font-bold transition-all ${config.days.includes(day.value)
-                                                    ? 'bg-blue-600 text-white shadow-md scale-105'
-                                                    : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                                                ? 'bg-blue-600 text-white shadow-md scale-105'
+                                                : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                                                 }`}
                                         >
                                             {day.label}
@@ -188,8 +187,8 @@ const SimulationPage: React.FC = () => {
                                         key={tag.id}
                                         onClick={() => toggleTagSelection(tag.id)}
                                         className={`px-2 py-1 rounded-md text-xs font-medium border transition-all flex items-center gap-1 ${selectedTagIds.includes(tag.id)
-                                                ? 'bg-white border-blue-500 shadow-sm ring-1 ring-blue-500'
-                                                : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
+                                            ? 'bg-white border-blue-500 shadow-sm ring-1 ring-blue-500'
+                                            : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
                                             }`}
                                     >
                                         <span className="w-2 h-2 rounded-full" style={{ backgroundColor: tag.color }}></span>
