@@ -1,6 +1,7 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect, useRef, useCallback } from "react";
 import { format, getDaysInMonth, addMonths } from "date-fns";
-import { FILL_COLORS, CalendarEvent, Config, Holiday } from "../utils/logic";
+import { FILL_COLORS } from "../utils/logic";
+import type { CalendarEvent, Holiday, Config } from "../utils/logic";
 
 interface CalendarGridProps {
     data: CalendarEvent[];
@@ -25,6 +26,13 @@ interface CalendarGridProps {
     onHolidayLeave: () => void;
 }
 
+const MARGIN = { top: 40, right: 20, bottom: 20, left: 10 };
+const CELL_SIZE = 34;
+const CELL_GAP = 4;
+const LOGICAL_GRID_WIDTH = 37; // 31 days + buffer
+const TOTAL_MONTHS = 12;
+const WEEK_LABELS = ["2ª", "3ª", "4ª", "5ª", "6ª", "Sáb", "Dom"];
+
 const CalendarGrid: React.FC<CalendarGridProps> = ({
     data,
     year,
@@ -39,32 +47,50 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
     onHolidayHover,
     onHolidayLeave,
 }) => {
-    // Dimensions
-    const margin = { top: 40, right: 20, bottom: 20, left: 10 };
-    const cellSize = 34;
-    const cellGap = 4;
-    const logicalGridWidth = 37; // 31 days + buffer
-    const totalMonths = 12;
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    // Scroll to flashing cell
+    useEffect(() => {
+        if (flashingCell && containerRef.current) {
+            const element = document.getElementById(`cell-${flashingCell}`);
+            if (element) {
+                const container = containerRef.current;
+                const elementRect = element.getBoundingClientRect();
+                const containerRect = container.getBoundingClientRect();
+
+                // Calculate relative position
+                const relativeTop = elementRect.top - containerRect.top;
+
+                // Calculate target scroll position to center the element
+                const targetScroll = container.scrollTop + relativeTop - (container.clientHeight / 2) + (elementRect.height / 2);
+
+                container.scrollTo({
+                    top: targetScroll,
+                    behavior: "smooth"
+                });
+            }
+        }
+    }, [flashingCell]);
 
     // Helper to calculate X position
-    const getVisualX = (colIndex: number) => {
+    const getVisualX = useCallback((colIndex: number) => {
         if (!showSundays && colIndex % 7 === 6) return -1;
-        let skipped = !showSundays ? Math.floor((colIndex + 1) / 7) : 0;
-        return (colIndex - skipped) * (cellSize + cellGap);
-    };
+        const skipped = !showSundays ? Math.floor((colIndex + 1) / 7) : 0;
+        return (colIndex - skipped) * (CELL_SIZE + CELL_GAP);
+    }, [showSundays]);
 
     // Calculate Grid Dimensions
-    const { gridWidth, totalHeight, visualColsCount } = useMemo(() => {
-        let visualColsCount = 0;
-        for (let i = 0; i < logicalGridWidth; i++) {
-            if (showSundays || i % 7 !== 6) visualColsCount++;
+    const { gridWidth, totalHeight } = useMemo(() => {
+        let count = 0;
+        for (let i = 0; i < LOGICAL_GRID_WIDTH; i++) {
+            if (showSundays || i % 7 !== 6) count++;
         }
         const width =
-            (cellSize + cellGap) * visualColsCount + margin.left + margin.right;
-        const fullContentHeight = (cellSize + cellGap) * totalMonths;
-        const height = fullContentHeight + margin.top + margin.bottom;
-        return { gridWidth: width, totalHeight: height, visualColsCount };
-    }, [showSundays, logicalGridWidth, totalMonths, margin]);
+            (CELL_SIZE + CELL_GAP) * count + MARGIN.left + MARGIN.right;
+        const fullContentHeight = (CELL_SIZE + CELL_GAP) * TOTAL_MONTHS;
+        const height = fullContentHeight + MARGIN.top + MARGIN.bottom;
+        return { gridWidth: width, totalHeight: height };
+    }, [showSundays]);
 
     // Prepare Data for Rendering
     const gridData = useMemo(() => {
@@ -88,7 +114,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
         const contractEndStr = format(contractEnd, "yyyy-MM-dd");
         const todayStr = format(new Date(), "yyyy-MM-dd");
 
-        for (let mIndex = 0; mIndex < totalMonths; mIndex++) {
+        for (let mIndex = 0; mIndex < TOTAL_MONTHS; mIndex++) {
             const loopYear = currentRenderDate.getFullYear();
             const loopMonth = currentRenderDate.getMonth();
             const daysInMonthCount = getDaysInMonth(currentRenderDate);
@@ -97,7 +123,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
             const gridOffset = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
 
             const days = [];
-            for (let c = 0; c < logicalGridWidth; c++) {
+            for (let c = 0; c < LOGICAL_GRID_WIDTH; c++) {
                 const x = getVisualX(c);
                 if (x === -1) continue;
 
@@ -124,7 +150,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                         dayEvents,
                         holiday,
                         x,
-                        y: mIndex * (cellSize + cellGap),
+                        y: mIndex * (CELL_SIZE + CELL_GAP),
                         colIndex: c,
                         isContract,
                         isContractStartDay,
@@ -138,14 +164,13 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
             currentRenderDate = addMonths(currentRenderDate, 1);
         }
         return months;
-    }, [year, data, holidays, showSundays, config.startDate]);
+    }, [year, data, holidays, config.startDate, getVisualX]);
 
     // Render Helpers
-    const weekLabels = ["2ª", "3ª", "4ª", "5ª", "6ª", "Sáb", "Dom"];
-    const barHeight = (cellSize + cellGap) * totalMonths + 30; // Extra height for crosshair
+    const barHeight = (CELL_SIZE + CELL_GAP) * TOTAL_MONTHS + 30; // Extra height for crosshair
 
     return (
-        <div className="overflow-auto custom-scrollbar flex-1 bg-white relative">
+        <div ref={containerRef} className="overflow-auto custom-scrollbar flex-1 bg-white relative">
             <svg
                 width={gridWidth}
                 height={totalHeight}
@@ -178,19 +203,19 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                     </linearGradient>
                 </defs>
 
-                <g transform={`translate(${margin.left}, ${margin.top})`}>
+                <g transform={`translate(${MARGIN.left}, ${MARGIN.top})`}>
                     {/* Layer 1: Backgrounds (Weekends) */}
                     <g>
-                        {Array.from({ length: logicalGridWidth }).map((_, c) => {
+                        {Array.from({ length: LOGICAL_GRID_WIDTH }).map((_, c) => {
                             if (c % 7 === 5 || c % 7 === 6) {
                                 const x = getVisualX(c);
                                 if (x !== -1) {
                                     return (
                                         <rect
                                             key={`bg-${c}`}
-                                            x={x - cellGap / 2}
+                                            x={x - CELL_GAP / 2}
                                             y={-28}
-                                            width={cellSize + cellGap}
+                                            width={CELL_SIZE + CELL_GAP}
                                             height={barHeight}
                                             fill="#e2e8f0"
                                             rx={4}
@@ -206,10 +231,10 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                     <g>
                         {hoveredMonth !== null && (
                             <rect
-                                x={-margin.left}
-                                y={hoveredMonth * (cellSize + cellGap) - cellGap / 2}
+                                x={-MARGIN.left}
+                                y={hoveredMonth * (CELL_SIZE + CELL_GAP) - CELL_GAP / 2}
                                 width={gridWidth}
-                                height={cellSize + cellGap}
+                                height={CELL_SIZE + CELL_GAP}
                                 rx={6}
                                 fill="rgba(243, 244, 246, 0.85)"
                                 className="pointer-events-none transition-opacity duration-75"
@@ -217,9 +242,9 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                         )}
                         {hoveredColumn !== null && (
                             <rect
-                                x={getVisualX(hoveredColumn) - cellGap / 2}
+                                x={getVisualX(hoveredColumn) - CELL_GAP / 2}
                                 y={-28}
-                                width={cellSize + cellGap}
+                                width={CELL_SIZE + CELL_GAP}
                                 height={barHeight}
                                 rx={6}
                                 fill="rgba(243, 244, 246, 0.85)"
@@ -230,14 +255,14 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
 
                     {/* Layer 3: Column Labels */}
                     <g>
-                        {Array.from({ length: logicalGridWidth }).map((_, c) => {
+                        {Array.from({ length: LOGICAL_GRID_WIDTH }).map((_, c) => {
                             const x = getVisualX(c);
                             if (x !== -1) {
                                 const isHovered = c === hoveredColumn;
                                 return (
                                     <text
                                         key={`col-${c}`}
-                                        x={x + cellSize / 2}
+                                        x={x + CELL_SIZE / 2}
                                         y={-15}
                                         textAnchor="middle"
                                         fontSize="11"
@@ -246,7 +271,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                                         className="transition-all duration-100 font-sans cursor-default"
                                         onMouseEnter={() => onHoverChange({ monthIndex: hoveredMonth || 0, columnIndex: c })}
                                     >
-                                        {weekLabels[c % 7]}
+                                        {WEEK_LABELS[c % 7]}
                                     </text>
                                 );
                             }
@@ -284,9 +309,9 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                                                 ? "#fee2e2"
                                                 : "#f9fafb";
 
-                                let bgOpacity = !isContract ? 0.3 : 1;
-                                let stroke = hasClasses ? "#e5e7eb" : "none";
-                                let strokeWidth = hasClasses ? 1 : 0;
+                                const bgOpacity = !isContract ? 0.3 : 1;
+                                const stroke = hasClasses ? "#e5e7eb" : "none";
+                                const strokeWidth = hasClasses ? 1 : 0;
 
                                 // Interactive State
                                 const isHovered = hoveredMonth === day.mIndex && hoveredColumn === day.colIndex;
@@ -300,6 +325,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                                 return (
                                     <g
                                         key={dateStr}
+                                        id={`cell-${dateStr}`}
                                         transform={`translate(${x}, ${y})`}
                                         className={isFlashing ? "animate-flip-2" : ""}
                                         onMouseEnter={(e) => {
@@ -313,6 +339,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                                             }
                                         }}
                                         onMouseLeave={() => {
+                                            onHoverChange(null);
                                             if (holiday) onHolidayLeave();
                                         }}
                                         onClick={(e) => {
@@ -329,8 +356,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                                     >
                                         {/* Cell Rect */}
                                         <rect
-                                            width={cellSize}
-                                            height={cellSize}
+                                            width={CELL_SIZE}
+                                            height={CELL_SIZE}
                                             rx={isHovered && (isClickable || isHoverable) ? 0 : 6}
                                             fill={bgFill}
                                             fillOpacity={bgOpacity}
@@ -341,8 +368,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
 
                                         {/* Day Number */}
                                         <text
-                                            x={cellSize / 2}
-                                            y={cellSize / 2}
+                                            x={CELL_SIZE / 2}
+                                            y={CELL_SIZE / 2}
                                             dy={hasClasses ? "0.1em" : "0.35em"}
                                             textAnchor="middle"
                                             fontSize="10"
@@ -354,7 +381,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
 
                                         {/* Smart Pills */}
                                         {hasClasses && (
-                                            <g transform={`translate(0, ${cellSize - 7})`}>
+                                            <g transform={`translate(0, ${CELL_SIZE - 7})`}>
                                                 {(() => {
                                                     const normalClass = dayEvents.filter(
                                                         (ev) => ev.type === "Normal" && ev.attended
@@ -365,7 +392,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                                                     const totalPills = normalClass.length + otherClasses.length;
                                                     const barHeight = 4;
                                                     const padding = 2;
-                                                    const totalWidthAvailable = cellSize - padding * 2;
+                                                    const totalWidthAvailable = CELL_SIZE - padding * 2;
                                                     const gap = 1;
                                                     const pillWidth =
                                                         (totalWidthAvailable - gap * (totalPills - 1)) / totalPills;
@@ -428,12 +455,12 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                                             <path d="M 0 6 Q 0 0 6 0 L 14 0 L 0 14 Z" fill="#2563eb" className="pointer-events-none" />
                                         )}
                                         {isContractEndDay && (
-                                            <path d={`M ${cellSize} ${cellSize - 6} Q ${cellSize} ${cellSize} ${cellSize - 6} ${cellSize} L ${cellSize - 14} ${cellSize} L ${cellSize} ${cellSize - 14} Z`} fill="#f97316" className="pointer-events-none" />
+                                            <path d={`M ${CELL_SIZE} ${CELL_SIZE - 6} Q ${CELL_SIZE} ${CELL_SIZE} ${CELL_SIZE - 6} ${CELL_SIZE} L ${CELL_SIZE - 14} ${CELL_SIZE} L ${CELL_SIZE} ${CELL_SIZE - 14} Z`} fill="#f97316" className="pointer-events-none" />
                                         )}
 
                                         {/* Today Highlight */}
                                         {isToday && (
-                                            <rect width={cellSize} height={cellSize} rx={6} fill="none" stroke="#6366f1" strokeWidth="2.5" className="pointer-events-none animate-pulse" />
+                                            <rect width={CELL_SIZE} height={CELL_SIZE} rx={6} fill="none" stroke="#6366f1" strokeWidth="2.5" className="pointer-events-none animate-pulse" />
                                         )}
                                     </g>
                                 );
@@ -445,10 +472,10 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                     <g className="pointer-events-none">
                         {hoveredMonth !== null && (
                             <rect
-                                x={-margin.left}
-                                y={hoveredMonth * (cellSize + cellGap) - cellGap / 2}
+                                x={-MARGIN.left}
+                                y={hoveredMonth * (CELL_SIZE + CELL_GAP) - CELL_GAP / 2}
                                 width={gridWidth}
-                                height={cellSize + cellGap}
+                                height={CELL_SIZE + CELL_GAP}
                                 rx={6}
                                 fill="none"
                                 stroke="#9ca3af"
@@ -457,9 +484,9 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                         )}
                         {hoveredColumn !== null && (
                             <rect
-                                x={getVisualX(hoveredColumn) - cellGap / 2}
+                                x={getVisualX(hoveredColumn) - CELL_GAP / 2}
                                 y={-28}
-                                width={cellSize + cellGap}
+                                width={CELL_SIZE + CELL_GAP}
                                 height={barHeight}
                                 rx={6}
                                 fill="none"
