@@ -1,6 +1,8 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import CalendarGrid from "./components/CalendarGrid";
+import type { CalendarGridHandle } from "./components/CalendarGrid";
 import MonthsSidebar from "./components/MonthsSidebar";
+import type { MonthsSidebarHandle } from "./components/MonthsSidebar";
 import Layout from "./components/Layout";
 import Header from "./components/Header";
 import SimulationPage from "./pages/SimulationPage";
@@ -10,11 +12,13 @@ import { IMMUTABLE_RULES } from "./config/rules";
 
 const AppContent: React.FC = () => {
   const [year, setYear] = useState(2025);
-  const [hoveredData, setHoveredData] = useState<{ monthIndex: number | null; columnIndex: number | null } | null>(null);
+  // hoveredData state removed for performance
   const [tooltipData, setTooltipData] = useState<{ x: number; y: number; content: React.ReactNode } | null>(null);
   const [flashingCell, setFlashingCell] = useState<string | null>(null);
   const [activePage, setActivePage] = useState("calendar");
-  const sidebarHighlightRef = React.useRef<HTMLDivElement>(null);
+  
+  const calendarRef = useRef<CalendarGridHandle>(null);
+  const sidebarRef = useRef<MonthsSidebarHandle>(null);
 
   const { config, simulationResult, generatedClasses, specialDates } = useSimulation();
 
@@ -31,7 +35,9 @@ const AppContent: React.FC = () => {
   };
 
   const handleHoverChange = useCallback((data: { monthIndex: number | null; columnIndex: number | null } | null) => {
-    setHoveredData(data);
+    // Direct communication via refs to avoid re-rendering the massive CalendarGrid
+    calendarRef.current?.setHovered(data?.monthIndex ?? null, data?.columnIndex ?? null);
+    sidebarRef.current?.setHovered(data?.monthIndex ?? null);
   }, []);
 
   const handleHolidayHover = (data: { date: string; events: CalendarEvent[]; holiday: Holiday }, pos: { x: number; y: number }) => {
@@ -48,7 +54,7 @@ const AppContent: React.FC = () => {
   };
 
   const handleMonthClick = (monthIndex: number) => {
-    const dateStr = `${year} -${String(monthIndex + 1).padStart(2, '0')}-01`;
+    const dateStr = `${year}-${String(monthIndex + 1).padStart(2, '0')}-01`;
     setFlashingCell(dateStr);
     setTimeout(() => setFlashingCell(null), 1000);
   };
@@ -69,19 +75,19 @@ const AppContent: React.FC = () => {
           {/* Main Content Area - Flex container to hold Sidebar and Grid side-by-side */}
           <div className="flex flex-1 overflow-hidden relative bg-gray-50">
             {/* Months Sidebar (Fixed Left) */}
-            <div className="flex-shrink-0 z-10 bg-white border-r border-gray-200 h-full">
+            <div className="shrink-0 z-10 bg-white border-r border-gray-200 h-full">
               <MonthsSidebar
+                ref={sidebarRef}
                 year={year}
-                hoveredMonth={hoveredData?.monthIndex ?? null}
                 onHoverChange={handleHoverChange}
                 onMonthClick={handleMonthClick}
-                highlightRef={sidebarHighlightRef}
               />
             </div>
 
             {/* Calendar Grid (Scrollable) */}
             <div className="flex-1 overflow-hidden relative">
               <CalendarGrid
+                ref={calendarRef}
                 data={generatedClasses}
                 year={year}
                 config={config}
@@ -94,8 +100,6 @@ const AppContent: React.FC = () => {
                 onHolidayLeave={() => setTooltipData(null)}
                 simulationResult={simulationResult}
                 specialDates={specialDates}
-                sidebarHighlightRef={sidebarHighlightRef}
-                hoveredData={hoveredData}
               />
             </div>
           </div>
@@ -105,11 +109,11 @@ const AppContent: React.FC = () => {
       {/* Tooltip */}
       {tooltipData && (
         <div
-          className="fixed z-50 bg-white px-3 py-2 rounded shadow-lg border border-gray-200 pointer-events-none transform -translate-y-full -translate-x-1/2 mt-[-8px]"
+          className="fixed z-50 bg-white px-3 py-2 rounded shadow-lg border border-gray-200 pointer-events-none transform -translate-y-full -translate-x-1/2 -mt-2"
           style={{ left: tooltipData.x, top: tooltipData.y }}
         >
           {tooltipData.content}
-          <div className="absolute bottom-[-6px] left-1/2 transform -translate-x-1/2 w-3 h-3 bg-white border-b border-r border-gray-200 rotate-45"></div>
+          <div className="absolute -bottom-1.5 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-white border-b border-r border-gray-200 rotate-45"></div>
         </div>
       )}
     </Layout>

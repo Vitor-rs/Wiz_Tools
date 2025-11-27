@@ -1,22 +1,48 @@
-import React from "react";
+import { useState, useImperativeHandle, forwardRef, useRef, useEffect } from "react";
 import { addMonths, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-interface MonthsSidebarProps {
-    year: number;
-    hoveredMonth: number | null;
-    onHoverChange?: (data: { monthIndex: number | null; columnIndex: number | null } | null) => void;
-    onMonthClick?: (monthIndex: number) => void;
-    highlightRef?: React.RefObject<HTMLDivElement | null>;
+export interface MonthsSidebarHandle {
+    setHovered: (monthIndex: number | null) => void;
 }
 
-const MonthsSidebar: React.FC<MonthsSidebarProps> = ({
+interface MonthsSidebarProps {
+    year: number;
+    onHoverChange?: (data: { monthIndex: number | null; columnIndex: number | null } | null) => void;
+    onMonthClick?: (monthIndex: number) => void;
+}
+
+const MonthsSidebar = forwardRef<MonthsSidebarHandle, MonthsSidebarProps>(({
     year,
-    hoveredMonth,
     onHoverChange,
     onMonthClick,
-    highlightRef,
-}) => {
+}, ref) => {
+    const [hoveredMonth, setHoveredMonth] = useState<number | null>(null);
+    const highlightRef = useRef<HTMLDivElement>(null);
+
+    const cellSize = 34;
+    const cellGap = 4;
+    const margin = { top: 45 };
+
+    useImperativeHandle(ref, () => ({
+        setHovered: (monthIndex) => {
+            setHoveredMonth(monthIndex);
+        }
+    }));
+
+    // Sync highlight box with state
+    useEffect(() => {
+        if (highlightRef.current) {
+            if (hoveredMonth !== null) {
+                const top = margin.top + hoveredMonth * (cellSize + cellGap) - cellGap / 2;
+                highlightRef.current.style.top = `${top}px`;
+                highlightRef.current.style.display = 'block';
+            } else {
+                highlightRef.current.style.display = 'none';
+            }
+        }
+    }, [hoveredMonth]);
+
     const months: Date[] = [];
     let current = new Date(year, 0, 1);
     for (let i = 0; i < 12; i++) {
@@ -24,18 +50,14 @@ const MonthsSidebar: React.FC<MonthsSidebarProps> = ({
         current = addMonths(current, 1);
     }
 
-    const cellSize = 34;
-    const cellGap = 4;
-    const margin = { top: 45 };
-
     return (
         <div className="w-20 bg-white fixed-col-shadow shrink-0 relative z-10">
-            {/* Highlight Extension (HTML) - Controlled via Ref for performance */}
+            {/* Highlight Extension (HTML) - Controlled via Ref/State */}
             <div
                 ref={highlightRef}
                 className="absolute bg-gray-100/85 border-y border-l border-gray-400 rounded-l-md pointer-events-none z-0"
                 style={{
-                    display: 'none', // Initially hidden, controlled by CalendarGrid
+                    display: 'none',
                     left: '3px',
                     height: `${cellSize + cellGap}px`,
                     width: '78px',
@@ -99,10 +121,17 @@ const MonthsSidebar: React.FC<MonthsSidebarProps> = ({
                                 className="transition-all duration-100 font-sans cursor-default"
                                 style={{
                                     textShadow: isHovered ? "0px 0px 1px #1e3a8a, 0px 0px 10px rgba(59, 130, 246, 0.4)" : "none",
-                                    cursor: "pointer"
+                                    cursor: "pointer",
+                                    pointerEvents: 'auto'
                                 }}
-                                onMouseEnter={() => onHoverChange && onHoverChange({ monthIndex: i, columnIndex: null })}
-                                onMouseLeave={() => onHoverChange && onHoverChange(null)}
+                                onMouseEnter={() => {
+                                    setHoveredMonth(i);
+                                    onHoverChange && onHoverChange({ monthIndex: i, columnIndex: null });
+                                }}
+                                onMouseLeave={() => {
+                                    setHoveredMonth(null);
+                                    onHoverChange && onHoverChange(null);
+                                }}
                                 onClick={() => onMonthClick && onMonthClick(i)}
                             >
                                 {format(m, "MMMM", { locale: ptBR }).replace(/^\w/, (c) =>
@@ -115,6 +144,6 @@ const MonthsSidebar: React.FC<MonthsSidebarProps> = ({
             </svg>
         </div>
     );
-};
+});
 
 export default MonthsSidebar;

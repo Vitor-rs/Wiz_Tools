@@ -1,7 +1,11 @@
-import React, { useMemo, useEffect, useRef, useCallback } from "react";
+import React, { useMemo, useEffect, useRef, useCallback, useImperativeHandle, forwardRef } from "react";
 import { format, getDaysInMonth, addMonths } from "date-fns";
 import { FILL_COLORS } from "../utils/logic";
 import type { CalendarEvent, Holiday, Config, SpecialDate } from "../types";
+
+export interface CalendarGridHandle {
+    setHovered: (monthIndex: number | null, columnIndex: number | null) => void;
+}
 
 interface CalendarGridProps {
     data: CalendarEvent[];
@@ -24,8 +28,6 @@ interface CalendarGridProps {
     ) => void;
     onHolidayLeave: () => void;
     specialDates: SpecialDate[];
-    sidebarHighlightRef?: React.RefObject<HTMLDivElement | null>;
-    hoveredData: { monthIndex: number | null; columnIndex: number | null } | null;
 }
 
 const MARGIN = { top: 45, right: 20, bottom: 20, left: 10 };
@@ -59,7 +61,7 @@ type DayData =
         colIndex: number;
     };
 
-const CalendarGrid: React.FC<CalendarGridProps> = React.memo(({
+const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
     data,
     year,
     config,
@@ -70,9 +72,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = React.memo(({
     flashingCell,
     onHolidayHover,
     onHolidayLeave,
-    sidebarHighlightRef,
-    hoveredData,
-}) => {
+}, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
 
     // Crosshair Refs (Direct DOM Manipulation)
@@ -124,17 +124,6 @@ const CalendarGrid: React.FC<CalendarGridProps> = React.memo(({
             } else {
                 hBgRef.current.style.display = 'none';
                 hBorderRef.current.style.display = 'none';
-            }
-
-            // Sync Sidebar Highlight (Direct DOM)
-            if (sidebarHighlightRef?.current) {
-                if (monthIndex !== null) {
-                    const top = MARGIN.top + monthIndex * (CELL_SIZE + CELL_GAP) - CELL_GAP / 2;
-                    sidebarHighlightRef.current.style.top = `${top}px`;
-                    sidebarHighlightRef.current.style.display = 'block';
-                } else {
-                    sidebarHighlightRef.current.style.display = 'none';
-                }
             }
         }
 
@@ -191,7 +180,13 @@ const CalendarGrid: React.FC<CalendarGridProps> = React.memo(({
             }
             prevHoveredColRef.current = columnIndex;
         }
-    }, [gridWidth, barHeight, getVisualX, sidebarHighlightRef]);
+    }, [gridWidth, barHeight, getVisualX]);
+
+    useImperativeHandle(ref, () => ({
+        setHovered: (monthIndex, columnIndex) => {
+            updateCrosshair(monthIndex, columnIndex);
+        }
+    }));
 
     // Scroll to flashing cell
     useEffect(() => {
@@ -215,15 +210,6 @@ const CalendarGrid: React.FC<CalendarGridProps> = React.memo(({
             }
         }
     }, [flashingCell]);
-
-    // Sync crosshair with external hover state (e.g. Sidebar)
-    useEffect(() => {
-        if (hoveredData) {
-            updateCrosshair(hoveredData.monthIndex, hoveredData.columnIndex);
-        } else {
-            updateCrosshair(null, null);
-        }
-    }, [hoveredData, updateCrosshair]);
 
     // Prepare Data for Rendering
     const gridData = useMemo(() => {
@@ -538,7 +524,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = React.memo(({
                                                 fillOpacity={bgOpacity}
                                                 stroke={stroke}
                                                 strokeWidth={strokeWidth}
-                                                className="transition-all duration-200 hover:stroke-blue-500 hover:stroke-2 hover:fill-blue-50 hover:[fill-opacity:1]"
+                                                className="hover:stroke-blue-500 hover:stroke-2 hover:fill-blue-50 hover:[fill-opacity:1]"
                                                 style={{ filter: hasClasses ? "url(#cell-shadow)" : "none" }}
                                             />
 
@@ -662,4 +648,4 @@ const CalendarGrid: React.FC<CalendarGridProps> = React.memo(({
     );
 });
 
-export default CalendarGrid;
+export default React.memo(CalendarGrid);
