@@ -44,6 +44,7 @@ type DayData =
         dateStr: string;
         dayEvents: CalendarEvent[];
         holiday?: Holiday;
+        specialDate?: SpecialDate;
         x: number;
         y: number;
         colIndex: number;
@@ -72,6 +73,7 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
     flashingCell,
     onHolidayHover,
     onHolidayLeave,
+    specialDates
 }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -254,6 +256,7 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
                     const dateStr = format(date, "yyyy-MM-dd");
                     const dayEvents = dataByDate[dateStr] || [];
                     const holiday = holidays.find((h) => h.date === dateStr);
+                    const specialDate = specialDates.find((sd) => sd.date === dateStr);
 
                     const time = date.getTime();
                     const isContract =
@@ -269,6 +272,7 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
                         dateStr,
                         dayEvents,
                         holiday,
+                        specialDate,
                         x,
                         y: mIndex * (CELL_SIZE + CELL_GAP),
                         colIndex: c,
@@ -450,6 +454,7 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
                                         dateStr,
                                         dayEvents,
                                         holiday,
+                                        specialDate,
                                         x,
                                         y,
                                         isContract,
@@ -465,11 +470,13 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
                                         ? "#e5e7eb"
                                         : hasClasses
                                             ? "#ffffff"
-                                            : isWeekend
-                                                ? "rgba(255,255,255,0.4)"
-                                                : holiday
-                                                    ? "#fee2e2"
-                                                    : "#f9fafb";
+                                            : specialDate
+                                                ? "#fbcfe8" // Pink-200 for special dates
+                                                : isWeekend
+                                                    ? "rgba(255,255,255,0.4)"
+                                                    : holiday
+                                                        ? "#fee2e2"
+                                                        : "#f9fafb";
 
                                     const bgOpacity = !isContract ? 0.3 : 1;
                                     const stroke = "#e5e7eb";
@@ -477,7 +484,7 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
 
                                     // Interactive State - Handled by Refs now, so no React hover logic here
                                     const isClickable = hasClasses;
-                                    const isHoverable = holiday && !hasClasses;
+                                    const isHoverable = (holiday || specialDate) && !hasClasses;
 
                                     return (
                                         <g
@@ -493,16 +500,24 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
                                                 updateCrosshair(day.mIndex, day.colIndex);
                                                 onHoverChange({ monthIndex: day.mIndex, columnIndex: day.colIndex });
 
-                                                if (holiday && !hasClasses) {
+                                                if ((holiday || specialDate) && !hasClasses) {
                                                     const rectBox = e.currentTarget.getBoundingClientRect();
-                                                    onHolidayHover(
-                                                        { date: dateStr, events: [], holiday },
-                                                        { x: rectBox.right, y: rectBox.top }
-                                                    );
+                                                    const holidayData = holiday || (specialDate ? {
+                                                        date: specialDate.date,
+                                                        name: specialDate.description,
+                                                        type: 'Data Especial'
+                                                    } : undefined);
+
+                                                    if (holidayData) {
+                                                        onHolidayHover(
+                                                            { date: dateStr, events: [], holiday: holidayData },
+                                                            { x: rectBox.right, y: rectBox.top }
+                                                        );
+                                                    }
                                                 }
                                             }}
                                             onMouseLeave={() => {
-                                                if (holiday) onHolidayLeave();
+                                                if (holiday || specialDate) onHolidayLeave();
                                             }}
                                             onClick={(e) => {
                                                 if (hasClasses) {

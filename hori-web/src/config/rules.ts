@@ -28,11 +28,11 @@ export const IMMUTABLE_RULES = {
     { date: "2025-06-19", name: "Corpus Christi", type: "National" }, // Mobile
     { date: "2025-09-07", name: "Independência do Brasil", type: "National" },
     { date: "2025-10-12", name: "Nossa Senhora Aparecida", type: "National" },
-    { date: "2025-10-11", name: "Dia do Pantanal", type: "Municipal" }, // MS State Holiday
+    { date: "2025-10-11", name: "Criação do Estado (MS)", type: "Municipal" }, // MS State Holiday
     { date: "2025-11-02", name: "Finados", type: "National" },
+    { date: "2025-11-11", name: "Aniversário de Naviraí", type: "Municipal" }, // Municipal
     { date: "2025-11-15", name: "Proclamação da República", type: "National" },
     { date: "2025-11-20", name: "Dia da Consciência Negra", type: "National" }, // Now National
-    { date: "2025-12-13", name: "Aniversário de Tenavirai", type: "Municipal" }, // Municipal
     { date: "2025-12-25", name: "Natal", type: "National" },
   ] as HolidayRule[],
 

@@ -1,5 +1,6 @@
-import { addDays, parseISO, addMonths } from "date-fns";
+import { addDays, parseISO, addYears } from "date-fns";
 import { isNonClassDay } from "../config/rules";
+import type { SpecialDate } from "../types";
 
 export interface SimulationResult {
   totalClasses: number;
@@ -10,11 +11,12 @@ export interface SimulationResult {
 
 export const calculateContractClasses = (
   startDateStr: string,
-  classDays: number[] // e.g., [2, 4] for Tue/Thu (1=Mon, 2=Tue, etc.)
+  classDays: number[], // e.g., [2, 4] for Tue/Thu (1=Mon, 2=Tue, etc.)
+  specialDates: SpecialDate[] = []
 ): SimulationResult => {
   const startDate = parseISO(startDateStr);
-  // Contract is EXACTLY 12 months from start date
-  const contractEndDate = addMonths(startDate, 12);
+  // Contract is EXACTLY 1 year from start date
+  const contractEndDate = addYears(startDate, 1);
 
   let currentDate = startDate;
   let totalClasses = 0;
@@ -28,15 +30,26 @@ export const calculateContractClasses = (
 
     // Check if this day is a class day
     if (classDays.includes(dayOfWeek)) {
-      const nonClassCheck = isNonClassDay(dateStr);
-      if (nonClassCheck.isNonClass) {
-        skippedDates.push({
+      // 1. Check User-Defined Special Dates first
+      const specialDate = specialDates.find(sd => sd.date === dateStr);
+      
+      if (specialDate) {
+         skippedDates.push({
           date: dateStr,
-          reason: nonClassCheck.reason || "Feriado",
+          reason: specialDate.description,
         });
       } else {
-        validDates.push(dateStr);
-        totalClasses++;
+        // 2. Check System Rules (Holidays/Recess)
+        const nonClassCheck = isNonClassDay(dateStr);
+        if (nonClassCheck.isNonClass) {
+          skippedDates.push({
+            date: dateStr,
+            reason: nonClassCheck.reason || "Feriado",
+          });
+        } else {
+          validDates.push(dateStr);
+          totalClasses++;
+        }
       }
     }
 

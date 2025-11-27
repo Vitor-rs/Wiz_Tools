@@ -17,7 +17,7 @@ export interface Config {
 export interface Holiday {
   date: string;
   name: string;
-  type?: "National" | "Municipal" | "Recess"; // Added type
+  type?: string;
 }
 
 export interface CalendarEvent {

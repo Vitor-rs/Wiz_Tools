@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSimulation } from '../context/SimulationContext';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Plus, Tag as TagIcon, Trash2, Play } from 'lucide-react';
+import { Plus, Tag as TagIcon, Trash2, Play, Pencil, X } from 'lucide-react';
 import { IMMUTABLE_RULES } from '../config/rules';
 
 const DAYS = [
@@ -22,8 +22,11 @@ const SimulationPage: React.FC = () => {
         specialDates,
         addSpecialDate,
         removeSpecialDate,
+        updateSpecialDate,
         tags,
         addTag,
+        updateTag,
+        removeTag,
         generateMockedClasses
     } = useSimulation();
 
@@ -33,6 +36,8 @@ const SimulationPage: React.FC = () => {
     const [isTagModalOpen, setIsTagModalOpen] = useState(false);
     const [newTagName, setNewTagName] = useState('');
     const [newTagColor, setNewTagColor] = useState('#3b82f6');
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [editingTagId, setEditingTagId] = useState<string | null>(null);
 
     useEffect(() => {
         if (specialDates.length === 0) {
@@ -64,28 +69,85 @@ const SimulationPage: React.FC = () => {
         }
     };
 
-    const handleAddSpecialDate = () => {
+    const handleAddOrUpdateSpecialDate = () => {
         if (!newDate || !newDesc) return;
-        addSpecialDate({
-            id: crypto.randomUUID(),
-            date: newDate,
-            description: newDesc,
-            tagIds: selectedTagIds
-        });
+
+        if (editingId) {
+            updateSpecialDate(editingId, {
+                date: newDate,
+                description: newDesc,
+                tagIds: selectedTagIds
+            });
+            setEditingId(null);
+        } else {
+            addSpecialDate({
+                id: crypto.randomUUID(),
+                date: newDate,
+                description: newDesc,
+                tagIds: selectedTagIds
+            });
+        }
+        
         setNewDate('');
         setNewDesc('');
         setSelectedTagIds([]);
     };
 
-    const handleAddTag = () => {
+    const handleEditClick = (date: any) => {
+        setEditingId(date.id);
+        setNewDate(date.date);
+        setNewDesc(date.description);
+        setSelectedTagIds(date.tagIds);
+        // Scroll to top to see the form
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleCancelEdit = () => {
+        setEditingId(null);
+        setNewDate('');
+        setNewDesc('');
+        setSelectedTagIds([]);
+    };
+
+    const handleSaveTag = () => {
         if (!newTagName) return;
-        addTag({
-            id: crypto.randomUUID(),
-            label: newTagName,
-            color: newTagColor
-        });
+
+        if (editingTagId) {
+            updateTag(editingTagId, {
+                label: newTagName,
+                color: newTagColor
+            });
+            setEditingTagId(null);
+        } else {
+            addTag({
+                id: crypto.randomUUID(),
+                label: newTagName,
+                color: newTagColor
+            });
+        }
         setNewTagName('');
-        setIsTagModalOpen(false);
+        setNewTagColor('#3b82f6');
+    };
+
+    const handleEditTagClick = (tag: any) => {
+        setEditingTagId(tag.id);
+        setNewTagName(tag.label);
+        setNewTagColor(tag.color);
+    };
+
+    const handleCancelTagEdit = () => {
+        setEditingTagId(null);
+        setNewTagName('');
+        setNewTagColor('#3b82f6');
+    };
+
+    const handleDeleteTag = (id: string) => {
+        if (window.confirm('Tem certeza que deseja excluir esta tag?')) {
+            removeTag(id);
+            if (editingTagId === id) {
+                handleCancelTagEdit();
+            }
+        }
     };
 
     const toggleTagSelection = (tagId: string) => {
@@ -251,8 +313,10 @@ const SimulationPage: React.FC = () => {
                             </button>
                         </div>
 
-                        <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 mb-6">
-                            <h3 className="text-sm font-bold text-slate-700 mb-3">Adicionar Nova Data</h3>
+                        <div className={`p-4 rounded-lg border mb-6 transition-colors ${editingId ? 'bg-blue-50 border-blue-200' : 'bg-slate-50 border-slate-200'}`}>
+                            <h3 className="text-sm font-bold text-slate-700 mb-3">
+                                {editingId ? 'Editar Data' : 'Adicionar Nova Data'}
+                            </h3>
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                                 <div>
                                     <label className="block text-xs font-medium text-slate-500 mb-1">Data</label>
@@ -273,13 +337,21 @@ const SimulationPage: React.FC = () => {
                                         className="w-full border border-slate-300 rounded px-2 py-1.5 text-sm"
                                     />
                                 </div>
-                                <div>
+                                <div className="flex gap-2">
+                                    {editingId && (
+                                        <button
+                                            onClick={handleCancelEdit}
+                                            className="flex-1 bg-slate-200 text-slate-700 rounded px-3 py-1.5 text-sm font-medium hover:bg-slate-300 transition-colors"
+                                        >
+                                            Cancelar
+                                        </button>
+                                    )}
                                     <button
-                                        onClick={handleAddSpecialDate}
+                                        onClick={handleAddOrUpdateSpecialDate}
                                         disabled={!newDate || !newDesc}
-                                        className="w-full bg-blue-600 text-white rounded px-3 py-1.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                        className={`flex-1 text-white rounded px-3 py-1.5 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${editingId ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'}`}
                                     >
-                                        Adicionar
+                                        {editingId ? 'Salvar' : 'Adicionar'}
                                     </button>
                                 </div>
                             </div>
@@ -308,7 +380,7 @@ const SimulationPage: React.FC = () => {
                                         <th className="px-4 py-3 w-32">Data</th>
                                         <th className="px-4 py-3">Descrição</th>
                                         <th className="px-4 py-3">Tags</th>
-                                        <th className="px-4 py-3 w-16 text-center">Ações</th>
+                                        <th className="px-4 py-3 w-24 text-center">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
@@ -320,7 +392,7 @@ const SimulationPage: React.FC = () => {
                                         </tr>
                                     ) : (
                                         specialDates.map(date => (
-                                            <tr key={date.id} className="hover:bg-slate-50 transition-colors group">
+                                            <tr key={date.id} className={`hover:bg-slate-50 transition-colors group ${editingId === date.id ? 'bg-blue-50' : ''}`}>
                                                 <td className="px-4 py-3 font-medium text-slate-700">
                                                     {format(new Date(date.date + 'T12:00:00'), 'dd/MM/yyyy')}
                                                 </td>
@@ -343,13 +415,22 @@ const SimulationPage: React.FC = () => {
                                                     </div>
                                                 </td>
                                                 <td className="px-4 py-3 text-center">
-                                                    <button
-                                                        onClick={() => removeSpecialDate(date.id)}
-                                                        className="text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                                                        title="Remover"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
+                                                    <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <button
+                                                            onClick={() => handleEditClick(date)}
+                                                            className="text-slate-400 hover:text-blue-500 transition-colors"
+                                                            title="Editar"
+                                                        >
+                                                            <Pencil size={16} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => removeSpecialDate(date.id)}
+                                                            className="text-slate-400 hover:text-red-500 transition-colors"
+                                                            title="Remover"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))
@@ -363,45 +444,89 @@ const SimulationPage: React.FC = () => {
 
             {isTagModalOpen && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
-                    <div className="bg-white p-6 rounded-xl shadow-2xl w-80 animate-scale-in">
-                        <h3 className="text-lg font-bold text-slate-800 mb-4">Nova Tag</h3>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-xs font-medium text-slate-500 mb-1">Nome</label>
-                                <input
-                                    type="text"
-                                    value={newTagName}
-                                    onChange={(e) => setNewTagName(e.target.value)}
-                                    className="w-full border border-slate-300 rounded px-3 py-2 text-sm"
-                                    autoFocus
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-slate-500 mb-1">Cor</label>
-                                <div className="flex gap-2 flex-wrap">
-                                    {['#ef4444', '#f97316', '#f59e0b', '#84cc16', '#22c55e', '#06b6d4', '#3b82f6', '#6366f1', '#a855f7', '#ec4899', '#64748b'].map(color => (
-                                        <button
-                                            key={color}
-                                            onClick={() => setNewTagColor(color)}
-                                            className={`w-6 h-6 rounded-full border-2 transition-transform ${newTagColor === color ? 'border-slate-800 scale-110' : 'border-transparent hover:scale-110'}`}
-                                            style={{ backgroundColor: color }}
+                    <div className="bg-white p-6 rounded-xl shadow-2xl w-96 animate-scale-in max-h-[90vh] flex flex-col">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-bold text-slate-800">Gerenciar Tags</h3>
+                            <button onClick={() => setIsTagModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div className="space-y-4 mb-6">
+                            <div className={`p-3 rounded-lg border ${editingTagId ? 'bg-blue-50 border-blue-200' : 'bg-slate-50 border-slate-200'}`}>
+                                <div className="text-xs font-bold text-slate-700 mb-2">
+                                    {editingTagId ? 'Editar Tag' : 'Nova Tag'}
+                                </div>
+                                <div className="space-y-3">
+                                    <div>
+                                        <label className="block text-[10px] font-medium text-slate-500 mb-1">Nome</label>
+                                        <input
+                                            type="text"
+                                            value={newTagName}
+                                            onChange={(e) => setNewTagName(e.target.value)}
+                                            className="w-full border border-slate-300 rounded px-2 py-1.5 text-sm"
+                                            placeholder="Nome da tag..."
                                         />
-                                    ))}
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-medium text-slate-500 mb-1">Cor</label>
+                                        <div className="flex gap-1.5 flex-wrap">
+                                            {['#ef4444', '#f97316', '#f59e0b', '#84cc16', '#22c55e', '#06b6d4', '#3b82f6', '#6366f1', '#a855f7', '#ec4899', '#64748b'].map(color => (
+                                                <button
+                                                    key={color}
+                                                    onClick={() => setNewTagColor(color)}
+                                                    className={`w-5 h-5 rounded-full border-2 transition-transform ${newTagColor === color ? 'border-slate-800 scale-110' : 'border-transparent hover:scale-110'}`}
+                                                    style={{ backgroundColor: color }}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-2 pt-1">
+                                        {editingTagId && (
+                                            <button
+                                                onClick={handleCancelTagEdit}
+                                                className="flex-1 px-2 py-1.5 bg-slate-200 text-slate-700 rounded text-xs font-medium hover:bg-slate-300"
+                                            >
+                                                Cancelar
+                                            </button>
+                                        )}
+                                        <button
+                                            onClick={handleSaveTag}
+                                            disabled={!newTagName}
+                                            className={`flex-1 px-2 py-1.5 text-white rounded text-xs font-medium disabled:opacity-50 ${editingTagId ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'}`}
+                                        >
+                                            {editingTagId ? 'Salvar Alterações' : 'Criar Tag'}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="flex gap-2 pt-2">
-                                <button
-                                    onClick={() => setIsTagModalOpen(false)}
-                                    className="flex-1 px-3 py-2 bg-slate-100 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-200"
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    onClick={handleAddTag}
-                                    className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
-                                >
-                                    Criar
-                                </button>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto custom-scrollbar border-t pt-4">
+                            <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Tags Existentes</h4>
+                            <div className="space-y-2">
+                                {tags.map(tag => (
+                                    <div key={tag.id} className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-lg border border-transparent hover:border-slate-100 group transition-all">
+                                        <div className="flex items-center gap-2">
+                                            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: tag.color }}></span>
+                                            <span className="text-sm text-slate-700 font-medium">{tag.label}</span>
+                                        </div>
+                                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button
+                                                onClick={() => handleEditTagClick(tag)}
+                                                className="p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded"
+                                            >
+                                                <Pencil size={14} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteTag(tag.id)}
+                                                className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded"
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     </div>

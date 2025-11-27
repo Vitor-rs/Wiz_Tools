@@ -16,6 +16,8 @@ interface SimulationContextType {
     updateSpecialDate: (id: string, updates: Partial<SpecialDate>) => void;
     tags: Tag[];
     addTag: (tag: Tag) => void;
+    updateTag: (id: string, updates: Partial<Tag>) => void;
+    removeTag: (id: string) => void;
     generatedClasses: CalendarEvent[];
     generateMockedClasses: () => void;
 }
@@ -46,12 +48,12 @@ export const SimulationProvider: React.FC<{ children: ReactNode }> = ({ children
     const [tags, setTags] = useState<Tag[]>(DEFAULT_TAGS);
     const [generatedClasses, setGeneratedClasses] = useState<CalendarEvent[]>([]);
 
-    const simulationResult = useMemo(() => {
+        const simulationResult = useMemo(() => {
         if (config.startDate && config.days.length > 0) {
-            return calculateContractClasses(config.startDate, config.days);
+            return calculateContractClasses(config.startDate, config.days, specialDates);
         }
         return null;
-    }, [config]);
+    }, [config, specialDates]);
 
     const updateConfig = (newConfig: Partial<Config>) => {
         setConfig(prev => ({ ...prev, ...newConfig }));
@@ -71,6 +73,14 @@ export const SimulationProvider: React.FC<{ children: ReactNode }> = ({ children
 
     const addTag = (tag: Tag) => {
         setTags(prev => [...prev, tag]);
+    };
+
+    const updateTag = (id: string, updates: Partial<Tag>) => {
+        setTags(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
+    };
+
+    const removeTag = (id: string) => {
+        setTags(prev => prev.filter(t => t.id !== id));
     };
 
     const generateMockedClasses = () => {
@@ -127,6 +137,8 @@ export const SimulationProvider: React.FC<{ children: ReactNode }> = ({ children
             updateSpecialDate,
             tags,
             addTag,
+            updateTag,
+            removeTag,
             generatedClasses,
             generateMockedClasses
         }}>
