@@ -10,10 +10,11 @@ import { IMMUTABLE_RULES } from "./config/rules";
 
 const AppContent: React.FC = () => {
   const [year, setYear] = useState(2025);
-  const [hoveredData, setHoveredData] = useState<{ monthIndex: number; columnIndex: number } | null>(null);
+  const [hoveredData, setHoveredData] = useState<{ monthIndex: number | null; columnIndex: number | null } | null>(null);
   const [tooltipData, setTooltipData] = useState<{ x: number; y: number; content: React.ReactNode } | null>(null);
   const [flashingCell, setFlashingCell] = useState<string | null>(null);
   const [activePage, setActivePage] = useState("calendar");
+  const sidebarHighlightRef = React.useRef<HTMLDivElement>(null);
 
   const { config, simulationResult, generatedClasses, specialDates } = useSimulation();
 
@@ -29,7 +30,7 @@ const AppContent: React.FC = () => {
     // Implement click logic if needed
   };
 
-  const handleHoverChange = useCallback((data: { monthIndex: number; columnIndex: number } | null) => {
+  const handleHoverChange = useCallback((data: { monthIndex: number | null; columnIndex: number | null } | null) => {
     setHoveredData(data);
   }, []);
 
@@ -72,7 +73,9 @@ const AppContent: React.FC = () => {
               <MonthsSidebar
                 year={year}
                 hoveredMonth={hoveredData?.monthIndex ?? null}
+                onHoverChange={handleHoverChange}
                 onMonthClick={handleMonthClick}
+                highlightRef={sidebarHighlightRef}
               />
             </div>
 
@@ -91,6 +94,8 @@ const AppContent: React.FC = () => {
                 onHolidayLeave={() => setTooltipData(null)}
                 simulationResult={simulationResult}
                 specialDates={specialDates}
+                sidebarHighlightRef={sidebarHighlightRef}
+                hoveredData={hoveredData}
               />
             </div>
           </div>

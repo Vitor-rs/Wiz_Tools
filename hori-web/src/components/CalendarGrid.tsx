@@ -24,9 +24,11 @@ interface CalendarGridProps {
     ) => void;
     onHolidayLeave: () => void;
     specialDates: SpecialDate[];
+    sidebarHighlightRef?: React.RefObject<HTMLDivElement | null>;
+    hoveredData: { monthIndex: number | null; columnIndex: number | null } | null;
 }
 
-const MARGIN = { top: 40, right: 20, bottom: 20, left: 10 };
+const MARGIN = { top: 45, right: 20, bottom: 20, left: 10 };
 const CELL_SIZE = 34;
 const CELL_GAP = 4;
 const LOGICAL_GRID_WIDTH = 37; // 31 days + buffer
@@ -68,16 +70,128 @@ const CalendarGrid: React.FC<CalendarGridProps> = React.memo(({
     flashingCell,
     onHolidayHover,
     onHolidayLeave,
-    specialDates,
+    sidebarHighlightRef,
+    hoveredData,
 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
 
     // Crosshair Refs (Direct DOM Manipulation)
     const hBgRef = useRef<HTMLDivElement>(null);
     const vBgRef = useRef<HTMLDivElement>(null);
+    const headerHighlightRef = useRef<HTMLDivElement>(null);
     const hBorderRef = useRef<HTMLDivElement>(null);
     const vBorderRef = useRef<HTMLDivElement>(null);
     const prevHoveredColRef = useRef<number | null>(null);
+
+    // Calculate Grid Dimensions
+    const { gridWidth, totalHeight } = useMemo(() => {
+        let count = 0;
+        for (let i = 0; i < LOGICAL_GRID_WIDTH; i++) {
+            if (showSundays || i % 7 !== 6) count++;
+        }
+        const width =
+            (CELL_SIZE + CELL_GAP) * count + MARGIN.left + MARGIN.right;
+        const fullContentHeight = (CELL_SIZE + CELL_GAP) * TOTAL_MONTHS;
+        const height = fullContentHeight + MARGIN.top + MARGIN.bottom;
+        return { gridWidth: width, totalHeight: height };
+    }, [showSundays]);
+
+    // Helper to calculate X position
+    const getVisualX = useCallback((colIndex: number) => {
+        if (!showSundays && colIndex % 7 === 6) return -1;
+        const skipped = !showSundays ? Math.floor((colIndex + 1) / 7) : 0;
+        return (colIndex - skipped) * (CELL_SIZE + CELL_GAP);
+    }, [showSundays]);
+
+    // Render Helpers
+    const barHeight = (CELL_SIZE + CELL_GAP) * TOTAL_MONTHS + 30; // Extra height for crosshair
+
+    // Direct DOM Update Function
+    const updateCrosshair = useCallback((monthIndex: number | null, columnIndex: number | null) => {
+        // Horizontal Bar (Month)
+        if (hBgRef.current && hBorderRef.current) {
+            if (monthIndex !== null && monthIndex >= 0) {
+                const top = MARGIN.top + monthIndex * (CELL_SIZE + CELL_GAP) - CELL_GAP / 2;
+                const style = {
+                    display: 'block',
+                    top: `${top}px`,
+                    left: '0px',
+                    width: `${gridWidth}px`,
+                    height: `${CELL_SIZE + CELL_GAP}px`
+                };
+                Object.assign(hBgRef.current.style, style);
+                Object.assign(hBorderRef.current.style, style);
+            } else {
+                hBgRef.current.style.display = 'none';
+                hBorderRef.current.style.display = 'none';
+            }
+
+            // Sync Sidebar Highlight (Direct DOM)
+            if (sidebarHighlightRef?.current) {
+                if (monthIndex !== null) {
+                    const top = MARGIN.top + monthIndex * (CELL_SIZE + CELL_GAP) - CELL_GAP / 2;
+                    sidebarHighlightRef.current.style.top = `${top}px`;
+                    sidebarHighlightRef.current.style.display = 'block';
+                } else {
+                    sidebarHighlightRef.current.style.display = 'none';
+                }
+            }
+        }
+
+        // Vertical Bar (Column)
+        if (vBgRef.current && vBorderRef.current && headerHighlightRef.current) {
+            if (columnIndex !== null) {
+                const x = getVisualX(columnIndex);
+                const left = MARGIN.left + x - CELL_GAP / 2;
+
+                // Gray vertical bar
+                const style = {
+                    display: 'block',
+                    top: `${MARGIN.top - 28}px`,
+                    left: `${left}px`,
+                    width: `${CELL_SIZE + CELL_GAP}px`,
+                    height: `${barHeight}px`
+                };
+                Object.assign(vBgRef.current.style, style);
+                Object.assign(vBorderRef.current.style, style);
+
+                // Blue header highlight (tip)
+                const headerStyle = {
+                    display: 'block',
+                    top: `${MARGIN.top - 28}px`, // Match vertical bar top
+                    left: `${left}px`,
+                    width: `${CELL_SIZE + CELL_GAP}px`,
+                    height: '23px', // 28 - 5 = 23px (Ends at dotted line)
+                };
+                Object.assign(headerHighlightRef.current.style, headerStyle);
+
+            } else {
+                vBgRef.current.style.display = 'none';
+                vBorderRef.current.style.display = 'none';
+                headerHighlightRef.current.style.display = 'none';
+            }
+        }
+
+        // Column Label Highlight
+        if (columnIndex !== prevHoveredColRef.current) {
+            if (prevHoveredColRef.current !== null) {
+                const prevLabel = document.getElementById(`col-label-${prevHoveredColRef.current}`);
+                if (prevLabel) {
+                    const isWeekend = prevHoveredColRef.current % 7 >= 5;
+                    prevLabel.setAttribute('fill', isWeekend ? "#64748b" : "#374151");
+                    prevLabel.setAttribute('font-weight', "bold");
+                }
+            }
+            if (columnIndex !== null) {
+                const newLabel = document.getElementById(`col-label-${columnIndex}`);
+                if (newLabel) {
+                    newLabel.setAttribute('fill', "#ffffff");
+                    newLabel.setAttribute('font-weight', "900");
+                }
+            }
+            prevHoveredColRef.current = columnIndex;
+        }
+    }, [gridWidth, barHeight, getVisualX, sidebarHighlightRef]);
 
     // Scroll to flashing cell
     useEffect(() => {
@@ -102,25 +216,14 @@ const CalendarGrid: React.FC<CalendarGridProps> = React.memo(({
         }
     }, [flashingCell]);
 
-    // Helper to calculate X position
-    const getVisualX = useCallback((colIndex: number) => {
-        if (!showSundays && colIndex % 7 === 6) return -1;
-        const skipped = !showSundays ? Math.floor((colIndex + 1) / 7) : 0;
-        return (colIndex - skipped) * (CELL_SIZE + CELL_GAP);
-    }, [showSundays]);
-
-    // Calculate Grid Dimensions
-    const { gridWidth, totalHeight } = useMemo(() => {
-        let count = 0;
-        for (let i = 0; i < LOGICAL_GRID_WIDTH; i++) {
-            if (showSundays || i % 7 !== 6) count++;
+    // Sync crosshair with external hover state (e.g. Sidebar)
+    useEffect(() => {
+        if (hoveredData) {
+            updateCrosshair(hoveredData.monthIndex, hoveredData.columnIndex);
+        } else {
+            updateCrosshair(null, null);
         }
-        const width =
-            (CELL_SIZE + CELL_GAP) * count + MARGIN.left + MARGIN.right;
-        const fullContentHeight = (CELL_SIZE + CELL_GAP) * TOTAL_MONTHS;
-        const height = fullContentHeight + MARGIN.top + MARGIN.bottom;
-        return { gridWidth: width, totalHeight: height };
-    }, [showSundays]);
+    }, [hoveredData, updateCrosshair]);
 
     // Prepare Data for Rendering
     const gridData = useMemo(() => {
@@ -203,70 +306,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = React.memo(({
             currentRenderDate = addMonths(currentRenderDate, 1);
         }
         return months;
-    }, [year, data, holidays, specialDates, config.startDate, getVisualX]);
-
-    // Render Helpers
-    const barHeight = (CELL_SIZE + CELL_GAP) * TOTAL_MONTHS + 30; // Extra height for crosshair
-
-    // Direct DOM Update Function
-    const updateCrosshair = (monthIndex: number | null, columnIndex: number | null) => {
-        // Horizontal Bar (Month)
-        if (hBgRef.current && hBorderRef.current) {
-            if (monthIndex !== null) {
-                const top = MARGIN.top + monthIndex * (CELL_SIZE + CELL_GAP) - CELL_GAP / 2;
-                const style = {
-                    display: 'block',
-                    top: `${top}px`,
-                    left: '0px',
-                    width: `${gridWidth}px`,
-                    height: `${CELL_SIZE + CELL_GAP}px`
-                };
-                Object.assign(hBgRef.current.style, style);
-                Object.assign(hBorderRef.current.style, style);
-            } else {
-                hBgRef.current.style.display = 'none';
-                hBorderRef.current.style.display = 'none';
-            }
-        }
-
-        // Vertical Bar (Column)
-        if (vBgRef.current && vBorderRef.current) {
-            if (columnIndex !== null) {
-                const x = getVisualX(columnIndex);
-                const left = MARGIN.left + x - CELL_GAP / 2;
-                const style = {
-                    display: 'block',
-                    top: `${MARGIN.top - 28}px`,
-                    left: `${left}px`,
-                    width: `${CELL_SIZE + CELL_GAP}px`,
-                    height: `${barHeight}px`
-                };
-                Object.assign(vBgRef.current.style, style);
-                Object.assign(vBorderRef.current.style, style);
-            } else {
-                vBgRef.current.style.display = 'none';
-                vBorderRef.current.style.display = 'none';
-            }
-        }
-
-        // Column Label Highlight
-        if (columnIndex !== prevHoveredColRef.current) {
-            if (prevHoveredColRef.current !== null) {
-                const prevLabel = document.getElementById(`col-label-${prevHoveredColRef.current}`);
-                if (prevLabel) {
-                    const isWeekend = prevHoveredColRef.current % 7 >= 5;
-                    prevLabel.setAttribute('fill', isWeekend ? "#64748b" : "#374151");
-                }
-            }
-            if (columnIndex !== null) {
-                const newLabel = document.getElementById(`col-label-${columnIndex}`);
-                if (newLabel) {
-                    newLabel.setAttribute('fill', "#2563eb");
-                }
-            }
-            prevHoveredColRef.current = columnIndex;
-        }
-    };
+    }, [year, data, holidays, config.startDate, getVisualX]);
 
     const handleMouseLeave = () => {
         updateCrosshair(null, null);
@@ -306,12 +346,17 @@ const CalendarGrid: React.FC<CalendarGridProps> = React.memo(({
                 {/* Layer 2: Crosshair Backgrounds - HTML (Refs) */}
                 <div
                     ref={hBgRef}
-                    className="absolute bg-gray-100/85 rounded-md pointer-events-none"
+                    className="absolute bg-gray-100/85 rounded-r-md pointer-events-none"
                     style={{ display: 'none' }}
                 />
                 <div
                     ref={vBgRef}
                     className="absolute bg-gray-100/85 rounded-md pointer-events-none"
+                    style={{ display: 'none' }}
+                />
+                <div
+                    ref={headerHighlightRef}
+                    className="absolute bg-blue-600 rounded-t-md pointer-events-none"
                     style={{ display: 'none' }}
                 />
 
@@ -349,6 +394,17 @@ const CalendarGrid: React.FC<CalendarGridProps> = React.memo(({
                     <g transform={`translate(${MARGIN.left}, ${MARGIN.top})`}>
                         {/* Layer 3: Column Labels */}
                         <g>
+                            {/* Dotted border line below week headers */}
+                            <line
+                                x1="0"
+                                y1="-5"
+                                x2={gridWidth - MARGIN.left - MARGIN.right}
+                                y2="-5"
+                                stroke="#cbd5e1"
+                                strokeWidth="1"
+                                strokeDasharray="3,3"
+                                strokeLinecap="round"
+                            />
                             {Array.from({ length: LOGICAL_GRID_WIDTH }).map((_, c) => {
                                 const x = getVisualX(c);
                                 if (x !== -1) {
@@ -372,7 +428,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = React.memo(({
                                                 // The user usually enters from top, so maybe month 0?
                                                 // Or better: don't trigger crosshair on labels, just highlight label.
                                                 updateCrosshair(null, c);
-                                                onHoverChange({ monthIndex: 0, columnIndex: c }); // Default to month 0?
+                                                onHoverChange({ monthIndex: -1, columnIndex: c }); // Use -1 or null to indicate "header only"
                                             }}
                                         >
                                             {WEEK_LABELS[c % 7]}
@@ -592,7 +648,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = React.memo(({
                 {/* Layer 5: Crosshair Borders (Overlay) - HTML (Refs) */}
                 <div
                     ref={hBorderRef}
-                    className="absolute border border-gray-400 rounded-md pointer-events-none z-20"
+                    className="absolute border border-gray-400 border-l-0 rounded-r-md pointer-events-none z-20"
                     style={{ display: 'none' }}
                 />
                 <div
