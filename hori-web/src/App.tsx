@@ -22,6 +22,9 @@ function App() {
   const [activePage, setActivePage] = useState('calendar')
   const [year, setYear] = useState(2024)
   const [hoveredData, setHoveredData] = useState<{ monthIndex: number; columnIndex: number } | null>(null)
+  const handleHoverChange = (data: { monthIndex: number; columnIndex: number } | null) => {
+    setHoveredData(data)
+  }
   const [tooltipData, setTooltipData] = useState<{ data: { date: string; events: CalendarEvent[]; holiday?: Holiday }; position: { x: number; y: number } } | null>(null)
   const [flashingCell, setFlashingCell] = useState<string | null>(null)
 
@@ -76,9 +79,7 @@ function App() {
             holidays={holidays}
             onCellClick={handleCellClick}
             showSundays={true}
-            onHoverChange={setHoveredData}
-            hoveredColumn={hoveredData?.columnIndex ?? null}
-            hoveredMonth={hoveredData?.monthIndex ?? null}
+            onHoverChange={handleHoverChange}
             flashingCell={flashingCell}
             onHolidayHover={handleHolidayHover}
             onHolidayLeave={() => setTooltipData(null)}
