@@ -486,8 +486,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = React.memo(({
                                                     : "#f9fafb";
 
                                     const bgOpacity = !isContract ? 0.3 : 1;
-                                    const stroke = hasClasses ? "#e5e7eb" : "none";
-                                    const strokeWidth = hasClasses ? 1 : 0;
+                                    const stroke = "#e5e7eb";
+                                    const strokeWidth = 0.5;
 
                                     // Interactive State - Handled by Refs now, so no React hover logic here
                                     const isClickable = hasClasses;
@@ -538,6 +538,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = React.memo(({
                                                 fillOpacity={bgOpacity}
                                                 stroke={stroke}
                                                 strokeWidth={strokeWidth}
+                                                className="transition-all duration-200 hover:stroke-blue-500 hover:stroke-2 hover:fill-blue-50 hover:[fill-opacity:1]"
                                                 style={{ filter: hasClasses ? "url(#cell-shadow)" : "none" }}
                                             />
 
