@@ -6,12 +6,14 @@ interface MonthsSidebarProps {
     year: number;
     hoveredMonth: number | null;
     onHoverChange?: (monthIndex: number | null) => void;
+    onMonthClick?: (monthIndex: number) => void;
 }
 
 const MonthsSidebar: React.FC<MonthsSidebarProps> = ({
     year,
     hoveredMonth,
     onHoverChange,
+    onMonthClick,
 }) => {
     const months: Date[] = [];
     let current = new Date(year, 0, 1);
@@ -57,10 +59,12 @@ const MonthsSidebar: React.FC<MonthsSidebarProps> = ({
                                 fill={isHovered ? "#1e3a8a" : "#1f2937"}
                                 className="transition-all duration-100 font-sans cursor-default"
                                 style={{
-                                    textShadow: isHovered ? "0px 0px 1px #1e3a8a, 0px 0px 10px rgba(59, 130, 246, 0.4)" : "none"
+                                    textShadow: isHovered ? "0px 0px 1px #1e3a8a, 0px 0px 10px rgba(59, 130, 246, 0.4)" : "none",
+                                    cursor: "pointer"
                                 }}
                                 onMouseEnter={() => onHoverChange && onHoverChange(i)}
                                 onMouseLeave={() => onHoverChange && onHoverChange(null)}
+                                onClick={() => onMonthClick && onMonthClick(i)}
                             >
                                 {format(m, "MMMM", { locale: ptBR }).replace(/^\w/, (c) =>
                                     c.toUpperCase()

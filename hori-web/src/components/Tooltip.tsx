@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import type { CalendarEvent, Holiday } from "../utils/logic";
+import type { CalendarEvent, Holiday } from "../types";
 
 interface TooltipProps {
     data: { date: string; events: CalendarEvent[]; holiday?: Holiday } | null;

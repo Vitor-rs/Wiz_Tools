@@ -1,7 +1,7 @@
 import React, { useMemo, useEffect, useRef, useCallback } from "react";
 import { format, getDaysInMonth, addMonths } from "date-fns";
 import { FILL_COLORS } from "../utils/logic";
-import type { CalendarEvent, Holiday, Config } from "../utils/logic";
+import type { CalendarEvent, Holiday, Config } from "../types";
 
 interface CalendarGridProps {
     data: CalendarEvent[];
@@ -17,6 +17,7 @@ interface CalendarGridProps {
         data: { monthIndex: number; columnIndex: number } | null
     ) => void;
     flashingCell: string | null;
+    simulationResult: { validDates: string[]; skippedDates: { date: string; reason: string }[] } | null;
     onHolidayHover: (
         data: { date: string; events: CalendarEvent[]; holiday: Holiday },
         pos: { x: number; y: number }

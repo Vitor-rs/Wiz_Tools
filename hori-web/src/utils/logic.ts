@@ -8,6 +8,8 @@ import {
   differenceInMinutes,
 } from "date-fns";
 
+import type { Config, Holiday, CalendarEvent } from "../types";
+
 // --- CONFIGURATION & CONSTANTS ---
 
 export const WEEK_DAYS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
@@ -21,32 +23,6 @@ export const FILL_COLORS: Record<string, string> = {
   Atraso: "#f97316",
   HorarioDiferente: "#ec4899",
 };
-
-// --- TYPES ---
-
-export interface Config {
-  startDate: string;
-  monthsDuration: number;
-  days: number[];
-  time: string;
-}
-
-export interface Holiday {
-  date: string;
-  name: string;
-}
-
-export interface CalendarEvent {
-  id: string;
-  date: string;
-  type: "Normal" | "Falta" | "Reposição" | "Anteposição" | "Futuro";
-  attended: boolean;
-  late?: boolean;
-  differentTime?: boolean;
-  arrivalTime?: string;
-  refDate?: string;
-  refType?: string;
-}
 
 export interface KPI {
   kpiLiquid: number;

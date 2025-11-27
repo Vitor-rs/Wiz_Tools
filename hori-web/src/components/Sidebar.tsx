@@ -26,6 +26,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         { id: "calendar", label: "Frequência Anual", icon: Calendar },
         { id: "attendance_sheet", label: "Ficha de Frequência", icon: FileText },
         { id: "enrollment", label: "Matrícula", icon: Users },
+        { id: "simulation", label: "Simulação", icon: Settings },
         { id: "dashboard", label: "Dashboard", icon: BarChart2 },
     ];
 
@@ -68,16 +69,16 @@ const Sidebar: React.FC<SidebarProps> = ({
                         key={item.id}
                         onClick={() => onNavigate(item.id)}
                         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 group relative ${activePage === item.id
-                                ? "bg-blue-600 text-white shadow-md shadow-blue-900/20"
-                                : "hover:bg-slate-800/50 hover:text-white"
+                            ? "bg-blue-600 text-white shadow-md shadow-blue-900/20"
+                            : "hover:bg-slate-800/50 hover:text-white"
                             } ${isCollapsed ? "justify-center" : ""}`}
                         title={isCollapsed ? item.label : ""}
                     >
                         <item.icon
                             size={18}
                             className={`${activePage === item.id
-                                    ? "text-white"
-                                    : "text-slate-400 group-hover:text-white"
+                                ? "text-white"
+                                : "text-slate-400 group-hover:text-white"
                                 }`}
                         />
                         {!isCollapsed && <span className="font-medium">{item.label}</span>}
