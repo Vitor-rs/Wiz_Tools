@@ -271,7 +271,11 @@ const CalendarGrid: React.FC<CalendarGridProps> = React.memo(({
     };
 
     return (
-        <div ref={containerRef} className="overflow-auto custom-scrollbar flex-1 bg-white relative">
+        <div
+            ref={containerRef}
+            className="overflow-auto custom-scrollbar flex-1 bg-white relative"
+            onMouseLeave={handleMouseLeave}
+        >
             <div className="relative min-w-max min-h-max">
                 {/* Layer 1: Backgrounds (Weekends) - HTML */}
                 {Array.from({ length: LOGICAL_GRID_WIDTH }).map((_, c) => {
