@@ -1,6 +1,7 @@
 import React, { useMemo, useEffect, useRef, useCallback, useImperativeHandle, forwardRef } from "react";
 import { format, getDaysInMonth, addMonths } from "date-fns";
 import { FILL_COLORS } from "../utils/logic";
+import { IMMUTABLE_RULES } from "../config/rules";
 import type { CalendarEvent, Holiday, Config, SpecialDate } from "../types";
 
 export interface CalendarGridHandle {
@@ -190,6 +191,33 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
         }
     }));
 
+    // Selection State
+    const [selectionStart, setSelectionStart] = React.useState<string | null>(null);
+    const [selectionEnd, setSelectionEnd] = React.useState<string | null>(null);
+    const isDragging = useRef(false);
+
+    // Global Mouse Up & Click Outside Handler
+    useEffect(() => {
+        const handleGlobalMouseUp = () => {
+            isDragging.current = false;
+        };
+
+        const handleGlobalMouseDown = (e: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+                setSelectionStart(null);
+                setSelectionEnd(null);
+            }
+        };
+
+        window.addEventListener('mouseup', handleGlobalMouseUp);
+        window.addEventListener('mousedown', handleGlobalMouseDown);
+
+        return () => {
+            window.removeEventListener('mouseup', handleGlobalMouseUp);
+            window.removeEventListener('mousedown', handleGlobalMouseDown);
+        };
+    }, []);
+
     // Scroll to flashing cell
     useEffect(() => {
         if (flashingCell && containerRef.current) {
@@ -212,6 +240,52 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
             }
         }
     }, [flashingCell]);
+
+    // Selection Helpers
+    const selectedDates = useMemo(() => {
+        if (!selectionStart || !selectionEnd) return new Set<string>();
+
+        const start = new Date(selectionStart + "T12:00:00");
+        const end = new Date(selectionEnd + "T12:00:00");
+
+        const min = start < end ? start : end;
+        const max = start < end ? end : start;
+
+        const dates = new Set<string>();
+        const current = new Date(min);
+
+        while (current <= max) {
+            dates.add(format(current, 'yyyy-MM-dd'));
+            current.setDate(current.getDate() + 1);
+        }
+        return dates;
+    }, [selectionStart, selectionEnd]);
+
+    const handleCellMouseDown = (dateStr: string, e: React.MouseEvent) => {
+        // Only left click
+        if (e.button !== 0) return;
+
+        isDragging.current = true;
+        setSelectionStart(dateStr);
+        setSelectionEnd(dateStr);
+    };
+
+    const handleCellMouseEnter = (dateStr: string) => {
+        if (isDragging.current) {
+            setSelectionEnd(dateStr);
+        }
+    };
+
+    // Single Selection Timeout
+    useEffect(() => {
+        if (selectionStart && selectionEnd && selectionStart === selectionEnd) {
+            const timer = setTimeout(() => {
+                setSelectionStart(null);
+                setSelectionEnd(null);
+            }, IMMUTABLE_RULES.interaction.singleSelectionTimeout);
+            return () => clearTimeout(timer);
+        }
+    }, [selectionStart, selectionEnd]);
 
     // Prepare Data for Rendering
     const gridData = useMemo(() => {
@@ -306,7 +380,7 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
     return (
         <div
             ref={containerRef}
-            className="overflow-auto custom-scrollbar flex-1 bg-white relative"
+            className="overflow-auto custom-scrollbar flex-1 bg-white relative select-none"
             onMouseLeave={handleMouseLeave}
         >
             <div className="relative min-w-max min-h-max">
@@ -411,14 +485,8 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
                                             className="font-sans cursor-default transition-colors duration-150"
                                             style={{ pointerEvents: 'auto' }}
                                             onMouseEnter={() => {
-                                                // We don't have month index here easily, but we can assume 0 or just update col
-                                                // Actually, labels are outside the grid data loop.
-                                                // Let's just update the column highlight and notify App
-                                                // We don't know the month index here, so maybe just keep previous month or null?
-                                                // The user usually enters from top, so maybe month 0?
-                                                // Or better: don't trigger crosshair on labels, just highlight label.
                                                 updateCrosshair(null, c);
-                                                onHoverChange({ monthIndex: -1, columnIndex: c }); // Use -1 or null to indicate "header only"
+                                                onHoverChange({ monthIndex: -1, columnIndex: c });
                                             }}
                                         >
                                             {WEEK_LABELS[c % 7]}
@@ -445,6 +513,10 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
                                                 fill="transparent"
                                                 style={{ pointerEvents: 'auto' }}
                                                 onMouseEnter={() => handleMouseLeave()}
+                                                onClick={() => {
+                                                    setSelectionStart(null);
+                                                    setSelectionEnd(null);
+                                                }}
                                             />
                                         );
                                     }
@@ -465,24 +537,27 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
                                     const hasClasses = dayEvents.length > 0;
                                     const isWeekend = day.colIndex % 7 >= 5;
                                     const isFlashing = flashingCell === dateStr;
+                                    const isSelected = selectedDates.has(dateStr);
 
-                                    const bgFill = !isContract
-                                        ? "#e5e7eb"
-                                        : hasClasses
-                                            ? "#ffffff"
-                                            : specialDate
-                                                ? "#fbcfe8" // Pink-200 for special dates
-                                                : isWeekend
-                                                    ? "rgba(255,255,255,0.4)"
-                                                    : holiday
-                                                        ? "#fee2e2"
-                                                        : "#f9fafb";
+                                    const bgFill = isSelected
+                                        ? "#bfdbfe" // Blue-200 for selection
+                                        : !isContract
+                                            ? "#e5e7eb"
+                                            : hasClasses
+                                                ? "#ffffff"
+                                                : specialDate
+                                                    ? "#fbcfe8" // Pink-200 for special dates
+                                                    : isWeekend
+                                                        ? "rgba(255,255,255,0.4)"
+                                                        : holiday
+                                                            ? "#fee2e2"
+                                                            : "#f9fafb";
 
                                     const bgOpacity = !isContract ? 0.3 : 1;
                                     const stroke = "#e5e7eb";
                                     const strokeWidth = 0.5;
 
-                                    // Interactive State - Handled by Refs now, so no React hover logic here
+                                    // Interactive State
                                     const isClickable = hasClasses;
                                     const isHoverable = (holiday || specialDate) && !hasClasses;
 
@@ -496,9 +571,11 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
                                                 cursor: isClickable ? "pointer" : isHoverable ? "help" : "default",
                                                 pointerEvents: 'auto'
                                             }}
+                                            onMouseDown={(e) => handleCellMouseDown(dateStr, e)}
                                             onMouseEnter={(e) => {
                                                 updateCrosshair(day.mIndex, day.colIndex);
                                                 onHoverChange({ monthIndex: day.mIndex, columnIndex: day.colIndex });
+                                                handleCellMouseEnter(dateStr);
 
                                                 if ((holiday || specialDate) && !hasClasses) {
                                                     const rectBox = e.currentTarget.getBoundingClientRect();

@@ -60,6 +60,11 @@ export const IMMUTABLE_RULES = {
     lateThresholdMinutes: 10, // > 10 min = Late
     differentTimeThresholdMinutes: 50, // > 50 min (or close to next hour) = Different Time
   },
+
+  // UI Interaction Rules
+  interaction: {
+    singleSelectionTimeout: 6000, // 6 seconds
+  },
 };
 
 // Helper to check if a date is a "Non-Class Day" (Holiday or Recess)
