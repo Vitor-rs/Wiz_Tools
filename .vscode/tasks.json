@@ -2,17 +2,41 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
+			"label": "Install All Dependencies",
+			"type": "shell",
+			"command": "npm install",
+			"problemMatcher": [],
+			"detail": "Installs dependencies for all workspaces",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
 			"type": "npm",
 			"script": "dev",
 			"path": "hori-web",
 			"problemMatcher": [],
-			"label": "npm: dev - hori-web",
-			"detail": "vite",
+			"label": "Run: Hori Web",
+			"detail": "Inicia o projeto principal (Vite)",
+			"isBackground": true,
 			"presentation": {
 				"group": "dashboard",
 				"reveal": "always"
-			},
-			"isBackground": true
+			}
+		},
+		{
+			"type": "npm",
+			"script": "dev",
+			"path": "hori-flow",
+			"problemMatcher": [],
+			"label": "Run: Hori Flow (ReactFlow)",
+			"detail": "Inicia o laboratório de ReactFlow",
+			"isBackground": true,
+			"presentation": {
+				"group": "dashboard",
+				"reveal": "always"
+			}
 		}
 	]
 }

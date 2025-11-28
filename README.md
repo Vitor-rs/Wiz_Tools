@@ -30,6 +30,13 @@ Este projeto é uma aplicação web moderna desenvolvida para auxiliar na gestã
 
 ## 📂 Estrutura do Projeto
 
+O repositório funciona como um monorepo contendo:
+
+- **`hori-web/`**: Aplicação principal (Gestão Pedagógica).
+- **`hori-flow/`**: Laboratório de testes para diagramas com ReactFlow.
+- **`hori-electron/`**: (Em desenvolvimento) Versão desktop.
+
+### Detalhes do `hori-web`
 O código-fonte principal encontra-se na pasta `hori-web`:
 
 - **`src/components`**: Componentes de UI reutilizáveis (CalendarGrid, Sidebar, Modal, Header, etc.).
@@ -39,35 +46,35 @@ O código-fonte principal encontra-se na pasta `hori-web`:
 - **`src/utils`**: Lógica pura para cálculo de datas, geração de calendário e simulação de contratos (`simulation.ts`, `logic.ts`).
 - **`src/types`**: Definições de interfaces TypeScript compartilhadas.
 
-## 🔧 Como Executar
+## 🔧 Como Executar (Automação)
 
-Pré-requisitos: Node.js instalado.
+Este projeto está configurado como um **Monorepo**. Você pode gerenciar tudo da raiz.
 
-1. **Acesse o diretório do projeto web:**
+### 1. Instalação Geral
+Para instalar as dependências de **todos** os projetos (`hori-web`, `hori-flow`, etc.) de uma vez:
 
-   ```bash
-   cd hori-web
-   ```
+```bash
+npm install
+```
 
-2. **Instale as dependências:**
+### 2. Executando os Projetos
+Você pode usar as **Tasks do VS Code** (recomendado) ou o terminal.
 
-   ```bash
-   npm install
-   ```
+**Via VS Code:**
+1. Pressione `Ctrl + Shift + P` (ou `Cmd + Shift + P`).
+2. Digite `Tasks: Run Task`.
+3. Escolha uma das opções:
+   - **Run: Hori Web**: Inicia o sistema principal.
+   - **Run: Hori Flow (ReactFlow)**: Inicia o laboratório de testes do ReactFlow.
 
-3. **Inicie o servidor de desenvolvimento:**
+**Via Terminal (Raiz):**
+```bash
+# Rodar o projeto principal
+npm run dev:web
 
-   ```bash
-   npm run dev
-   ```
-
-   O servidor geralmente iniciará em `http://localhost:5173`.
-
-4. **Build para produção:**
-
-   ```bash
-   npm run build
-   ```
+# Rodar o laboratório ReactFlow
+npm run dev:flow
+```
 
 ## 📋 Contexto de Negócio
 

@@ -1,0 +1,16 @@
+{
+  "name": "hori-calendar-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "hori-web",
+    "hori-electron",
+    "hori-flow"
+  ],
+  "scripts": {
+    "install:all": "npm install",
+    "dev:web": "npm run dev --workspace=hori-web",
+    "dev:flow": "npm run dev --workspace=hori-flow",
+    "build:all": "npm run build --workspaces"
+  }
+}
