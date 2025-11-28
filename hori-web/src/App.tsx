@@ -6,6 +6,7 @@ import type { MonthsSidebarHandle } from "./components/MonthsSidebar";
 import Layout from "./components/Layout";
 import Header from "./components/Header";
 import SimulationPage from "./pages/SimulationPage";
+import CheckInPage from "./pages/CheckInPage";
 import { SimulationProvider, useSimulation } from "./context/SimulationContext";
 import type { CalendarEvent, Holiday } from "./types/index";
 import { IMMUTABLE_RULES } from "./config/rules";
@@ -16,7 +17,7 @@ const AppContent: React.FC = () => {
   const [tooltipData, setTooltipData] = useState<{ x: number; y: number; content: React.ReactNode } | null>(null);
   const [flashingCell, setFlashingCell] = useState<string | null>(null);
   const [activePage, setActivePage] = useState("calendar");
-  
+
   const calendarRef = useRef<CalendarGridHandle>(null);
   const sidebarRef = useRef<MonthsSidebarHandle>(null);
 
@@ -63,6 +64,8 @@ const AppContent: React.FC = () => {
     <Layout activePage={activePage} onNavigate={setActivePage}>
       {activePage === 'simulation' ? (
         <SimulationPage />
+      ) : activePage === 'checkin' ? (
+        <CheckInPage />
       ) : (
         <>
           <Header

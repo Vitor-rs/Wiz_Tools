@@ -7,6 +7,7 @@ import {
     ChevronLeft,
     ChevronRight,
     BarChart2,
+    CheckSquare,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -24,6 +25,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
     const menuItems = [
         { id: "calendar", label: "Frequência Anual", icon: Calendar },
+        { id: "checkin", label: "Check-in", icon: CheckSquare },
         { id: "attendance_sheet", label: "Ficha de Frequência", icon: FileText },
         { id: "enrollment", label: "Matrícula", icon: Users },
         { id: "simulation", label: "Simulação", icon: Settings },

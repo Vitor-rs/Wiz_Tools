@@ -296,7 +296,7 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
             currentRenderDate = addMonths(currentRenderDate, 1);
         }
         return months;
-    }, [year, data, holidays, config.startDate, getVisualX]);
+    }, [year, data, holidays, config.startDate, getVisualX, specialDates]);
 
     const handleMouseLeave = () => {
         updateCrosshair(null, null);

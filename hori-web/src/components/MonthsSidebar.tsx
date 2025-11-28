@@ -12,6 +12,10 @@ interface MonthsSidebarProps {
     onMonthClick?: (monthIndex: number) => void;
 }
 
+const cellSize = 34;
+const cellGap = 4;
+const margin = { top: 45 };
+
 const MonthsSidebar = forwardRef<MonthsSidebarHandle, MonthsSidebarProps>(({
     year,
     onHoverChange,
@@ -19,10 +23,6 @@ const MonthsSidebar = forwardRef<MonthsSidebarHandle, MonthsSidebarProps>(({
 }, ref) => {
     const [hoveredMonth, setHoveredMonth] = useState<number | null>(null);
     const highlightRef = useRef<HTMLDivElement>(null);
-
-    const cellSize = 34;
-    const cellGap = 4;
-    const margin = { top: 45 };
 
     useImperativeHandle(ref, () => ({
         setHovered: (monthIndex) => {
@@ -126,11 +126,11 @@ const MonthsSidebar = forwardRef<MonthsSidebarHandle, MonthsSidebarProps>(({
                                 }}
                                 onMouseEnter={() => {
                                     setHoveredMonth(i);
-                                    onHoverChange && onHoverChange({ monthIndex: i, columnIndex: null });
+                                    if (onHoverChange) onHoverChange({ monthIndex: i, columnIndex: null });
                                 }}
                                 onMouseLeave={() => {
                                     setHoveredMonth(null);
-                                    onHoverChange && onHoverChange(null);
+                                    if (onHoverChange) onHoverChange(null);
                                 }}
                                 onClick={() => onMonthClick && onMonthClick(i)}
                             >
