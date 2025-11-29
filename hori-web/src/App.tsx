@@ -100,36 +100,39 @@ const AppContent: React.FC = () => {
           />
 
           {/* Main Content Area - Flex container to hold Sidebar and Grid side-by-side */}
-          <div className="flex flex-1 overflow-hidden relative bg-gray-50">
-            {/* Months Sidebar (Fixed Left) */}
-            <div className="shrink-0 z-10 bg-white border-r border-gray-200 h-full">
-              <MonthsSidebar
-                ref={sidebarRef}
-                year={year}
-                onHoverChange={handleHoverChange}
-                onMonthClick={handleMonthClick}
-              />
-            </div>
+          <div className="flex flex-1 overflow-hidden relative bg-[#f5f6fa] p-[10px]">
+            {/* The "Card" Container */}
+            <div className="flex max-w-full max-h-full bg-white rounded-2xl overflow-hidden shadow-md border border-slate-200">
+              {/* Months Sidebar (Fixed Left) */}
+              <div className="shrink-0 z-10 bg-white border-r border-gray-200 h-full">
+                <MonthsSidebar
+                  ref={sidebarRef}
+                  year={year}
+                  onHoverChange={handleHoverChange}
+                  onMonthClick={handleMonthClick}
+                />
+              </div>
 
-            {/* Calendar Grid (Scrollable) */}
-            <div className="flex-1 overflow-hidden relative">
-              <CalendarGrid
-                ref={calendarRef}
-                data={generatedClasses}
-                year={year}
-                config={config}
-                holidays={holidays}
-                onCellClick={handleCellClick}
-                showSundays={true}
-                onHoverChange={handleHoverChange}
-                flashingDates={flashingDates}
-                searchRangeDates={searchRangeDates}
-                onClearSelection={handleClearSelection}
-                onHolidayHover={handleHolidayHover}
-                onHolidayLeave={() => setTooltipData(null)}
-                simulationResult={simulationResult}
-                specialDates={specialDates}
-              />
+              {/* Calendar Grid (Scrollable) */}
+              <div className="flex-1 overflow-hidden relative">
+                <CalendarGrid
+                  ref={calendarRef}
+                  data={generatedClasses}
+                  year={year}
+                  config={config}
+                  holidays={holidays}
+                  onCellClick={handleCellClick}
+                  showSundays={true}
+                  onHoverChange={handleHoverChange}
+                  flashingDates={flashingDates}
+                  searchRangeDates={searchRangeDates}
+                  onClearSelection={handleClearSelection}
+                  onHolidayHover={handleHolidayHover}
+                  onHolidayLeave={() => setTooltipData(null)}
+                  simulationResult={simulationResult}
+                  specialDates={specialDates}
+                />
+              </div>
             </div>
           </div>
         </>

@@ -11,7 +11,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activePage, onNavigate }) => 
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
     return (
-        <div className="flex h-screen w-full bg-white overflow-hidden">
+        <div className="flex h-screen w-full bg-[#f5f6fa] overflow-hidden">
             <Sidebar
                 activePage={activePage}
                 onNavigate={onNavigate}
