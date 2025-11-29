@@ -4,7 +4,7 @@ import type { CalendarGridHandle } from "./components/CalendarGrid";
 import MonthsSidebar from "./components/MonthsSidebar";
 import type { MonthsSidebarHandle } from "./components/MonthsSidebar";
 import Layout from "./components/Layout";
-import Header from "./components/Header";
+import CalendarHeader from "./components/CalendarHeader";
 import SimulationPage from "./pages/SimulationPage";
 import CheckInPage from "./pages/CheckInPage";
 import { SimulationProvider, useSimulation } from "./context/SimulationContext";
@@ -15,7 +15,8 @@ const AppContent: React.FC = () => {
   const [year, setYear] = useState(2025);
   // hoveredData state removed for performance
   const [tooltipData, setTooltipData] = useState<{ x: number; y: number; content: React.ReactNode } | null>(null);
-  const [flashingCell, setFlashingCell] = useState<string | null>(null);
+  const [flashingDates, setFlashingDates] = useState<Set<string>>(new Set());
+  const [searchRangeDates, setSearchRangeDates] = useState<Set<string>>(new Set());
   const [activePage, setActivePage] = useState("calendar");
 
   const calendarRef = useRef<CalendarGridHandle>(null);
@@ -56,8 +57,32 @@ const AppContent: React.FC = () => {
 
   const handleMonthClick = (monthIndex: number) => {
     const dateStr = `${year}-${String(monthIndex + 1).padStart(2, '0')}-01`;
-    setFlashingCell(dateStr);
-    setTimeout(() => setFlashingCell(null), 1000);
+    setFlashingDates(new Set([dateStr]));
+    setTimeout(() => setFlashingDates(new Set()), 1000);
+  };
+
+  const handleSearchDate = (result: { flashingDates: string[], rangeDates: string[] }) => {
+    // Check if we need to change year based on the first found date
+    const allDates = [...result.flashingDates, ...result.rangeDates];
+    if (allDates.length > 0) {
+      const [y] = allDates[0].split('-').map(Number);
+      if (y !== year) {
+        setYear(y);
+      }
+    }
+
+    setFlashingDates(new Set(result.flashingDates));
+    setSearchRangeDates(new Set(result.rangeDates));
+
+    // Clear flashing dates after animation, but keep ranges
+    if (result.flashingDates.length > 0) {
+      setTimeout(() => setFlashingDates(new Set()), 2000);
+    }
+  };
+
+  const handleClearSelection = () => {
+    setSearchRangeDates(new Set());
+    setFlashingDates(new Set());
   };
 
   return (
@@ -68,11 +93,10 @@ const AppContent: React.FC = () => {
         <CheckInPage />
       ) : (
         <>
-          <Header
-            student={{ name: "Vitor", level: "Avançado" }}
+          <CalendarHeader
             year={year}
             onYearChange={setYear}
-            onConfigClick={() => setActivePage('simulation')}
+            onSearchDate={handleSearchDate}
           />
 
           {/* Main Content Area - Flex container to hold Sidebar and Grid side-by-side */}
@@ -98,7 +122,9 @@ const AppContent: React.FC = () => {
                 onCellClick={handleCellClick}
                 showSundays={true}
                 onHoverChange={handleHoverChange}
-                flashingCell={flashingCell}
+                flashingDates={flashingDates}
+                searchRangeDates={searchRangeDates}
+                onClearSelection={handleClearSelection}
                 onHolidayHover={handleHolidayHover}
                 onHolidayLeave={() => setTooltipData(null)}
                 simulationResult={simulationResult}
@@ -110,16 +136,18 @@ const AppContent: React.FC = () => {
       )}
 
       {/* Tooltip */}
-      {tooltipData && (
-        <div
-          className="fixed z-50 bg-white px-3 py-2 rounded shadow-lg border border-gray-200 pointer-events-none transform -translate-y-full -translate-x-1/2 -mt-2"
-          style={{ left: tooltipData.x, top: tooltipData.y }}
-        >
-          {tooltipData.content}
-          <div className="absolute -bottom-1.5 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-white border-b border-r border-gray-200 rotate-45"></div>
-        </div>
-      )}
-    </Layout>
+      {
+        tooltipData && (
+          <div
+            className="fixed z-50 bg-white px-3 py-2 rounded shadow-lg border border-gray-200 pointer-events-none transform -translate-y-full -translate-x-1/2 -mt-2"
+            style={{ left: tooltipData.x, top: tooltipData.y }}
+          >
+            {tooltipData.content}
+            <div className="absolute -bottom-1.5 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-white border-b border-r border-gray-200 rotate-45"></div>
+          </div>
+        )
+      }
+    </Layout >
   );
 };
 

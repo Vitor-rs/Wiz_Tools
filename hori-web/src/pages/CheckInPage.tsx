@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Clock, Search, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { Clock, Search, ChevronLeft, ChevronRight, Check, CheckSquare } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import PageHeader from '../components/PageHeader';
@@ -71,38 +71,46 @@ const CheckInPage: React.FC = () => {
     return (
         <div className="flex flex-col h-full bg-slate-50 text-slate-800 font-sans">
             <PageHeader
-                title="Gerenciamento de Entrada"
-                subtitle={
-                    <div className="flex items-center gap-2">
-                        <span className="capitalize">{format(currentTime, "EEEE, dd 'de' MMMM", { locale: ptBR })}</span>
+                title={
+                    <div className="flex items-center gap-3">
+                        <CheckSquare className="w-8 h-8 text-blue-600" />
+                        <span className="text-2xl font-bold text-gray-900">Gerenciamento de Entrada</span>
+                    </div>
+                }
+
+            >
+                <div className="flex items-center justify-between w-full">
+                    {/* Timeline Tabs */}
+                    <div className="flex items-center gap-2 overflow-x-auto pb-1 custom-scrollbar">
+                        <button className="p-1 rounded-full hover:bg-slate-200 text-slate-400 transition-colors">
+                            <ChevronLeft size={18} />
+                        </button>
+                        {TIME_SLOTS.map(slot => (
+                            <button
+                                key={slot}
+                                onClick={() => setSelectedSlot(slot)}
+                                className={`px-3 py-1 rounded-md text-xs font-bold transition-all whitespace-nowrap ${selectedSlot === slot
+                                    ? 'bg-white text-blue-600 shadow-sm ring-1 ring-slate-200'
+                                    : 'text-slate-500 hover:bg-slate-200/50 hover:text-slate-700'
+                                    }`}
+                            >
+                                {slot}
+                            </button>
+                        ))}
+                        <button className="p-1 rounded-full hover:bg-slate-200 text-slate-400 transition-colors">
+                            <ChevronRight size={18} />
+                        </button>
+                    </div>
+
+                    {/* Timestamp */}
+                    <div className="flex items-center gap-2 text-sm text-slate-500 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm ml-4 shrink-0">
+                        <span className="capitalize font-medium">{format(currentTime, "EEEE, dd 'de' MMMM", { locale: ptBR })}</span>
                         <span className="w-1 h-1 rounded-full bg-slate-300" />
-                        <div className="flex items-center gap-1 font-mono text-slate-600">
+                        <div className="flex items-center gap-1 font-mono text-slate-600 font-bold">
                             <Clock size={14} />
                             {format(currentTime, "HH:mm")}
                         </div>
                     </div>
-                }
-            >
-                {/* Timeline Tabs */}
-                <div className="flex items-center gap-2 overflow-x-auto pb-1 custom-scrollbar">
-                    <button className="p-1 rounded-full hover:bg-slate-200 text-slate-400 transition-colors">
-                        <ChevronLeft size={18} />
-                    </button>
-                    {TIME_SLOTS.map(slot => (
-                        <button
-                            key={slot}
-                            onClick={() => setSelectedSlot(slot)}
-                            className={`px-3 py-1 rounded-md text-xs font-bold transition-all whitespace-nowrap ${selectedSlot === slot
-                                    ? 'bg-white text-blue-600 shadow-sm ring-1 ring-slate-200'
-                                    : 'text-slate-500 hover:bg-slate-200/50 hover:text-slate-700'
-                                }`}
-                        >
-                            {slot}
-                        </button>
-                    ))}
-                    <button className="p-1 rounded-full hover:bg-slate-200 text-slate-400 transition-colors">
-                        <ChevronRight size={18} />
-                    </button>
                 </div>
             </PageHeader>
 
@@ -188,8 +196,8 @@ const CheckInPage: React.FC = () => {
                                             <div
                                                 key={day.value}
                                                 className={`w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold border ${student.days.includes(day.value)
-                                                        ? 'bg-blue-600 text-white border-blue-600'
-                                                        : 'bg-slate-50 text-slate-300 border-slate-100'
+                                                    ? 'bg-blue-600 text-white border-blue-600'
+                                                    : 'bg-slate-50 text-slate-300 border-slate-100'
                                                     }`}
                                             >
                                                 {day.label.replace('ª', '')}

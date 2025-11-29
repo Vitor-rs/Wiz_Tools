@@ -24,7 +24,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     onToggleCollapse,
 }) => {
     const menuItems = [
-        { id: "calendar", label: "Frequência Anual", icon: Calendar },
+        { id: "calendar", label: "Calendário Anual", icon: Calendar },
         { id: "checkin", label: "Check-in", icon: CheckSquare },
         { id: "attendance_sheet", label: "Ficha de Frequência", icon: FileText },
         { id: "enrollment", label: "Matrícula", icon: Users },
@@ -34,7 +34,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
     return (
         <div
-            className={`bg-[#0f172a] text-slate-300 h-screen flex flex-col transition-all duration-300 border-r border-slate-800 ${isCollapsed ? "w-16" : "w-64"
+            className={`bg-[linear-gradient(to_left,#2a5298,#1e3c72)] text-slate-300 h-screen flex flex-col transition-all duration-300 border-r border-slate-800 ${isCollapsed ? "w-16" : "w-64"
                 }`}
         >
             {/* Header / Logo Area */}
@@ -94,7 +94,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             </nav>
 
             {/* Footer / Settings */}
-            <div className="p-3 border-t border-slate-800 bg-[#0f172a]">
+            <div className="p-3 border-t border-slate-800 bg-transparent">
                 <button
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:bg-slate-800/50 hover:text-white transition-colors ${isCollapsed ? "justify-center" : ""
                         }`}

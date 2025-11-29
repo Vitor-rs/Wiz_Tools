@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSimulation } from '../context/SimulationContext';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Plus, Trash2, Play, Pencil, X } from 'lucide-react';
+import { Plus, Trash2, Play, Pencil, X, Settings } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import { IMMUTABLE_RULES } from '../config/rules';
 import type { Tag, SpecialDate } from '../types/index';
@@ -161,8 +161,12 @@ const SimulationPage: React.FC = () => {
     return (
         <div className="flex flex-col h-full bg-slate-50">
             <PageHeader
-                title="Simulador de Contrato & Datas Especiais"
-                subtitle="Configure os dias de aula, feriados e regras do contrato."
+                title={
+                    <div className="flex items-center gap-3">
+                        <Settings className="w-8 h-8 text-blue-600" />
+                        <span className="text-2xl font-bold text-gray-900">Simulador de Contrato & Datas Especiais</span>
+                    </div>
+                }
             />
 
             <div className="flex-1 overflow-y-auto custom-scrollbar p-8">

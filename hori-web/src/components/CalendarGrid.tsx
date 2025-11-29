@@ -21,7 +21,9 @@ interface CalendarGridProps {
     onHoverChange: (
         data: { monthIndex: number; columnIndex: number } | null
     ) => void;
-    flashingCell: string | null;
+    flashingDates: Set<string>;
+    searchRangeDates: Set<string>;
+    onClearSelection: () => void;
     simulationResult: { validDates: string[]; skippedDates: { date: string; reason: string }[] } | null;
     onHolidayHover: (
         data: { date: string; events: CalendarEvent[]; holiday: Holiday },
@@ -71,7 +73,9 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
     onCellClick,
     showSundays,
     onHoverChange,
-    flashingCell,
+    flashingDates,
+    searchRangeDates,
+    onClearSelection,
     onHolidayHover,
     onHolidayLeave,
     specialDates
@@ -206,6 +210,7 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
             if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
                 setSelectionStart(null);
                 setSelectionEnd(null);
+                onClearSelection();
             }
         };
 
@@ -216,12 +221,14 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
             window.removeEventListener('mouseup', handleGlobalMouseUp);
             window.removeEventListener('mousedown', handleGlobalMouseDown);
         };
-    }, []);
+    }, [onClearSelection]);
 
     // Scroll to flashing cell
     useEffect(() => {
-        if (flashingCell && containerRef.current) {
-            const element = document.getElementById(`cell-${flashingCell}`);
+        if (flashingDates.size > 0 && containerRef.current) {
+            // Scroll to the first flashing date
+            const firstDate = Array.from(flashingDates)[0];
+            const element = document.getElementById(`cell-${firstDate}`);
             if (element) {
                 const container = containerRef.current;
                 const elementRect = element.getBoundingClientRect();
@@ -239,7 +246,7 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
                 });
             }
         }
-    }, [flashingCell]);
+    }, [flashingDates]);
 
     // Selection Helpers
     const selectedDates = useMemo(() => {
@@ -264,6 +271,7 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
     const handleCellMouseDown = (dateStr: string, e: React.MouseEvent) => {
         // Only left click
         if (e.button !== 0) return;
+        e.stopPropagation(); // Prevent container from clearing selection
 
         isDragging.current = true;
         setSelectionStart(dateStr);
@@ -382,6 +390,14 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
             ref={containerRef}
             className="overflow-auto custom-scrollbar flex-1 bg-white relative select-none"
             onMouseLeave={handleMouseLeave}
+            onMouseDown={(e) => {
+                // Only left click
+                if (e.button !== 0) return;
+                // Clear selection when clicking on empty areas (gaps, margins, ghost cells)
+                setSelectionStart(null);
+                setSelectionEnd(null);
+                onClearSelection();
+            }}
         >
             <div className="relative min-w-max min-h-max">
                 {/* Layer 1: Backgrounds (Weekends) - HTML */}
@@ -513,10 +529,6 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
                                                 fill="transparent"
                                                 style={{ pointerEvents: 'auto' }}
                                                 onMouseEnter={() => handleMouseLeave()}
-                                                onClick={() => {
-                                                    setSelectionStart(null);
-                                                    setSelectionEnd(null);
-                                                }}
                                             />
                                         );
                                     }
@@ -536,8 +548,7 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
                                     } = day;
                                     const hasClasses = dayEvents.length > 0;
                                     const isWeekend = day.colIndex % 7 >= 5;
-                                    const isFlashing = flashingCell === dateStr;
-                                    const isSelected = selectedDates.has(dateStr);
+                                    const isSelected = selectedDates.has(dateStr) || searchRangeDates.has(dateStr);
 
                                     const bgFill = isSelected
                                         ? "#bfdbfe" // Blue-200 for selection
@@ -561,12 +572,12 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
                                     const isClickable = hasClasses;
                                     const isHoverable = (holiday || specialDate) && !hasClasses;
 
+
                                     return (
                                         <g
                                             key={dateStr}
                                             id={`cell-${dateStr}`}
                                             transform={`translate(${x}, ${y})`}
-                                            className={isFlashing ? "animate-flip-2" : ""}
                                             style={{
                                                 cursor: isClickable ? "pointer" : isHoverable ? "help" : "default",
                                                 pointerEvents: 'auto'
@@ -735,6 +746,32 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
                     className="absolute border border-gray-400 rounded-md pointer-events-none z-20"
                     style={{ display: 'none' }}
                 />
+
+                {/* Layer 6: Flashing Cell Overlay - HTML */}
+                {(() => {
+                    if (flashingDates.size === 0) return null;
+                    const overlays = [];
+                    // Find coordinates
+                    for (const month of gridData) {
+                        for (const day of month.days) {
+                            if (day.type === 'valid' && flashingDates.has(day.dateStr)) {
+                                overlays.push(
+                                    <div
+                                        key={`flash-${day.dateStr}`}
+                                        className="absolute rounded-lg animate-carnival pointer-events-none"
+                                        style={{
+                                            left: MARGIN.left + day.x,
+                                            top: MARGIN.top + day.y,
+                                            width: CELL_SIZE,
+                                            height: CELL_SIZE
+                                        }}
+                                    />
+                                );
+                            }
+                        }
+                    }
+                    return overlays;
+                })()}
             </div>
         </div>
     );
