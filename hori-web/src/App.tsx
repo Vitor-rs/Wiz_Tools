@@ -11,6 +11,15 @@ import { SimulationProvider, useSimulation } from "./context/SimulationContext";
 import type { CalendarEvent, Holiday } from "./types/index";
 import { IMMUTABLE_RULES } from "./config/rules";
 
+const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
+  <div className="flex-1 flex items-center justify-center bg-slate-50 text-slate-400 h-full">
+    <div className="text-center">
+      <h2 className="text-2xl font-bold mb-2">{title}</h2>
+      <p>Em construção...</p>
+    </div>
+  </div>
+);
+
 const AppContent: React.FC = () => {
   const [year, setYear] = useState(2025);
   // hoveredData state removed for performance
@@ -91,6 +100,14 @@ const AppContent: React.FC = () => {
         <SimulationPage />
       ) : activePage === 'checkin' ? (
         <CheckInPage />
+      ) : activePage === 'attendance_sheet' ? (
+        <PlaceholderPage title="Ficha de Frequência" />
+      ) : activePage === 'presence_launcher' ? (
+        <PlaceholderPage title="Lançador de Presença" />
+      ) : activePage === 'book_registration' ? (
+        <PlaceholderPage title="Cadastramento de Livros" />
+      ) : activePage === 'inventory' ? (
+        <PlaceholderPage title="Estoque" />
       ) : (
         <>
           <CalendarHeader

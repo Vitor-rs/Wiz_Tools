@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
     Calendar,
     FileText,
@@ -8,6 +8,11 @@ import {
     ChevronRight,
     BarChart2,
     CheckSquare,
+    Layers,
+    ChevronDown,
+    BookOpen,
+    Package,
+    ClipboardCheck
 } from "lucide-react";
 
 interface SidebarProps {
@@ -17,20 +22,50 @@ interface SidebarProps {
     onToggleCollapse: () => void;
 }
 
+interface MenuItem {
+    id: string;
+    label: string;
+    icon: React.ElementType;
+    subItems?: { id: string; label: string }[];
+}
+
 const Sidebar: React.FC<SidebarProps> = ({
     activePage,
     onNavigate,
     isCollapsed,
     onToggleCollapse,
 }) => {
-    const menuItems = [
-        { id: "calendar", label: "Calendário Anual", icon: Calendar },
+    const [expandedMenu, setExpandedMenu] = useState<string | null>("system_components");
+
+    const menuItems: MenuItem[] = [
+        {
+            id: "system_components",
+            label: "Componentes do Sistema",
+            icon: Layers,
+            subItems: [
+                { id: "calendar", label: "Calendário Anual" },
+                { id: "attendance_sheet", label: "Ficha de Frequência" },
+                { id: "presence_launcher", label: "Lançador de Presença" },
+                { id: "book_registration", label: "Cadastramento de Livros" },
+                { id: "inventory", label: "Estoque" },
+            ]
+        },
         { id: "checkin", label: "Check-in", icon: CheckSquare },
-        { id: "attendance_sheet", label: "Ficha de Frequência", icon: FileText },
-        { id: "enrollment", label: "Matrícula", icon: Users },
         { id: "simulation", label: "Simulação", icon: Settings },
-        { id: "dashboard", label: "Dashboard", icon: BarChart2 },
     ];
+
+    const handleMainItemClick = (item: MenuItem) => {
+        if (item.subItems) {
+            if (isCollapsed) {
+                onToggleCollapse();
+                setTimeout(() => setExpandedMenu(item.id), 150);
+            } else {
+                setExpandedMenu(expandedMenu === item.id ? null : item.id);
+            }
+        } else {
+            onNavigate(item.id);
+        }
+    };
 
     return (
         <div
@@ -60,37 +95,72 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 py-6 px-2 space-y-1">
+            <nav className="flex-1 py-6 px-2 space-y-1 overflow-y-auto">
                 {!isCollapsed && (
                     <div className="px-3 mb-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                         Menu Principal
                     </div>
                 )}
-                {menuItems.map((item) => (
-                    <button
-                        key={item.id}
-                        onClick={() => onNavigate(item.id)}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 group relative ${activePage === item.id
-                            ? "bg-blue-600 text-white shadow-md shadow-blue-900/20"
-                            : "hover:bg-slate-800/50 hover:text-white"
-                            } ${isCollapsed ? "justify-center" : ""}`}
-                        title={isCollapsed ? item.label : ""}
-                    >
-                        <item.icon
-                            size={18}
-                            className={`${activePage === item.id
-                                ? "text-white"
-                                : "text-slate-400 group-hover:text-white"
-                                }`}
-                        />
-                        {!isCollapsed && <span className="font-medium">{item.label}</span>}
+                {menuItems.map((item) => {
+                    const isActive = activePage === item.id || item.subItems?.some(sub => sub.id === activePage);
+                    const isExpanded = expandedMenu === item.id;
 
-                        {/* Active Indicator for Collapsed Mode */}
-                        {isCollapsed && activePage === item.id && (
-                            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-blue-500 rounded-r-full" />
-                        )}
-                    </button>
-                ))}
+                    return (
+                        <div key={item.id} className="flex flex-col">
+                            <button
+                                onClick={() => handleMainItemClick(item)}
+                                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 group relative ${isActive && !item.subItems
+                                    ? "bg-blue-600 text-white shadow-md shadow-blue-900/20"
+                                    : "hover:bg-slate-800/50 hover:text-white"
+                                    } ${isCollapsed ? "justify-center" : ""}`}
+                                title={isCollapsed ? item.label : ""}
+                            >
+                                <item.icon
+                                    size={18}
+                                    className={`${isActive
+                                        ? "text-white"
+                                        : "text-slate-400 group-hover:text-white"
+                                        }`}
+                                />
+                                {!isCollapsed && (
+                                    <>
+                                        <span className={`font-medium flex-1 text-left ${isActive ? "text-white" : ""}`}>{item.label}</span>
+                                        {item.subItems && (
+                                            <ChevronDown
+                                                size={14}
+                                                className={`transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
+                                            />
+                                        )}
+                                    </>
+                                )}
+
+                                {/* Active Indicator for Collapsed Mode */}
+                                {isCollapsed && isActive && (
+                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-blue-500 rounded-r-full" />
+                                )}
+                            </button>
+
+                            {/* Sub-menu */}
+                            {!isCollapsed && item.subItems && isExpanded && (
+                                <div className="mt-1 ml-4 pl-4 border-l border-slate-700 space-y-1">
+                                    {item.subItems.map((subItem) => (
+                                        <button
+                                            key={subItem.id}
+                                            onClick={() => onNavigate(subItem.id)}
+                                            className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${activePage === subItem.id
+                                                ? "text-blue-400 bg-blue-900/20 font-medium"
+                                                : "text-slate-400 hover:text-white hover:bg-slate-800/30"
+                                                }`}
+                                        >
+                                            <div className={`w-1.5 h-1.5 rounded-full ${activePage === subItem.id ? "bg-blue-400" : "bg-slate-600"}`} />
+                                            <span>{subItem.label}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
             </nav>
 
             {/* Footer / Settings */}
