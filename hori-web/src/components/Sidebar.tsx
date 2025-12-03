@@ -1,18 +1,11 @@
 import React, { useState } from "react";
 import {
-    Calendar,
-    FileText,
-    Users,
     Settings,
     ChevronLeft,
     ChevronRight,
-    BarChart2,
     CheckSquare,
     Layers,
     ChevronDown,
-    BookOpen,
-    Package,
-    ClipboardCheck
 } from "lucide-react";
 
 interface SidebarProps {
