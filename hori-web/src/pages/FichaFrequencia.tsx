@@ -151,6 +151,7 @@ const FichaFrequencia: React.FC = () => {
     const [records, setRecords] = useState<AttendanceRecord[]>(() => generateMockData());
     const [selectedStudent, setSelectedStudent] = useState('Vitor');
     const [inputDate, setInputDate] = useState<string>(getFullDate(new Date()));
+    const [hoveredCol, setHoveredCol] = useState<number | null>(null);
 
     const handleLaunchPresence = () => {
         const dateObj = new Date(inputDate + 'T00:00:00'); // Ensure local time interpretation
@@ -236,12 +237,7 @@ const FichaFrequencia: React.FC = () => {
     const handleUpdateRecord = (id: string, field: keyof AttendanceRecord | string, value: string | number | boolean) => {
         const updatedRecords = records.map(record => {
             if (record.id === id) {
-                // Prevent editing if presence is 'F' (except maybe classNumber if needed, but user said "locked")
-                // Allowing classNumber edit might be useful, but user said "essas células... têm que ficar trancadas".
-                // I will lock everything for 'F' rows except maybe the ID/System fields which are not editable anyway.
-                if (record.presence === 'F' && field !== 'classNumber') return record; // Strict lock? Or allow classNumber?
-                // User said: "entrada e saída... edição, conteúdo, observação, as avaliações e etc."
-                // "Aula" (classNumber) was made editable in previous turn. I'll allow it for now, but lock others.
+                if (record.presence === 'F' && field !== 'classNumber') return record;
 
                 if (field.startsWith('evaluations.')) {
                     const evalField = field.split('.')[1] as keyof typeof record.evaluations;
@@ -260,14 +256,18 @@ const FichaFrequencia: React.FC = () => {
         setRecords(updatedRecords);
     };
 
-    // --- Styling Constants ---
-    const cellBase = "p-1 border border-slate-600 text-center text-xs h-8 align-middle text-slate-200";
-    const inputBase = "w-full h-full bg-transparent text-center focus:outline-none focus:bg-blue-900/50 text-slate-200 disabled:text-slate-500 disabled:cursor-not-allowed";
-    const headerBase = "p-[3px] border border-slate-600 font-bold bg-[#1e293b] text-white text-xs uppercase tracking-wider align-middle";
-    const subHeaderBase = "p-[3px] border border-slate-600 font-bold bg-[#1e293b] text-white text-xs uppercase tracking-wider align-middle";
+    // --- Styling Constants (Light Theme) ---
+    const cellBase = "p-1 border border-gray-200 text-center text-xs h-8 align-middle text-gray-700 font-sans";
+    const inputBase = "w-full h-full bg-transparent text-center focus:outline-none focus:bg-blue-50 text-gray-700 disabled:text-gray-400 disabled:cursor-not-allowed font-sans";
+    const headerBase = "p-[3px] border border-gray-200 font-bold bg-white text-gray-800 text-xs uppercase tracking-wider align-middle font-sans";
+    const subHeaderBase = "p-[3px] border border-gray-200 font-bold bg-gray-50 text-gray-600 text-xs uppercase tracking-wider align-middle font-sans";
 
-    // Hatched background for absent rows
-    const hatchedBg = "bg-[linear-gradient(45deg,rgba(255,255,255,0.05)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.05)_50%,rgba(255,255,255,0.05)_75%,transparent_75%,transparent)] bg-[length:8px_8px]";
+    // Hatched background for absent rows (Red stripes for light mode)
+    const hatchedBg = "bg-[linear-gradient(45deg,rgba(255,0,0,0.05)_25%,transparent_25%,transparent_50%,rgba(255,0,0,0.05)_50%,rgba(255,0,0,0.05)_75%,transparent_75%,transparent)] bg-[length:8px_8px]";
+
+    const getColClass = (index: number) => {
+        return hoveredCol === index ? 'bg-blue-50' : '';
+    };
 
     return (
         <PageContainer>
@@ -275,21 +275,21 @@ const FichaFrequencia: React.FC = () => {
                 title={
                     <div className="flex items-center gap-3">
                         <FileText className="w-8 h-8 text-blue-600" />
-                        <span className="text-2xl font-bold text-gray-900">Ficha de Frequência</span>
+                        <span className="text-2xl font-bold text-gray-900 font-sans">Ficha de Frequência</span>
                     </div>
                 }
             />
-            <div className="flex-1 p-[10px] overflow-hidden">
+            <div className="flex-1 p-2.5 overflow-hidden font-sans">
                 {/* Floating Card Container */}
-                <div className="flex flex-col flex-1 bg-brand-dark rounded-2xl overflow-hidden shadow-md border border-slate-700">
+                <div className="flex flex-col flex-1 bg-white rounded-2xl overflow-hidden shadow-md border border-gray-200">
 
                     {/* Top Controls */}
-                    <div className="bg-[#1e293b] p-4 border-b border-slate-700 flex items-center justify-between shadow-sm z-10">
+                    <div className="bg-white p-4 border-b border-gray-200 flex items-center justify-between shadow-sm z-10">
                         <div className="flex items-center gap-4">
                             <div className="flex flex-col">
-                                <label className="text-[10px] font-bold text-slate-400 uppercase">Aluno (a):</label>
+                                <label className="text-[10px] font-bold text-gray-500 uppercase">Aluno (a):</label>
                                 <select
-                                    className="bg-brand-dark border border-slate-600 rounded px-3 py-1.5 text-sm text-white w-64 focus:ring-1 focus:ring-blue-500 outline-none"
+                                    className="bg-white border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-700 w-64 focus:ring-1 focus:ring-blue-500 outline-none"
                                     value={selectedStudent}
                                     onChange={(e) => setSelectedStudent(e.target.value)}
                                 >
@@ -298,11 +298,12 @@ const FichaFrequencia: React.FC = () => {
                                     <option value="Maria">Maria</option>
                                 </select>
                             </div>
+
                             <div className="flex flex-col">
-                                <label className="text-[10px] font-bold text-slate-400 uppercase">Data:</label>
+                                <label className="text-[10px] font-bold text-gray-500 uppercase">Data:</label>
                                 <input
                                     type="date"
-                                    className="bg-brand-dark border border-slate-600 rounded px-3 py-1.5 text-sm text-white focus:ring-1 focus:ring-blue-500 outline-none"
+                                    className="bg-white border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-700 focus:ring-1 focus:ring-blue-500 outline-none"
                                     value={inputDate}
                                     onChange={(e) => setInputDate(e.target.value)}
                                 />
@@ -316,38 +317,38 @@ const FichaFrequencia: React.FC = () => {
                                 <button onClick={handleExitPresence} className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-1.5 rounded text-sm font-bold transition-colors border border-slate-600 ml-2">Saída</button>
                             </div>
 
-                            <div className="flex flex-col items-end text-xs text-slate-300 ml-4 border-l border-slate-700 pl-4 bg-brand-dark">
-                                <div>Professor(a): <span className="font-bold text-white">Vitor</span></div>
-                                <div>Livro/Estágio: <span className="font-bold text-white">NEXT GENERATION</span></div>
-                                <div>Idioma: <span className="font-bold text-white">ENGLISH</span></div>
+                            <div className="flex flex-col items-end text-xs text-gray-500 ml-4 border-l border-gray-200 pl-4 bg-white">
+                                <div>Professor(a): <span className="font-bold text-gray-800">Vitor</span></div>
+                                <div>Livro/Estágio: <span className="font-bold text-gray-800">NEXT GENERATION</span></div>
+                                <div>Idioma: <span className="font-bold text-gray-800">ENGLISH</span></div>
                                 <div className="flex items-center gap-1">Situação: <span className="bg-green-600 text-white px-1 rounded text-[10px] font-bold">ATIVO</span></div>
                             </div>
                         </div>
                     </div>
 
                     {/* Table Container */}
-                    <div className="flex-1 overflow-auto bg-brand-dark custom-scrollbar">
+                    <div className="flex-1 overflow-auto bg-white custom-scrollbar">
                         <table className="w-full text-sm border-collapse">
-                            <thead className="sticky top-0 z-20 shadow-md bg-[#1e293b]">
+                            <thead className="sticky top-0 z-20 shadow-md bg-white">
                                 {/* Top Header Row */}
                                 <tr>
                                     <th colSpan={4} className={`${headerBase} border-b-0`}>DATAS</th>
-                                    <th rowSpan={2} className={`${headerBase} w-10 max-w-10`}>
+                                    <th rowSpan={2} className={`${headerBase} w-10 max-w-10`} onMouseEnter={() => setHoveredCol(4)} onMouseLeave={() => setHoveredCol(null)}>
                                         <div className="flex items-center justify-center h-20 w-full">
                                             <span className="-rotate-90 whitespace-nowrap">Aula</span>
                                         </div>
                                     </th>
-                                    <th rowSpan={2} className={`${headerBase} w-10 max-w-10`}>
+                                    <th rowSpan={2} className={`${headerBase} w-10 max-w-10`} onMouseEnter={() => setHoveredCol(5)} onMouseLeave={() => setHoveredCol(null)}>
                                         <div className="flex items-center justify-center h-20 w-full">
                                             <span className="-rotate-90 whitespace-nowrap">Comparec</span>
                                         </div>
                                     </th>
                                     <th colSpan={2} className={`${headerBase} border-b-0`}>HORÁRIO</th>
-                                    <th rowSpan={2} className={`${headerBase} min-w-[150px]`}>Lição / Conteúdo</th>
-                                    <th rowSpan={2} className={`${headerBase} min-w-[150px]`}>Observações / Anotações</th>
+                                    <th rowSpan={2} className={`${headerBase} min-w-[150px]`} onMouseEnter={() => setHoveredCol(8)} onMouseLeave={() => setHoveredCol(null)}>Lição / Conteúdo</th>
+                                    <th rowSpan={2} className={`${headerBase} min-w-[150px]`} onMouseEnter={() => setHoveredCol(9)} onMouseLeave={() => setHoveredCol(null)}>Observações / Anotações</th>
                                     <th colSpan={9} className={`${headerBase} border-b-0`}>AVALIAÇÕES</th>
-                                    <th rowSpan={2} className={`${headerBase} min-w-[80px]`}>Professor(a)</th>
-                                    <th rowSpan={2} className={`${headerBase} w-10 max-w-10`}>
+                                    <th rowSpan={2} className={`${headerBase} min-w-20`} onMouseEnter={() => setHoveredCol(19)} onMouseLeave={() => setHoveredCol(null)}>Professor(a)</th>
+                                    <th rowSpan={2} className={`${headerBase} w-10 max-w-10`} onMouseEnter={() => setHoveredCol(20)} onMouseLeave={() => setHoveredCol(null)}>
                                         <div className="flex items-center justify-center h-20 w-full">
                                             <span className="-rotate-90 whitespace-nowrap">Duração</span>
                                         </div>
@@ -356,19 +357,19 @@ const FichaFrequencia: React.FC = () => {
                                 {/* Sub Header Row */}
                                 <tr>
                                     {/* Datas Sub-columns */}
-                                    <th className={`${subHeaderBase} w-10 max-w-10`}>Mês</th>
-                                    <th className={`${subHeaderBase} w-10 max-w-10`}>NS</th>
-                                    <th className={`${subHeaderBase} w-10 max-w-10`}>DS</th>
-                                    <th className={`${subHeaderBase} w-10 max-w-10`}>D/M</th>
+                                    <th className={`${subHeaderBase} w-10 max-w-10`} onMouseEnter={() => setHoveredCol(0)} onMouseLeave={() => setHoveredCol(null)}>Mês</th>
+                                    <th className={`${subHeaderBase} w-10 max-w-10`} onMouseEnter={() => setHoveredCol(1)} onMouseLeave={() => setHoveredCol(null)}>NS</th>
+                                    <th className={`${subHeaderBase} w-10 max-w-10`} onMouseEnter={() => setHoveredCol(2)} onMouseLeave={() => setHoveredCol(null)}>DS</th>
+                                    <th className={`${subHeaderBase} w-10 max-w-10`} onMouseEnter={() => setHoveredCol(3)} onMouseLeave={() => setHoveredCol(null)}>D/M</th>
 
                                     {/* Horário Sub-columns */}
-                                    <th className={`${subHeaderBase} w-20 min-w-20`}>
+                                    <th className={`${subHeaderBase} w-20 min-w-20`} onMouseEnter={() => setHoveredCol(6)} onMouseLeave={() => setHoveredCol(null)}>
                                         <div className="flex flex-col items-center justify-center gap-0.5">
                                             <span className="text-[9px]">Entrada</span>
                                             <LogIn size={12} />
                                         </div>
                                     </th>
-                                    <th className={`${subHeaderBase} w-20 min-w-20`}>
+                                    <th className={`${subHeaderBase} w-20 min-w-20`} onMouseEnter={() => setHoveredCol(7)} onMouseLeave={() => setHoveredCol(null)}>
                                         <div className="flex flex-col items-center justify-center gap-0.5">
                                             <span className="text-[9px]">Saída</span>
                                             <LogOut size={12} />
@@ -376,42 +377,37 @@ const FichaFrequencia: React.FC = () => {
                                     </th>
 
                                     {/* Avaliações Sub-columns - Fixed Widths */}
-                                    <th className={`${subHeaderBase} w-8 min-w-8`}>F</th>
-                                    <th className={`${subHeaderBase} w-8 min-w-8`}>A</th>
-                                    <th className={`${subHeaderBase} w-8 min-w-8`}>L</th>
-                                    <th className={`${subHeaderBase} w-8 min-w-8`}>E</th>
-                                    <th className={`${subHeaderBase} w-8 min-w-8`}>TRF</th>
-                                    <th className={`${subHeaderBase} w-8 min-w-8`}>S.T</th>
-                                    <th className={`${subHeaderBase} w-8 min-w-8`}>CS</th>
-                                    <th className={`${subHeaderBase} w-8 min-w-8`}>APP</th>
-                                    <th className={`${subHeaderBase} w-8 min-w-8`}>AL</th>
+                                    <th className={`${subHeaderBase} w-8 min-w-8`} onMouseEnter={() => setHoveredCol(10)} onMouseLeave={() => setHoveredCol(null)}>F</th>
+                                    <th className={`${subHeaderBase} w-8 min-w-8`} onMouseEnter={() => setHoveredCol(11)} onMouseLeave={() => setHoveredCol(null)}>A</th>
+                                    <th className={`${subHeaderBase} w-8 min-w-8`} onMouseEnter={() => setHoveredCol(12)} onMouseLeave={() => setHoveredCol(null)}>L</th>
+                                    <th className={`${subHeaderBase} w-8 min-w-8`} onMouseEnter={() => setHoveredCol(13)} onMouseLeave={() => setHoveredCol(null)}>E</th>
+                                    <th className={`${subHeaderBase} w-8 min-w-8`} onMouseEnter={() => setHoveredCol(14)} onMouseLeave={() => setHoveredCol(null)}>TRF</th>
+                                    <th className={`${subHeaderBase} w-8 min-w-8`} onMouseEnter={() => setHoveredCol(15)} onMouseLeave={() => setHoveredCol(null)}>S.T</th>
+                                    <th className={`${subHeaderBase} w-8 min-w-8`} onMouseEnter={() => setHoveredCol(16)} onMouseLeave={() => setHoveredCol(null)}>CS</th>
+                                    <th className={`${subHeaderBase} w-8 min-w-8`} onMouseEnter={() => setHoveredCol(17)} onMouseLeave={() => setHoveredCol(null)}>APP</th>
+                                    <th className={`${subHeaderBase} w-8 min-w-8`} onMouseEnter={() => setHoveredCol(18)} onMouseLeave={() => setHoveredCol(null)}>AL</th>
                                 </tr>
                             </thead>
-                            <tbody className="text-slate-300 bg-brand-dark">
+                            <tbody className="text-gray-700 bg-white">
                                 {records.map((row) => (
-                                    <tr key={row.id} className={`hover:bg-brand-dark/50 transition-colors border-b border-slate-700 ${row.presence === 'F' ? hatchedBg : ''}`}>
-                                        <td className={cellBase}>{row.month}</td>
-                                        <td className={cellBase}>{row.weekNumber}</td>
-                                        <td className={cellBase}>{row.dayOfWeek}</td>
-                                        <td className={cellBase}>{row.date}</td>
-                                        <td className={cellBase}>
-                                            <input
-                                                type="number"
-                                                className={inputBase}
-                                                value={row.classNumber}
-                                                onChange={(e) => handleUpdateRecord(row.id, 'classNumber', e.target.value === '' ? '' : Number(e.target.value))}
-                                            />
+                                    <tr key={row.id} className={`hover:bg-blue-50 transition-colors border-b border-gray-200 ${row.presence === 'F' ? hatchedBg : ''}`}>
+                                        <td className={`${cellBase} ${getColClass(0)}`} onMouseEnter={() => setHoveredCol(0)} onMouseLeave={() => setHoveredCol(null)}>{row.month}</td>
+                                        <td className={`${cellBase} ${getColClass(1)}`} onMouseEnter={() => setHoveredCol(1)} onMouseLeave={() => setHoveredCol(null)}>{row.weekNumber}</td>
+                                        <td className={`${cellBase} ${getColClass(2)}`} onMouseEnter={() => setHoveredCol(2)} onMouseLeave={() => setHoveredCol(null)}>{row.dayOfWeek}</td>
+                                        <td className={`${cellBase} ${getColClass(3)}`} onMouseEnter={() => setHoveredCol(3)} onMouseLeave={() => setHoveredCol(null)}>{row.date}</td>
+                                        <td className={`${cellBase} ${getColClass(4)} font-medium text-gray-900`} onMouseEnter={() => setHoveredCol(4)} onMouseLeave={() => setHoveredCol(null)}>
+                                            {row.classNumber}
                                         </td>
-                                        <td className={cellBase}>
+                                        <td className={`${cellBase} ${getColClass(5)}`} onMouseEnter={() => setHoveredCol(5)} onMouseLeave={() => setHoveredCol(null)}>
                                             {row.presence === 'P' && <div className="w-3 h-3 rounded-full bg-green-500 mx-auto"></div>}
                                             {row.presence === 'F' && <div className="w-3 h-3 rounded-full bg-red-500 mx-auto"></div>}
                                             {row.presence === 'X' && <div className="w-3 h-3 rounded-full bg-slate-300 mx-auto"></div>}
                                         </td>
-                                        <td className={`${cellBase} text-[10px]`}>{row.startTime}</td>
-                                        <td className={`${cellBase} text-[10px]`}>
+                                        <td className={`${cellBase} text-[10px] ${getColClass(6)}`} onMouseEnter={() => setHoveredCol(6)} onMouseLeave={() => setHoveredCol(null)}>{row.startTime}</td>
+                                        <td className={`${cellBase} text-[10px] ${getColClass(7)}`} onMouseEnter={() => setHoveredCol(7)} onMouseLeave={() => setHoveredCol(null)}>
                                             {row.endTime}
                                         </td>
-                                        <td className={cellBase}>
+                                        <td className={`${cellBase} ${getColClass(8)}`} onMouseEnter={() => setHoveredCol(8)} onMouseLeave={() => setHoveredCol(null)}>
                                             <input
                                                 type="text"
                                                 className={`${inputBase} text-left px-1`}
@@ -421,7 +417,7 @@ const FichaFrequencia: React.FC = () => {
                                                 disabled={row.presence === 'F'}
                                             />
                                         </td>
-                                        <td className={cellBase}>
+                                        <td className={`${cellBase} ${getColClass(9)}`} onMouseEnter={() => setHoveredCol(9)} onMouseLeave={() => setHoveredCol(null)}>
                                             <input
                                                 type="text"
                                                 className={`${inputBase} text-left px-1`}
@@ -432,18 +428,18 @@ const FichaFrequencia: React.FC = () => {
                                             />
                                         </td>
 
-                                        {/* Evaluations Inputs - All Text/Number inputs now, consistent w-8 */}
-                                        <td className={cellBase}><input type="text" className={inputBase} value={row.evaluations.fala} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.fala', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
-                                        <td className={cellBase}><input type="text" className={inputBase} value={row.evaluations.audicao} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.audicao', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
-                                        <td className={cellBase}><input type="text" className={inputBase} value={row.evaluations.leitura} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.leitura', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
-                                        <td className={cellBase}><input type="text" className={inputBase} value={row.evaluations.escrita} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.escrita', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
-                                        <td className={cellBase}><input type="text" className={inputBase} value={row.evaluations.tarefa} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.tarefa', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
-                                        <td className={cellBase}><input type="text" className={inputBase} value={row.evaluations.situacaoTarefa} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.situacaoTarefa', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
-                                        <td className={cellBase}><input type="text" className={inputBase} value={row.evaluations.checkingSentences} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.checkingSentences', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
-                                        <td className={cellBase}><input type="text" className={inputBase} value={row.evaluations.app} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.app', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
-                                        <td className={cellBase}><input type="text" className={inputBase} value={row.evaluations.engajamento} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.engajamento', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
+                                        {/* Evaluations Inputs */}
+                                        <td className={`${cellBase} ${getColClass(10)}`} onMouseEnter={() => setHoveredCol(10)} onMouseLeave={() => setHoveredCol(null)}><input type="text" className={inputBase} value={row.evaluations.fala} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.fala', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
+                                        <td className={`${cellBase} ${getColClass(11)}`} onMouseEnter={() => setHoveredCol(11)} onMouseLeave={() => setHoveredCol(null)}><input type="text" className={inputBase} value={row.evaluations.audicao} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.audicao', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
+                                        <td className={`${cellBase} ${getColClass(12)}`} onMouseEnter={() => setHoveredCol(12)} onMouseLeave={() => setHoveredCol(null)}><input type="text" className={inputBase} value={row.evaluations.leitura} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.leitura', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
+                                        <td className={`${cellBase} ${getColClass(13)}`} onMouseEnter={() => setHoveredCol(13)} onMouseLeave={() => setHoveredCol(null)}><input type="text" className={inputBase} value={row.evaluations.escrita} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.escrita', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
+                                        <td className={`${cellBase} ${getColClass(14)}`} onMouseEnter={() => setHoveredCol(14)} onMouseLeave={() => setHoveredCol(null)}><input type="text" className={inputBase} value={row.evaluations.tarefa} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.tarefa', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
+                                        <td className={`${cellBase} ${getColClass(15)}`} onMouseEnter={() => setHoveredCol(15)} onMouseLeave={() => setHoveredCol(null)}><input type="text" className={inputBase} value={row.evaluations.situacaoTarefa} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.situacaoTarefa', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
+                                        <td className={`${cellBase} ${getColClass(16)}`} onMouseEnter={() => setHoveredCol(16)} onMouseLeave={() => setHoveredCol(null)}><input type="text" className={inputBase} value={row.evaluations.checkingSentences} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.checkingSentences', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
+                                        <td className={`${cellBase} ${getColClass(17)}`} onMouseEnter={() => setHoveredCol(17)} onMouseLeave={() => setHoveredCol(null)}><input type="text" className={inputBase} value={row.evaluations.app} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.app', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
+                                        <td className={`${cellBase} ${getColClass(18)}`} onMouseEnter={() => setHoveredCol(18)} onMouseLeave={() => setHoveredCol(null)}><input type="text" className={inputBase} value={row.evaluations.engajamento} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.engajamento', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
 
-                                        <td className={cellBase}>
+                                        <td className={`${cellBase} ${getColClass(19)}`} onMouseEnter={() => setHoveredCol(19)} onMouseLeave={() => setHoveredCol(null)}>
                                             <input
                                                 type="text"
                                                 className={inputBase}
@@ -453,7 +449,7 @@ const FichaFrequencia: React.FC = () => {
                                                 disabled={row.presence === 'F'}
                                             />
                                         </td>
-                                        <td className={`${cellBase} text-[10px]`}>
+                                        <td className={`${cellBase} text-[10px] ${getColClass(20)}`} onMouseEnter={() => setHoveredCol(20)} onMouseLeave={() => setHoveredCol(null)}>
                                             {calculateDuration(row.startTime, row.endTime)}
                                         </td>
                                     </tr>
