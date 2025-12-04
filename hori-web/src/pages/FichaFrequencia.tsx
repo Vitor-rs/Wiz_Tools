@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { LogIn, LogOut } from 'lucide-react';
 
 // --- Types ---
 
@@ -106,7 +107,7 @@ const calculateDuration = (start: string, end: string): string => {
 
         const hours = Math.floor(diffM / 60);
         const minutes = diffM % 60;
-        return `${hours}:${minutes.toString().padStart(2, '0')}`;
+        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
     } catch {
         return '';
     }
@@ -203,95 +204,142 @@ const FichaFrequencia: React.FC = () => {
     };
 
     // --- Styling Constants ---
-    const cellBase = "p-1 border border-slate-300 text-center text-xs h-8 align-middle";
-    const inputBase = "w-full h-full bg-transparent text-center focus:outline-none focus:bg-blue-50";
-    const headerBase = "p-2 border border-slate-400 font-normal bg-slate-100 text-slate-700";
+    const cellBase = "p-1 border border-slate-600 text-center text-xs h-8 align-middle text-slate-200";
+    const inputBase = "w-full h-full bg-transparent text-center focus:outline-none focus:bg-blue-900/50 text-slate-200";
+    const headerBase = "p-[3px] border border-slate-600 font-bold bg-[#1e293b] text-white text-xs uppercase tracking-wider align-middle";
+    const subHeaderBase = "p-[3px] border border-slate-600 font-bold bg-[#1e293b] text-white text-xs uppercase tracking-wider align-middle";
 
     return (
-        <div className="flex flex-col h-full bg-white overflow-hidden font-sans">
-            {/* Top Form */}
-            <div className="bg-white p-4 border-b border-slate-200 flex items-end gap-4 shadow-sm z-10">
-                <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1">Aluno</label>
-                    <select
-                        className="border border-slate-300 rounded px-2 py-1 text-sm w-40"
-                        value={selectedStudent}
-                        onChange={(e) => setSelectedStudent(e.target.value)}
-                    >
-                        <option value="Vitor">Vitor</option>
-                        <option value="Joao">João</option>
-                        <option value="Maria">Maria</option>
-                    </select>
-                </div>
-                <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1">Aula</label>
-                    <input
-                        type="number"
-                        className="border border-slate-300 rounded px-2 py-1 text-sm w-20"
-                        value={newClassNumber}
-                        onChange={(e) => setNewClassNumber(Number(e.target.value))}
-                        placeholder="#"
-                    />
-                </div>
-                <button
-                    onClick={handleLaunchPresence}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded text-sm font-medium transition-colors"
-                >
-                    Lançar Presença
-                </button>
-            </div>
+        <div className="flex flex-col h-full bg-[#f5f6fa] p-[10px]">
+            {/* Floating Card Container */}
+            <div className="flex flex-col flex-1 bg-[#0f172a] rounded-2xl overflow-hidden shadow-md border border-slate-700">
 
-            {/* Table Container */}
-            <div className="flex-1 overflow-auto p-4 bg-slate-50">
-                <div className="bg-white shadow-sm border border-slate-300 inline-block min-w-full">
+                {/* Top Controls (Wizard Interactive Style) */}
+                <div className="bg-[#1e293b] p-4 border-b border-slate-700 flex items-center justify-between shadow-sm z-10">
+                    <div className="flex items-center gap-4">
+                        <div className="flex flex-col">
+                            <label className="text-[10px] font-bold text-slate-400 uppercase">Aluno (a):</label>
+                            <select
+                                className="bg-[#0f172a] border border-slate-600 rounded px-3 py-1.5 text-sm text-white w-64 focus:ring-1 focus:ring-blue-500 outline-none"
+                                value={selectedStudent}
+                                onChange={(e) => setSelectedStudent(e.target.value)}
+                            >
+                                <option value="Vitor">Vitor</option>
+                                <option value="Joao">João</option>
+                                <option value="Maria">Maria</option>
+                            </select>
+                        </div>
+
+                        <div className="flex items-end gap-2 ml-4">
+                            <button className="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors border border-slate-600">Bloquear</button>
+                            <button className="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors border border-slate-600">Desbloquear</button>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-end gap-2">
+                            <div className="flex flex-col">
+                                <label className="text-[10px] font-bold text-slate-400 uppercase">Aula</label>
+                                <input
+                                    type="number"
+                                    className="bg-[#0f172a] border border-slate-600 rounded px-2 py-1.5 text-sm text-white w-16 text-center focus:ring-1 focus:ring-blue-500 outline-none"
+                                    value={newClassNumber}
+                                    onChange={(e) => setNewClassNumber(Number(e.target.value))}
+                                    placeholder="#"
+                                />
+                            </div>
+                            <button onClick={handleLaunchPresence} className="bg-white text-slate-900 hover:bg-slate-100 px-4 py-1.5 rounded text-sm font-bold transition-colors">Veio</button>
+                            <button className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-1.5 rounded text-sm font-bold transition-colors border border-slate-600">Saída</button>
+                        </div>
+
+                        <div className="flex flex-col items-end text-xs text-slate-300 ml-4 border-l border-slate-700 pl-4">
+                            <div>Professor(a): <span className="font-bold text-white">Vitor</span></div>
+                            <div>Livro/Estágio: <span className="font-bold text-white">NEXT GENERATION</span></div>
+                            <div>Idioma: <span className="font-bold text-white">ENGLISH</span></div>
+                            <div className="flex items-center gap-1">Situação: <span className="bg-green-600 text-white px-1 rounded text-[10px] font-bold">ATIVO</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Table Container */}
+                <div className="flex-1 overflow-auto bg-[#0f172a] custom-scrollbar">
                     <table className="w-full text-sm border-collapse">
-                        <thead className="sticky top-0 z-20">
+                        <thead className="sticky top-0 z-20 shadow-md bg-[#1e293b]">
+                            {/* Top Header Row */}
                             <tr>
-                                <th className={`${headerBase} w-12`}>Mês</th>
-                                <th className={`${headerBase} w-10`}>NS</th>
-                                <th className={`${headerBase} w-10`}>DS</th>
-                                <th className={`${headerBase} w-16`}>D/M</th>
-                                <th className={`${headerBase} w-10`}>Aula</th>
-                                <th className={`${headerBase} w-10`}>Pres</th>
-                                <th className={`${headerBase} w-16`}>Entrada</th>
-                                <th className={`${headerBase} w-16`}>Saída</th>
-                                <th className={`${headerBase} min-w-[150px]`}>Lição / Conteúdo</th>
-                                <th className={`${headerBase} min-w-[150px]`}>Observações</th>
-                                <th className={`${headerBase} w-8`} title="Fala">F</th>
-                                <th className={`${headerBase} w-8`} title="Audição">A</th>
-                                <th className={`${headerBase} w-8`} title="Leitura">L</th>
-                                <th className={`${headerBase} w-8`} title="Escrita">E</th>
-                                <th className={`${headerBase} w-8`} title="Tarefa">Trf</th>
-                                <th className={`${headerBase} w-8`} title="Situação Tarefa">ST</th>
-                                <th className={`${headerBase} w-8`} title="Checking Sentences">CS</th>
-                                <th className={`${headerBase} w-8`} title="App">App</th>
-                                <th className={`${headerBase} w-8`} title="Engajamento">Eng</th>
-                                <th className={`${headerBase} min-w-[80px]`}>Prof.</th>
-                                <th className={`${headerBase} w-16`}>Duração</th>
+                                <th colSpan={4} className={`${headerBase} border-b-0`}>DATAS</th>
+                                <th rowSpan={2} className={`${headerBase} w-10 max-w-[2.5rem]`}>
+                                    <div className="flex items-center justify-center h-20 w-full">
+                                        <span className="-rotate-90 whitespace-nowrap">Aula</span>
+                                    </div>
+                                </th>
+                                <th rowSpan={2} className={`${headerBase} w-10 max-w-[2.5rem]`}>
+                                    <div className="flex items-center justify-center h-20 w-full">
+                                        <span className="-rotate-90 whitespace-nowrap">Presença</span>
+                                    </div>
+                                </th>
+                                <th colSpan={2} className={`${headerBase} border-b-0`}>HORÁRIO</th>
+                                <th rowSpan={2} className={`${headerBase} min-w-[150px]`}>Lição / Conteúdo</th>
+                                <th rowSpan={2} className={`${headerBase} min-w-[150px]`}>Observações / Anotações</th>
+                                <th colSpan={9} className={`${headerBase} border-b-0`}>AVALIAÇÕES</th>
+                                <th rowSpan={2} className={`${headerBase} min-w-[80px]`}>Professor(a)</th>
+                                <th rowSpan={2} className={`${headerBase} w-10 max-w-[2.5rem]`}>
+                                    <div className="flex items-center justify-center h-20 w-full">
+                                        <span className="-rotate-90 whitespace-nowrap">Duração</span>
+                                    </div>
+                                </th>
+                            </tr>
+                            {/* Sub Header Row */}
+                            <tr>
+                                {/* Datas Sub-columns - All same width (w-10 to match Mês visually or compact) */}
+                                <th className={`${subHeaderBase} w-10 max-w-[2.5rem]`}>Mês</th>
+                                <th className={`${subHeaderBase} w-10 max-w-[2.5rem]`}>NS</th>
+                                <th className={`${subHeaderBase} w-10 max-w-[2.5rem]`}>DS</th>
+                                <th className={`${subHeaderBase} w-10 max-w-[2.5rem]`}>D/M</th>
+
+                                {/* Horário Sub-columns (Equal Width, Icons, Smaller Text) */}
+                                <th className={`${subHeaderBase} w-20 min-w-[5rem]`}>
+                                    <div className="flex flex-col items-center justify-center gap-0.5">
+                                        <span className="text-[9px]">Entrada</span>
+                                        <LogIn size={12} />
+                                    </div>
+                                </th>
+                                <th className={`${subHeaderBase} w-20 min-w-[5rem]`}>
+                                    <div className="flex flex-col items-center justify-center gap-0.5">
+                                        <span className="text-[9px]">Saída</span>
+                                        <LogOut size={12} />
+                                    </div>
+                                </th>
+
+                                {/* Avaliações Sub-columns */}
+                                <th className={`${subHeaderBase} w-8 min-w-[2rem]`} title="Fala">F</th>
+                                <th className={`${subHeaderBase} w-8 min-w-[2rem]`} title="Audição">A</th>
+                                <th className={`${subHeaderBase} w-8 min-w-[2rem]`} title="Leitura">L</th>
+                                <th className={`${subHeaderBase} w-8 min-w-[2rem]`} title="Escrita">E</th>
+                                <th className={`${subHeaderBase} w-8 min-w-[2rem]`} title="Tarefa">Trf</th>
+                                <th className={`${subHeaderBase} w-8 min-w-[2rem]`} title="Situação Tarefa">ST</th>
+                                <th className={`${subHeaderBase} w-8 min-w-[2rem]`} title="Checking Sentences">CS</th>
+                                <th className={`${subHeaderBase} w-8 min-w-[2rem]`} title="App">App</th>
+                                <th className={`${subHeaderBase} w-8 min-w-[2rem]`} title="Engajamento">Al</th>
                             </tr>
                         </thead>
-                        <tbody className="text-slate-700 bg-white">
+                        <tbody className="text-slate-300 bg-[#0f172a]">
                             {records.map((row) => (
-                                <tr key={row.id} className="hover:bg-slate-50">
+                                <tr key={row.id} className="hover:bg-slate-800/50 border-b border-slate-700">
                                     <td className={cellBase}>{row.month}</td>
                                     <td className={cellBase}>{row.weekNumber}</td>
                                     <td className={cellBase}>{row.dayOfWeek}</td>
                                     <td className={cellBase}>{row.date}</td>
                                     <td className={cellBase}>
-                                        <input
-                                            type="number"
-                                            className={inputBase}
-                                            value={row.classNumber}
-                                            onChange={(e) => handleUpdateRecord(row.id, 'classNumber', e.target.value)}
-                                        />
+                                        {row.classNumber}
                                     </td>
                                     <td className={cellBase}>
                                         {row.presence === 'P' && <div className="w-3 h-3 rounded-full bg-green-500 mx-auto"></div>}
                                         {row.presence === 'F' && <div className="w-3 h-3 rounded-full bg-red-500 mx-auto"></div>}
                                         {row.presence === 'X' && <div className="w-3 h-3 rounded-full bg-slate-300 mx-auto"></div>}
                                     </td>
-                                    <td className={`${cellBase} font-mono text-[10px]`}>{row.startTime}</td>
-                                    <td className={`${cellBase} font-mono text-[10px]`}>
+                                    <td className={`${cellBase} text-[10px]`}>{row.startTime}</td>
+                                    <td className={`${cellBase} text-[10px]`}>
                                         {row.endTime ? (
                                             row.endTime
                                         ) : (
@@ -351,7 +399,7 @@ const FichaFrequencia: React.FC = () => {
                                             onChange={(e) => handleUpdateRecord(row.id, 'teacher', e.target.value)}
                                         />
                                     </td>
-                                    <td className={`${cellBase} font-mono text-[10px]`}>
+                                    <td className={`${cellBase} text-[10px]`}>
                                         {calculateDuration(row.startTime, row.endTime)}
                                     </td>
                                 </tr>

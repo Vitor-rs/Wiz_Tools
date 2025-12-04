@@ -7,6 +7,7 @@ import Layout from "./components/Layout";
 import CalendarHeader from "./components/CalendarHeader";
 import SimulationPage from "./pages/SimulationPage";
 import CheckInPage from "./pages/CheckInPage";
+import FichaFrequencia from "./pages/FichaFrequencia";
 import { SimulationProvider, useSimulation } from "./context/SimulationContext";
 import type { CalendarEvent, Holiday } from "./types/index";
 import { IMMUTABLE_RULES } from "./config/rules";
@@ -101,7 +102,7 @@ const AppContent: React.FC = () => {
       ) : activePage === 'checkin' ? (
         <CheckInPage />
       ) : activePage === 'attendance_sheet' ? (
-        <PlaceholderPage title="Ficha de Frequência" />
+        <FichaFrequencia />
       ) : activePage === 'presence_launcher' ? (
         <PlaceholderPage title="Lançador de Presença" />
       ) : activePage === 'book_registration' ? (
