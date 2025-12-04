@@ -431,41 +431,53 @@ const FichaFrequencia: React.FC = () => {
                                     const prevRow = records[index - 1];
                                     const nextRow = records[index + 1];
                                     
+                                    // A row is the "first of the week" if:
+                                    // 1. It's the very first row.
+                                    // 2. The week number changes.
+                                    // 3. The month changes (new month implies new week block visually).
                                     const isFirstOfWeek = !prevRow || row.weekNumber !== prevRow.weekNumber || row.month !== prevRow.month;
-                                    const isLastOfWeek = !nextRow || row.weekNumber !== nextRow.weekNumber || row.month !== nextRow.month;
+
+                                    // Day Grouping Logic (Multi-class days)
+                                    // A row is the "start of a multi-class day" if:
+                                    // 1. It has the same date as the NEXT row (implies > 1 class today).
+                                    // 2. It has a DIFFERENT date from the PREVIOUS row (implies it's the first of the group).
+                                    const isMultiClassDayStart = (nextRow && row.date === nextRow.date) && (!prevRow || row.date !== prevRow.date);
 
                                     const getWeekStyle = (colIndex: number) => {
                                         const shadows: string[] = [];
                                         const blue = '#60a5fa'; // blue-400
+                                        const pink = '#e879f9'; // fuchsia-400
                                         let classes = "";
 
-                                        // Column 1: NS (Week Number)
-                                        if (colIndex === 1) {
+                                        // --- Week Grouping (Blue) ---
+                                        // Apply logic only for columns 1 (NS) through 7 (Saída)
+                                        if (colIndex >= 1 && colIndex <= 7) {
                                             if (isFirstOfWeek) {
-                                                // First cell of the week: Blue BG
-                                                classes += " bg-blue-50";
-                                                // Top Border (Internal) if not new month
-                                                if (!isNewMonth) {
-                                                    shadows.push(`inset 0 1px 0 0 ${blue}`);
+                                                // Highlight background only for NS column (1)
+                                                if (colIndex === 1) {
+                                                    classes += " bg-blue-50";
                                                 }
-                                            } else {
-                                                // Subsequent cells: Right Border (Internal)
-                                                shadows.push(`inset -1px 0 0 0 ${blue}`);
-                                            }
-                                            
-                                            // Close the bottom of the NS block if it's the last row of the week
-                                            if (isLastOfWeek) {
-                                                shadows.push(`inset 0 -1px 0 0 ${blue}`);
+
+                                                // Top Border (Internal)
+                                                // Always apply if it's first of week, even if new month
+                                                shadows.push(`inset 0 1px 0 0 ${blue}`);
                                             }
                                         }
 
-                                        // Columns 2-7: DS to Saída (End)
+                                        // --- Day Grouping (Pink) ---
+                                        // Apply logic only for columns 2 (DS) through 7 (Saída)
                                         if (colIndex >= 2 && colIndex <= 7) {
-                                            if (isFirstOfWeek && !isNewMonth) {
-                                                shadows.push(`inset 0 1px 0 0 ${blue}`);
-                                            }
-                                            if (isLastOfWeek) {
-                                                shadows.push(`inset 0 -1px 0 0 ${blue}`);
+                                            if (isMultiClassDayStart) {
+                                                // Highlight background only for DS column (2)
+                                                if (colIndex === 2) {
+                                                    classes += " bg-fuchsia-50";
+                                                }
+
+                                                // Top Border (Internal)
+                                                // Only apply if it's NOT a new month AND NOT a new week (Week/Month border takes priority)
+                                                if (!isNewMonth && !isFirstOfWeek) {
+                                                    shadows.push(`inset 0 1px 0 0 ${pink}`);
+                                                }
                                             }
                                         }
                                         
