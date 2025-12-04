@@ -29,6 +29,7 @@ interface AttendanceRecord {
         app: string;
         engajamento: string;
     };
+    isMakeup?: boolean;
     teacher: string;
 }
 
@@ -92,292 +93,64 @@ const getWeekOfMonth = (date: Date) => {
 const FichaFrequencia: React.FC = () => {
     const [records, setRecords] = useState<AttendanceRecord[]>([
         {
-            id: '1',
-            month: 'NOV',
-            weekNumber: 2,
-            dayOfWeek: '2ª',
-            date: '03/11',
-            fullDate: '2025-11-03',
-            classNumber: 1,
-            presence: 'P',
-            startTime: '19:00',
-            endTime: '20:00',
-            content: '',
-            notes: '',
-            evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' },
-            teacher: 'Vitor'
+            id: '1', month: 'OUT', weekNumber: 1, dayOfWeek: '4ª', date: '01/10', fullDate: '2025-10-01', classNumber: 1, presence: 'P', startTime: '13:00', endTime: '14:00', content: '', notes: '', evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' }, teacher: 'Vitor'
         },
         {
-            id: '2',
-            month: 'NOV',
-            weekNumber: 2,
-            dayOfWeek: '4ª',
-            date: '05/11',
-            fullDate: '2025-11-05',
-            classNumber: 2,
-            presence: 'P',
-            startTime: '19:00',
-            endTime: '20:00',
-            content: '',
-            notes: '',
-            evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' },
-            teacher: 'Vitor'
+            id: '2', month: 'OUT', weekNumber: 2, dayOfWeek: '2ª', date: '06/10', fullDate: '2025-10-06', classNumber: 2, presence: 'P', startTime: '13:00', endTime: '14:00', content: '', notes: '', evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' }, teacher: 'Vitor'
         },
         {
-            id: '3',
-            month: 'NOV',
-            weekNumber: 3,
-            dayOfWeek: '2ª',
-            date: '10/11',
-            fullDate: '2025-11-10',
-            classNumber: 3,
-            presence: 'P',
-            startTime: '19:00',
-            endTime: '20:00',
-            content: '',
-            notes: '',
-            evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' },
-            teacher: 'Vitor'
+            id: '3', month: 'OUT', weekNumber: 2, dayOfWeek: '4ª', date: '08/10', fullDate: '2025-10-08', classNumber: 3, presence: 'P', startTime: '13:00', endTime: '14:00', content: '', notes: '', evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' }, teacher: 'Vitor'
         },
         {
-            id: '4',
-            month: 'NOV',
-            weekNumber: 3,
-            dayOfWeek: '4ª',
-            date: '12/11',
-            fullDate: '2025-11-12',
-            classNumber: 4,
-            presence: 'P',
-            startTime: '19:00',
-            endTime: '20:00',
-            content: '',
-            notes: '',
-            evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' },
-            teacher: 'Vitor'
+            id: '4', month: 'OUT', weekNumber: 3, dayOfWeek: '2ª', date: '13/10', fullDate: '2025-10-13', classNumber: 4, presence: 'P', startTime: '13:00', endTime: '14:00', content: '', notes: '', evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' }, teacher: 'Vitor'
         },
         {
-            id: '5',
-            month: 'NOV',
-            weekNumber: 4,
-            dayOfWeek: '2ª',
-            date: '17/11',
-            fullDate: '2025-11-17',
-            classNumber: 5,
-            presence: 'P',
-            startTime: '19:00',
-            endTime: '20:00',
-            content: '',
-            notes: '',
-            evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' },
-            teacher: 'Vitor'
+            id: '5', month: 'OUT', weekNumber: 3, dayOfWeek: '4ª', date: '15/10', fullDate: '2025-10-15', classNumber: 5, presence: 'P', startTime: '13:00', endTime: '14:00', content: '', notes: '', evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' }, teacher: 'Vitor'
         },
         {
-            id: '6',
-            month: 'NOV',
-            weekNumber: 4,
-            dayOfWeek: '4ª',
-            date: '19/11',
-            fullDate: '2025-11-19',
-            classNumber: 6,
-            presence: 'P',
-            startTime: '19:00',
-            endTime: '20:00',
-            content: '',
-            notes: '',
-            evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' },
-            teacher: 'Vitor'
+            id: '6', month: 'OUT', weekNumber: 4, dayOfWeek: '2ª', date: '20/10', fullDate: '2025-10-20', classNumber: 6, presence: 'F', startTime: 'x', endTime: 'x', content: '', notes: '', evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' }, teacher: 'Vitor'
         },
         {
-            id: '7',
-            month: 'NOV',
-            weekNumber: 5,
-            dayOfWeek: '2ª',
-            date: '24/11',
-            fullDate: '2025-11-24',
-            classNumber: 7,
-            presence: 'P',
-            startTime: '19:00',
-            endTime: '20:00',
-            content: '',
-            notes: '',
-            evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' },
-            teacher: 'Vitor'
+            id: '7', month: 'OUT', weekNumber: 4, dayOfWeek: '4ª', date: '22/10', fullDate: '2025-10-22', classNumber: 6, presence: 'P', isMakeup: true, startTime: '13:00', endTime: '14:00', content: '', notes: 'Reposição', evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' }, teacher: 'Vitor'
         },
         {
-            id: '8',
-            month: 'NOV',
-            weekNumber: 5,
-            dayOfWeek: '4ª',
-            date: '26/11',
-            fullDate: '2025-11-26',
-            classNumber: 8,
-            presence: 'P',
-            startTime: '19:00',
-            endTime: '20:00',
-            content: '',
-            notes: '',
-            evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' },
-            teacher: 'Vitor'
+            id: '8', month: 'OUT', weekNumber: 4, dayOfWeek: '4ª', date: '22/10', fullDate: '2025-10-22', classNumber: 7, presence: 'P', startTime: '14:00', endTime: '15:00', content: '', notes: '', evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' }, teacher: 'Vitor'
         },
         {
-            id: '9',
-            month: 'DEZ',
-            weekNumber: 1,
-            dayOfWeek: '2ª',
-            date: '01/12',
-            fullDate: '2025-12-01',
-            classNumber: 9,
-            presence: 'P',
-            startTime: '19:00',
-            endTime: '20:00',
-            content: '',
-            notes: '',
-            evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' },
-            teacher: 'Vitor'
+            id: '9', month: 'OUT', weekNumber: 5, dayOfWeek: '2ª', date: '27/10', fullDate: '2025-10-27', classNumber: 8, presence: 'P', startTime: '13:00', endTime: '14:00', content: '', notes: '', evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' }, teacher: 'Vitor'
         },
         {
-            id: '10',
-            month: 'DEZ',
-            weekNumber: 1,
-            dayOfWeek: '4ª',
-            date: '03/12',
-            fullDate: '2025-12-03',
-            classNumber: 10,
-            presence: 'P',
-            startTime: '19:00',
-            endTime: '20:00',
-            content: '',
-            notes: '',
-            evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' },
-            teacher: 'Vitor'
+            id: '10', month: 'OUT', weekNumber: 5, dayOfWeek: '4ª', date: '29/10', fullDate: '2025-10-29', classNumber: 10, presence: 'P', startTime: '13:00', endTime: '14:00', content: '', notes: '', evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' }, teacher: 'Vitor'
         },
         {
-            id: '11',
-            month: 'DEZ',
-            weekNumber: 2,
-            dayOfWeek: '2ª',
-            date: '08/12',
-            fullDate: '2025-12-08',
-            classNumber: 11,
-            presence: 'P',
-            startTime: '19:00',
-            endTime: '20:00',
-            content: '',
-            notes: '',
-            evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' },
-            teacher: 'Vitor'
+            id: '11', month: 'NOV', weekNumber: 2, dayOfWeek: '2ª', date: '03/11', fullDate: '2025-11-03', classNumber: 11, presence: 'P', startTime: '13:00', endTime: '14:00', content: '', notes: '', evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' }, teacher: 'Vitor'
         },
         {
-            id: '12',
-            month: 'DEZ',
-            weekNumber: 2,
-            dayOfWeek: '4ª',
-            date: '10/12',
-            fullDate: '2025-12-10',
-            classNumber: 12,
-            presence: 'P',
-            startTime: '19:00',
-            endTime: '20:00',
-            content: '',
-            notes: '',
-            evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' },
-            teacher: 'Vitor'
+            id: '12', month: 'NOV', weekNumber: 2, dayOfWeek: '4ª', date: '05/11', fullDate: '2025-11-05', classNumber: 12, presence: 'P', startTime: '13:00', endTime: '14:00', content: '', notes: '', evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' }, teacher: 'Vitor'
         },
         {
-            id: '13',
-            month: 'DEZ',
-            weekNumber: 3,
-            dayOfWeek: '2ª',
-            date: '15/12',
-            fullDate: '2025-12-15',
-            classNumber: 13,
-            presence: 'P',
-            startTime: '19:00',
-            endTime: '20:00',
-            content: '',
-            notes: '',
-            evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' },
-            teacher: 'Vitor'
+            id: '13', month: 'NOV', weekNumber: 3, dayOfWeek: '2ª', date: '10/11', fullDate: '2025-11-10', classNumber: 13, presence: 'F', startTime: 'x', endTime: 'x', content: '', notes: '', evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' }, teacher: 'Vitor'
         },
         {
-            id: '14',
-            month: 'DEZ',
-            weekNumber: 3,
-            dayOfWeek: '4ª',
-            date: '17/12',
-            fullDate: '2025-12-17',
-            classNumber: 14,
-            presence: 'P',
-            startTime: '19:00',
-            endTime: '20:00',
-            content: '',
-            notes: '',
-            evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' },
-            teacher: 'Vitor'
+            id: '14', month: 'NOV', weekNumber: 3, dayOfWeek: '4ª', date: '12/11', fullDate: '2025-11-12', classNumber: 13, presence: 'P', isMakeup: true, startTime: '13:00', endTime: '14:00', content: '', notes: 'Reposição', evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' }, teacher: 'Vitor'
         },
         {
-            id: '15',
-            month: 'DEZ',
-            weekNumber: 4,
-            dayOfWeek: '2ª',
-            date: '22/12',
-            fullDate: '2025-12-22',
-            classNumber: 15,
-            presence: 'P',
-            startTime: '19:00',
-            endTime: '20:00',
-            content: '',
-            notes: '',
-            evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' },
-            teacher: 'Vitor'
+            id: '15', month: 'NOV', weekNumber: 3, dayOfWeek: '4ª', date: '12/11', fullDate: '2025-11-12', classNumber: 14, presence: 'P', startTime: '14:00', endTime: '15:00', content: '', notes: '', evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' }, teacher: 'Vitor'
         },
         {
-            id: '16',
-            month: 'DEZ',
-            weekNumber: 4,
-            dayOfWeek: '4ª',
-            date: '24/12',
-            fullDate: '2025-12-24',
-            classNumber: 16,
-            presence: 'P',
-            startTime: '19:00',
-            endTime: '20:00',
-            content: '',
-            notes: '',
-            evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' },
-            teacher: 'Vitor'
+            id: '16', month: 'NOV', weekNumber: 4, dayOfWeek: '2ª', date: '17/11', fullDate: '2025-11-17', classNumber: 15, presence: 'F', startTime: 'x', endTime: 'x', content: '', notes: '', evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' }, teacher: 'Vitor'
         },
         {
-            id: '17',
-            month: 'DEZ',
-            weekNumber: 5,
-            dayOfWeek: '2ª',
-            date: '29/12',
-            fullDate: '2025-12-29',
-            classNumber: 17,
-            presence: 'P',
-            startTime: '19:00',
-            endTime: '20:00',
-            content: '',
-            notes: '',
-            evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' },
-            teacher: 'Vitor'
+            id: '17', month: 'NOV', weekNumber: 4, dayOfWeek: '4ª', date: '19/11', fullDate: '2025-11-19', classNumber: 16, presence: 'F', startTime: 'x', endTime: 'x', content: '', notes: '', evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' }, teacher: 'Vitor'
         },
         {
-            id: '18',
-            month: 'DEZ',
-            weekNumber: 5,
-            dayOfWeek: '4ª',
-            date: '31/12',
-            fullDate: '2025-12-31',
-            classNumber: 18,
-            presence: 'P',
-            startTime: '19:00',
-            endTime: '20:00',
-            content: '',
-            notes: '',
-            evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' },
-            teacher: 'Vitor'
+            id: '18', month: 'NOV', weekNumber: 4, dayOfWeek: '6ª', date: '21/11', fullDate: '2025-11-21', classNumber: 15, presence: 'P', isMakeup: true, startTime: '13:00', endTime: '14:00', content: '', notes: 'Reposição', evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' }, teacher: 'Vitor'
+        },
+        {
+            id: '19', month: 'NOV', weekNumber: 4, dayOfWeek: 'Sáb', date: '22/11', fullDate: '2025-11-22', classNumber: 16, presence: 'P', isMakeup: true, startTime: '08:00', endTime: '09:00', content: '', notes: 'Reposição', evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' }, teacher: 'Vitor'
+        },
+        {
+            id: '20', month: 'NOV', weekNumber: 5, dayOfWeek: '2ª', date: '24/11', fullDate: '2025-11-24', classNumber: 17, presence: 'P', startTime: '13:00', endTime: '14:00', content: '', notes: '', evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' }, teacher: 'Vitor'
         }
     ]);
     const [selectedStudent, setSelectedStudent] = useState('Vitor');
@@ -664,7 +437,12 @@ const FichaFrequencia: React.FC = () => {
                                             {row.classNumber}
                                         </td>
                                         <td className={`${cellBase} ${getColClass(5)} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={() => setHoveredCol(5)} onMouseLeave={() => setHoveredCol(null)}>
-                                            {row.presence === 'P' && <div className="w-3 h-3 rounded-full bg-green-500 mx-auto"></div>}
+                                            {row.presence === 'P' && (
+                                                <div className="flex items-center justify-center gap-1">
+                                                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                                                    {row.isMakeup && <div className="w-3 h-3 rounded-full bg-yellow-400"></div>}
+                                                </div>
+                                            )}
                                             {row.presence === 'F' && <div className="w-3 h-3 rounded-full bg-red-500 mx-auto"></div>}
                                             {row.presence === 'X' && <div className="w-3 h-3 rounded-full bg-slate-300 mx-auto"></div>}
                                         </td>
