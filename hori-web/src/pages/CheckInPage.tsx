@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Clock, Search, ChevronLeft, ChevronRight, Check, CheckSquare } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import PageHeader from '../components/PageHeader';
+import Header from '../layouts/Header';
+import PageContainer from '../layouts/PageContainer';
 
 interface Student {
     id: string;
@@ -69,8 +70,8 @@ const CheckInPage: React.FC = () => {
     }, [students, selectedSlot, searchQuery]);
 
     return (
-        <div className="flex flex-col h-full bg-slate-50 text-slate-800 font-sans">
-            <PageHeader
+        <PageContainer>
+            <Header
                 title={
                     <div className="flex items-center gap-3">
                         <CheckSquare className="w-8 h-8 text-blue-600" />
@@ -112,7 +113,7 @@ const CheckInPage: React.FC = () => {
                         </div>
                     </div>
                 </div>
-            </PageHeader>
+            </Header>
 
             {/* Toolbar */}
             <div className="px-6 py-3 bg-white border-b border-slate-200 flex items-center justify-between gap-4">
@@ -232,7 +233,7 @@ const CheckInPage: React.FC = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </PageContainer>
     );
 };
 

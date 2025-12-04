@@ -2,7 +2,7 @@ import React, { useMemo, useEffect, useRef, useCallback, useImperativeHandle, fo
 import { format, getDaysInMonth, addMonths } from "date-fns";
 import { FILL_COLORS } from "../utils/logic";
 import { IMMUTABLE_RULES } from "../config/rules";
-import type { CalendarEvent, Holiday, Config, SpecialDate } from "../types";
+import type { CalendarEvent, Holiday } from "../types";
 
 export interface CalendarGridHandle {
     setHovered: (monthIndex: number | null, columnIndex: number | null) => void;
@@ -11,7 +11,7 @@ export interface CalendarGridHandle {
 interface CalendarGridProps {
     data: CalendarEvent[];
     year: number;
-    config: Config;
+
     holidays: Holiday[];
     onCellClick: (
         data: { date: string; events: CalendarEvent[]; holiday?: Holiday },
@@ -24,13 +24,13 @@ interface CalendarGridProps {
     flashingDates: Set<string>;
     searchRangeDates: Set<string>;
     onClearSelection: () => void;
-    simulationResult: { validDates: string[]; skippedDates: { date: string; reason: string }[] } | null;
+
     onHolidayHover: (
         data: { date: string; events: CalendarEvent[]; holiday: Holiday },
         pos: { x: number; y: number }
     ) => void;
     onHolidayLeave: () => void;
-    specialDates: SpecialDate[];
+
 }
 
 const MARGIN = { top: 45, right: 20, bottom: 20, left: 10 };
@@ -47,13 +47,11 @@ type DayData =
         dateStr: string;
         dayEvents: CalendarEvent[];
         holiday?: Holiday;
-        specialDate?: SpecialDate;
+
         x: number;
         y: number;
         colIndex: number;
-        isContract: boolean;
-        isContractStartDay: boolean;
-        isContractEndDay: boolean;
+
         mIndex: number;
         isToday: boolean;
     }
@@ -68,7 +66,7 @@ type DayData =
 const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
     data,
     year,
-    config,
+
     holidays,
     onCellClick,
     showSundays,
@@ -78,7 +76,7 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
     onClearSelection,
     onHolidayHover,
     onHolidayLeave,
-    specialDates
+
 }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -308,13 +306,6 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
         const months = [];
         let currentRenderDate = new Date(year, 0, 1);
 
-        // Parse contract dates
-        const contractStart = new Date(config.startDate + "T12:00:00");
-        const contractEnd = new Date(contractStart);
-        contractEnd.setFullYear(contractEnd.getFullYear() + 1);
-
-        const contractStartStr = format(contractStart, "yyyy-MM-dd");
-        const contractEndStr = format(contractEnd, "yyyy-MM-dd");
         const todayStr = format(new Date(), "yyyy-MM-dd");
 
         for (let mIndex = 0; mIndex < TOTAL_MONTHS; mIndex++) {
@@ -338,14 +329,7 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
                     const dateStr = format(date, "yyyy-MM-dd");
                     const dayEvents = dataByDate[dateStr] || [];
                     const holiday = holidays.find((h) => h.date === dateStr);
-                    const specialDate = specialDates.find((sd) => sd.date === dateStr);
 
-                    const time = date.getTime();
-                    const isContract =
-                        time >= contractStart.getTime() && time <= contractEnd.getTime();
-
-                    const isContractStartDay = dateStr === contractStartStr;
-                    const isContractEndDay = dateStr === contractEndStr;
                     const isToday = dateStr === todayStr;
 
                     days.push({
@@ -354,13 +338,10 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
                         dateStr,
                         dayEvents,
                         holiday,
-                        specialDate,
+
                         x,
                         y: mIndex * (CELL_SIZE + CELL_GAP),
                         colIndex: c,
-                        isContract,
-                        isContractStartDay,
-                        isContractEndDay,
                         mIndex,
                         isToday
                     });
@@ -378,7 +359,7 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
             currentRenderDate = addMonths(currentRenderDate, 1);
         }
         return months;
-    }, [year, data, holidays, config.startDate, getVisualX, specialDates]);
+    }, [year, data, holidays, getVisualX]);
 
     const handleMouseLeave = () => {
         updateCrosshair(null, null);
@@ -538,12 +519,9 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
                                         dateStr,
                                         dayEvents,
                                         holiday,
-                                        specialDate,
+
                                         x,
                                         y,
-                                        isContract,
-                                        isContractStartDay,
-                                        isContractEndDay,
                                         isToday
                                     } = day;
                                     const hasClasses = dayEvents.length > 0;
@@ -552,25 +530,21 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
 
                                     const bgFill = isSelected
                                         ? "#bfdbfe" // Blue-200 for selection
-                                        : !isContract
-                                            ? "#e5e7eb"
-                                            : hasClasses
-                                                ? "#ffffff"
-                                                : specialDate
-                                                    ? "#fbcfe8" // Pink-200 for special dates
-                                                    : isWeekend
-                                                        ? "rgba(255,255,255,0.4)"
-                                                        : holiday
-                                                            ? "#fee2e2"
-                                                            : "#f9fafb";
+                                        : hasClasses
+                                            ? "#ffffff"
+                                            : isWeekend
+                                                ? "rgba(255,255,255,0.4)"
+                                                : holiday
+                                                    ? "#fee2e2"
+                                                    : "#f9fafb";
 
-                                    const bgOpacity = !isContract ? 0.3 : 1;
+                                    const bgOpacity = 1;
                                     const stroke = "#e5e7eb";
                                     const strokeWidth = 0.5;
 
                                     // Interactive State
                                     const isClickable = hasClasses;
-                                    const isHoverable = (holiday || specialDate) && !hasClasses;
+                                    const isHoverable = holiday && !hasClasses;
 
 
                                     return (
@@ -588,24 +562,19 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
                                                 onHoverChange({ monthIndex: day.mIndex, columnIndex: day.colIndex });
                                                 handleCellMouseEnter(dateStr);
 
-                                                if ((holiday || specialDate) && !hasClasses) {
+                                                if (holiday && !hasClasses) {
                                                     const rectBox = e.currentTarget.getBoundingClientRect();
-                                                    const holidayData = holiday || (specialDate ? {
-                                                        date: specialDate.date,
-                                                        name: specialDate.description,
-                                                        type: 'Data Especial'
-                                                    } : undefined);
 
-                                                    if (holidayData) {
+                                                    if (holiday) {
                                                         onHolidayHover(
-                                                            { date: dateStr, events: [], holiday: holidayData },
+                                                            { date: dateStr, events: [], holiday: holiday },
                                                             { x: rectBox.right, y: rectBox.top }
                                                         );
                                                     }
                                                 }
                                             }}
                                             onMouseLeave={() => {
-                                                if (holiday || specialDate) onHolidayLeave();
+                                                if (holiday) onHolidayLeave();
                                             }}
                                             onClick={(e) => {
                                                 if (hasClasses) {
@@ -638,7 +607,7 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
                                                 dy={hasClasses ? "0.1em" : "0.35em"}
                                                 textAnchor="middle"
                                                 fontSize="10"
-                                                fill={!isContract ? "#9ca3af" : hasClasses ? "#374151" : "#9ca3af"}
+                                                fill={hasClasses ? "#374151" : "#9ca3af"}
                                                 className="pointer-events-none select-none font-sans"
                                             >
                                                 {dayNum}
@@ -715,13 +684,7 @@ const CalendarGrid = forwardRef<CalendarGridHandle, CalendarGridProps>(({
                                                 </g>
                                             )}
 
-                                            {/* Dog Ears */}
-                                            {isContractStartDay && (
-                                                <path d="M 0 6 Q 0 0 6 0 L 14 0 L 0 14 Z" fill="#2563eb" className="pointer-events-none" />
-                                            )}
-                                            {isContractEndDay && (
-                                                <path d={`M ${CELL_SIZE} ${CELL_SIZE - 6} Q ${CELL_SIZE} ${CELL_SIZE} ${CELL_SIZE - 6} L ${CELL_SIZE - 14} ${CELL_SIZE} L ${CELL_SIZE} ${CELL_SIZE - 14} Z`} fill="#f97316" className="pointer-events-none" />
-                                            )}
+
 
                                             {/* Today Highlight */}
                                             {isToday && (

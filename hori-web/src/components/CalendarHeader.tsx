@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { format, parse, isValid, isAfter, isBefore } from "date-fns";
 import { Calendar, ChevronLeft, ChevronRight, Search } from "lucide-react";
-import PageHeader from "./PageHeader";
+import Header from "../layouts/Header";
 
 interface HeaderProps {
     year: number;
@@ -9,7 +9,7 @@ interface HeaderProps {
     onSearchDate: (result: { flashingDates: string[], rangeDates: string[] }) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ year, onYearChange, onSearchDate }) => {
+const CalendarHeader: React.FC<HeaderProps> = ({ year, onYearChange, onSearchDate }) => {
     const [searchQuery, setSearchQuery] = useState("");
     const MIN_YEAR = 1900;
     const [yearInput, setYearInput] = useState(year.toString());
@@ -152,7 +152,7 @@ const Header: React.FC<HeaderProps> = ({ year, onYearChange, onSearchDate }) => 
     };
 
     return (
-        <PageHeader
+        <Header
             title={
                 <div className="flex items-center gap-3">
                     <Calendar className="w-8 h-8 text-blue-600" />
@@ -206,8 +206,8 @@ const Header: React.FC<HeaderProps> = ({ year, onYearChange, onSearchDate }) => 
                     </button>
                 </form>
             </div>
-        </PageHeader>
+        </Header>
     );
 };
 
-export default Header;
+export default CalendarHeader;

@@ -3,22 +3,25 @@ import CalendarGrid from "./components/CalendarGrid";
 import type { CalendarGridHandle } from "./components/CalendarGrid";
 import MonthsSidebar from "./components/MonthsSidebar";
 import type { MonthsSidebarHandle } from "./components/MonthsSidebar";
-import Layout from "./components/Layout";
+import Layout from "./layouts/Layout";
 import CalendarHeader from "./components/CalendarHeader";
-import SimulationPage from "./pages/SimulationPage";
+import PageContainer from "./layouts/PageContainer";
+
 import CheckInPage from "./pages/CheckInPage";
 import FichaFrequencia from "./pages/FichaFrequencia";
-import { SimulationProvider, useSimulation } from "./context/SimulationContext";
+
 import type { CalendarEvent, Holiday } from "./types/index";
 import { IMMUTABLE_RULES } from "./config/rules";
 
 const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
-  <div className="flex-1 flex items-center justify-center bg-slate-50 text-slate-400 h-full">
-    <div className="text-center">
-      <h2 className="text-2xl font-bold mb-2">{title}</h2>
-      <p>Em construção...</p>
+  <PageContainer>
+    <div className="flex-1 flex items-center justify-center text-slate-400 h-full">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold mb-2">{title}</h2>
+        <p>Em construção...</p>
+      </div>
     </div>
-  </div>
+  </PageContainer>
 );
 
 const AppContent: React.FC = () => {
@@ -32,7 +35,7 @@ const AppContent: React.FC = () => {
   const calendarRef = useRef<CalendarGridHandle>(null);
   const sidebarRef = useRef<MonthsSidebarHandle>(null);
 
-  const { config, simulationResult, generatedClasses, specialDates } = useSimulation();
+
 
   // Use holidays from rules
   const holidays: Holiday[] = IMMUTABLE_RULES.holidays.map(h => ({
@@ -97,9 +100,8 @@ const AppContent: React.FC = () => {
 
   return (
     <Layout activePage={activePage} onNavigate={setActivePage}>
-      {activePage === 'simulation' ? (
-        <SimulationPage />
-      ) : activePage === 'checkin' ? (
+
+      {activePage === 'checkin' ? (
         <CheckInPage />
       ) : activePage === 'attendance_sheet' ? (
         <FichaFrequencia />
@@ -110,7 +112,7 @@ const AppContent: React.FC = () => {
       ) : activePage === 'inventory' ? (
         <PlaceholderPage title="Estoque" />
       ) : (
-        <>
+        <PageContainer>
           <CalendarHeader
             year={year}
             onYearChange={setYear}
@@ -118,7 +120,7 @@ const AppContent: React.FC = () => {
           />
 
           {/* Main Content Area - Flex container to hold Sidebar and Grid side-by-side */}
-          <div className="flex flex-1 overflow-hidden relative bg-[#f5f6fa] p-[10px]">
+          <div className="flex flex-1 overflow-hidden relative p-[10px]">
             {/* The "Card" Container */}
             <div className="flex max-w-full max-h-full bg-white rounded-2xl overflow-hidden shadow-md border border-slate-200">
               {/* Months Sidebar (Fixed Left) */}
@@ -135,9 +137,9 @@ const AppContent: React.FC = () => {
               <div className="flex-1 overflow-hidden relative">
                 <CalendarGrid
                   ref={calendarRef}
-                  data={generatedClasses}
+                  data={[]}
                   year={year}
-                  config={config}
+
                   holidays={holidays}
                   onCellClick={handleCellClick}
                   showSundays={true}
@@ -147,13 +149,13 @@ const AppContent: React.FC = () => {
                   onClearSelection={handleClearSelection}
                   onHolidayHover={handleHolidayHover}
                   onHolidayLeave={() => setTooltipData(null)}
-                  simulationResult={simulationResult}
-                  specialDates={specialDates}
+
+
                 />
               </div>
             </div>
           </div>
-        </>
+        </PageContainer>
       )}
 
       {/* Tooltip */}
@@ -174,9 +176,7 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <SimulationProvider>
-      <AppContent />
-    </SimulationProvider>
+    <AppContent />
   );
 };
 

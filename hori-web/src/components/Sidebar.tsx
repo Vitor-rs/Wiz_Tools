@@ -44,7 +44,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             ]
         },
         { id: "checkin", label: "Check-in", icon: CheckSquare },
-        { id: "simulation", label: "Simulação", icon: Settings },
+
     ];
 
     const handleMainItemClick = (item: MenuItem) => {
