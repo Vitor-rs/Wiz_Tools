@@ -62,7 +62,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
     return (
         <div
-            className={`bg-[linear-gradient(to_left,#2a5298,#1e3c72)] text-slate-300 h-screen flex flex-col transition-all duration-300 border-r border-slate-800 ${isCollapsed ? "w-16" : "w-64"
+            className={`bg-[linear-gradient(to_left,#2a5298,#1e3c72)] text-slate-300 h-screen flex flex-col transition-all duration-300 border-r border-slate-800 shrink-0 ${isCollapsed ? "w-16" : "w-64"
                 }`}
         >
             {/* Header / Logo Area */}

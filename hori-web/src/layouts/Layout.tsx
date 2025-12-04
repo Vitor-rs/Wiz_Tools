@@ -18,7 +18,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activePage, onNavigate }) => 
                 isCollapsed={isSidebarCollapsed}
                 onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
             />
-            <main className="flex-1 flex flex-col h-full overflow-hidden relative">
+            <main className="flex-1 flex flex-col h-full overflow-hidden relative min-w-0">
                 {children}
             </main>
         </div>
