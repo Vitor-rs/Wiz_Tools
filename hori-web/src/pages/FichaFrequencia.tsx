@@ -156,15 +156,60 @@ const FichaFrequencia: React.FC = () => {
     const [selectedStudent, setSelectedStudent] = useState('Vitor');
     const [inputDate, setInputDate] = useState<string>(getFullDate(new Date()));
     const [inputClassNumber, setInputClassNumber] = useState<string>('');
-    const [hoveredCol, setHoveredCol] = useState<number | null>(null);
+    // hoveredCol removed as we use direct DOM manipulation for crosshair
     const [showScrollTop, setShowScrollTop] = useState(false);
     const tableContainerRef = React.useRef<HTMLDivElement>(null);
+    const rowHighlightRef = React.useRef<HTMLDivElement>(null);
+    const colHighlightRef = React.useRef<HTMLDivElement>(null);
 
     const handleScroll = () => {
         if (tableContainerRef.current) {
             const { scrollTop } = tableContainerRef.current;
             setShowScrollTop(scrollTop > 300);
         }
+    };
+
+    const handleRowEnter = (e: React.MouseEvent<HTMLTableRowElement>) => {
+        if (rowHighlightRef.current && tableContainerRef.current) {
+            const tr = e.currentTarget;
+            // Calculate position relative to the container
+            // Since the table is inside the container, offsetTop should work if container is relative
+            // However, tr.offsetTop is relative to the table (offsetParent).
+            // If table is the only child, it matches.
+            
+            const top = tr.offsetTop;
+            const height = tr.offsetHeight;
+            const width = tr.offsetWidth; // Full width
+
+            rowHighlightRef.current.style.display = 'block';
+            rowHighlightRef.current.style.top = `${top}px`;
+            rowHighlightRef.current.style.height = `${height}px`;
+            rowHighlightRef.current.style.width = `${width}px`;
+        }
+    };
+
+    const handleColEnter = (e: React.MouseEvent<HTMLTableCellElement>) => {
+        if (colHighlightRef.current) {
+            const td = e.currentTarget;
+            const left = td.offsetLeft;
+            const width = td.offsetWidth;
+            // Vertical bar should span the visible height or table height?
+            // User said "Na coluna...". Usually full height.
+            // But table height varies.
+            // Let's set it to table scrollHeight.
+            const tableHeight = tableContainerRef.current?.scrollHeight || 0;
+
+            colHighlightRef.current.style.display = 'block';
+            colHighlightRef.current.style.left = `${left}px`;
+            colHighlightRef.current.style.width = `${width}px`;
+            colHighlightRef.current.style.height = `${tableHeight}px`;
+            colHighlightRef.current.style.top = '0px';
+        }
+    };
+
+    const handleMouseLeave = () => {
+        if (rowHighlightRef.current) rowHighlightRef.current.style.display = 'none';
+        if (colHighlightRef.current) colHighlightRef.current.style.display = 'none';
     };
 
     const scrollToTop = () => {
@@ -276,10 +321,6 @@ const FichaFrequencia: React.FC = () => {
     // Using Royal Blue (#3867d6) at 10% opacity: rgba(56, 103, 214, 0.10)
     const lightHatchedBg = "bg-[linear-gradient(-45deg,rgba(56,103,214,0.1)_25%,transparent_25%,transparent_50%,rgba(56,103,214,0.1)_50%,rgba(56,103,214,0.1)_75%,transparent_75%,transparent)] bg-[length:4px_4px]";
 
-    const getColClass = (index: number) => {
-        return hoveredCol === index ? 'bg-blue-50' : '';
-    };
-
     return (
         <PageContainer>
             <Header
@@ -364,29 +405,42 @@ const FichaFrequencia: React.FC = () => {
                     <div
                         ref={tableContainerRef}
                         onScroll={handleScroll}
-                        className="flex-1 overflow-auto bg-white custom-scrollbar"
+                        onMouseLeave={handleMouseLeave}
+                        className="flex-1 overflow-auto bg-white custom-scrollbar relative"
                     >
+                        {/* Crosshair Overlays */}
+                        <div 
+                            ref={rowHighlightRef} 
+                            className="absolute pointer-events-none z-10 hidden border-t border-b border-gray-400 bg-gray-500/10"
+                            style={{ borderTopWidth: '0.5px', borderBottomWidth: '0.5px' }}
+                        />
+                        <div 
+                            ref={colHighlightRef} 
+                            className="absolute pointer-events-none z-10 hidden border-l border-r border-gray-400 bg-gray-500/10"
+                            style={{ borderLeftWidth: '0.5px', borderRightWidth: '0.5px' }}
+                        />
+
                         <table className="w-full text-sm border-separate border-spacing-0">
                             <thead className="sticky top-0 z-20 shadow-md bg-white">
                                 {/* Top Header Row */}
                                 <tr>
                                     <th colSpan={4} className={`${headerBase}`}>DATAS</th>
-                                    <th rowSpan={2} className={`${headerBase} w-10 max-w-10`} onMouseEnter={() => setHoveredCol(4)} onMouseLeave={() => setHoveredCol(null)}>
+                                    <th rowSpan={2} className={`${headerBase} w-10 max-w-10`}>
                                         <div className="flex items-center justify-center h-20 w-full">
                                             <span className="-rotate-90 whitespace-nowrap">Aula</span>
                                         </div>
                                     </th>
-                                    <th rowSpan={2} className={`${headerBase} w-10 max-w-10`} onMouseEnter={() => setHoveredCol(5)} onMouseLeave={() => setHoveredCol(null)}>
+                                    <th rowSpan={2} className={`${headerBase} w-10 max-w-10`}>
                                         <div className="flex items-center justify-center h-20 w-full">
                                             <span className="-rotate-90 whitespace-nowrap">Comparec</span>
                                         </div>
                                     </th>
                                     <th colSpan={2} className={`${headerBase}`}>HORÁRIO</th>
-                                    <th rowSpan={2} className={`${headerBase} min-w-[150px]`} onMouseEnter={() => setHoveredCol(8)} onMouseLeave={() => setHoveredCol(null)}>Lição / Conteúdo</th>
-                                    <th rowSpan={2} className={`${headerBase} min-w-[150px]`} onMouseEnter={() => setHoveredCol(9)} onMouseLeave={() => setHoveredCol(null)}>Observações / Anotações</th>
+                                    <th rowSpan={2} className={`${headerBase} min-w-[150px]`}>Lição / Conteúdo</th>
+                                    <th rowSpan={2} className={`${headerBase} min-w-[150px]`}>Observações / Anotações</th>
                                     <th colSpan={9} className={`${headerBase}`}>AVALIAÇÕES</th>
-                                    <th rowSpan={2} className={`${headerBase} min-w-20`} onMouseEnter={() => setHoveredCol(19)} onMouseLeave={() => setHoveredCol(null)}>Professor(a)</th>
-                                    <th rowSpan={2} className={`${headerBase} w-10 max-w-10`} onMouseEnter={() => setHoveredCol(20)} onMouseLeave={() => setHoveredCol(null)}>
+                                    <th rowSpan={2} className={`${headerBase} min-w-20`}>Professor(a)</th>
+                                    <th rowSpan={2} className={`${headerBase} w-10 max-w-10`}>
                                         <div className="flex items-center justify-center h-20 w-full">
                                             <span className="-rotate-90 whitespace-nowrap">Duração</span>
                                         </div>
@@ -395,19 +449,19 @@ const FichaFrequencia: React.FC = () => {
                                 {/* Sub Header Row */}
                                 <tr>
                                     {/* Datas Sub-columns */}
-                                    <th className={`${subHeaderBase.replace('bg-[#FFFDF6]', 'bg-[#3867d6]/50 text-blue-900')} w-10 max-w-10`} onMouseEnter={() => setHoveredCol(0)} onMouseLeave={() => setHoveredCol(null)}>Mês</th>
-                                    <th className={`${subHeaderBase} w-10 max-w-10`} onMouseEnter={() => setHoveredCol(1)} onMouseLeave={() => setHoveredCol(null)}>NS</th>
-                                    <th className={`${subHeaderBase} w-10 max-w-10`} onMouseEnter={() => setHoveredCol(2)} onMouseLeave={() => setHoveredCol(null)}>DS</th>
-                                    <th className={`${subHeaderBase} w-10 max-w-10`} onMouseEnter={() => setHoveredCol(3)} onMouseLeave={() => setHoveredCol(null)}>D/M</th>
+                                    <th className={`${subHeaderBase.replace('bg-[#FFFDF6]', 'bg-[#3867d6]/50 text-blue-900')} w-10 max-w-10`}>Mês</th>
+                                    <th className={`${subHeaderBase} w-10 max-w-10`}>NS</th>
+                                    <th className={`${subHeaderBase} w-10 max-w-10`}>DS</th>
+                                    <th className={`${subHeaderBase} w-10 max-w-10`}>D/M</th>
 
                                     {/* Horário Sub-columns */}
-                                    <th className={`${subHeaderBase} w-20 min-w-20`} onMouseEnter={() => setHoveredCol(6)} onMouseLeave={() => setHoveredCol(null)}>
+                                    <th className={`${subHeaderBase} w-20 min-w-20`}>
                                         <div className="flex flex-col items-center justify-center gap-0.5">
                                             <span className="text-[9px]">Entrada</span>
                                             <LogIn size={12} />
                                         </div>
                                     </th>
-                                    <th className={`${subHeaderBase} w-20 min-w-20`} onMouseEnter={() => setHoveredCol(7)} onMouseLeave={() => setHoveredCol(null)}>
+                                    <th className={`${subHeaderBase} w-20 min-w-20`}>
                                         <div className="flex flex-col items-center justify-center gap-0.5">
                                             <span className="text-[9px]">Saída</span>
                                             <LogOut size={12} />
@@ -415,15 +469,15 @@ const FichaFrequencia: React.FC = () => {
                                     </th>
 
                                     {/* Avaliações Sub-columns - Fixed Widths */}
-                                    <th className={`${subHeaderBase} w-8 min-w-8`} onMouseEnter={() => setHoveredCol(10)} onMouseLeave={() => setHoveredCol(null)}>F</th>
-                                    <th className={`${subHeaderBase} w-8 min-w-8`} onMouseEnter={() => setHoveredCol(11)} onMouseLeave={() => setHoveredCol(null)}>A</th>
-                                    <th className={`${subHeaderBase} w-8 min-w-8`} onMouseEnter={() => setHoveredCol(12)} onMouseLeave={() => setHoveredCol(null)}>L</th>
-                                    <th className={`${subHeaderBase} w-8 min-w-8`} onMouseEnter={() => setHoveredCol(13)} onMouseLeave={() => setHoveredCol(null)}>E</th>
-                                    <th className={`${subHeaderBase} w-8 min-w-8`} onMouseEnter={() => setHoveredCol(14)} onMouseLeave={() => setHoveredCol(null)}>TRF</th>
-                                    <th className={`${subHeaderBase} w-8 min-w-8`} onMouseEnter={() => setHoveredCol(15)} onMouseLeave={() => setHoveredCol(null)}>S.T</th>
-                                    <th className={`${subHeaderBase} w-8 min-w-8`} onMouseEnter={() => setHoveredCol(16)} onMouseLeave={() => setHoveredCol(null)}>CS</th>
-                                    <th className={`${subHeaderBase} w-8 min-w-8`} onMouseEnter={() => setHoveredCol(17)} onMouseLeave={() => setHoveredCol(null)}>APP</th>
-                                    <th className={`${subHeaderBase} w-8 min-w-8`} onMouseEnter={() => setHoveredCol(18)} onMouseLeave={() => setHoveredCol(null)}>AL</th>
+                                    <th className={`${subHeaderBase} w-8 min-w-8`}>F</th>
+                                    <th className={`${subHeaderBase} w-8 min-w-8`}>A</th>
+                                    <th className={`${subHeaderBase} w-8 min-w-8`}>L</th>
+                                    <th className={`${subHeaderBase} w-8 min-w-8`}>E</th>
+                                    <th className={`${subHeaderBase} w-8 min-w-8`}>TRF</th>
+                                    <th className={`${subHeaderBase} w-8 min-w-8`}>S.T</th>
+                                    <th className={`${subHeaderBase} w-8 min-w-8`}>CS</th>
+                                    <th className={`${subHeaderBase} w-8 min-w-8`}>APP</th>
+                                    <th className={`${subHeaderBase} w-8 min-w-8`}>AL</th>
                                 </tr>
                             </thead>
                             <tbody className="text-gray-700 bg-white">
@@ -518,8 +572,8 @@ const FichaFrequencia: React.FC = () => {
                                     };
 
                                     return (
-                                        <tr key={row.id} className="hover:bg-blue-50 transition-colors">
-                                            <td className={`${cellBase.replace('border-b', '')} bg-[#3867d6]/30 font-bold text-blue-900 ${getColClass(0)} ${topBorderClass}`} onMouseEnter={() => setHoveredCol(0)} onMouseLeave={() => setHoveredCol(null)}>
+                                        <tr key={row.id} className="transition-colors" onMouseEnter={handleRowEnter}>
+                                            <td className={`${cellBase.replace('border-b', '')} bg-[#3867d6]/30 font-bold text-blue-900 ${topBorderClass}`} onMouseEnter={handleColEnter}>
                                                 {showMonth ? (row.month.charAt(0) + row.month.slice(1).toLowerCase()) : ''}
                                             </td>
 
@@ -530,8 +584,6 @@ const FichaFrequencia: React.FC = () => {
                                                 const showGrayStripes = isEmpty && row.presence !== 'F';
 
                                                 // Border Logic:
-                                                // Remove Right: If empty AND neighbor (DS) is also empty (DS is empty if !showDate)
-                                                // Remove Bottom: If empty AND neighbor below (Next NS) is also empty (Next NS is empty if !nextRowIsNewWeek)
                                                 const removeRight = isEmpty && !showDate;
                                                 const removeBottom = isEmpty && !nextRowIsNewWeek;
 
@@ -541,10 +593,9 @@ const FichaFrequencia: React.FC = () => {
 
                                                 return (
                                                     <td
-                                                        className={`${cellBase} ${getColClass(1)} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass} ${className} ${borderClass} ${showGrayStripes ? lightHatchedBg : ''}`}
+                                                        className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass} ${className} ${borderClass} ${showGrayStripes ? lightHatchedBg : ''}`}
                                                         style={style}
-                                                        onMouseEnter={() => setHoveredCol(1)}
-                                                        onMouseLeave={() => setHoveredCol(null)}
+                                                        onMouseEnter={handleColEnter}
                                                     >
                                                         {showWeek ? row.weekNumber : ''}
                                                     </td>
@@ -558,8 +609,6 @@ const FichaFrequencia: React.FC = () => {
                                                 const showGrayStripes = isEmpty && row.presence !== 'F';
 
                                                 // Border Logic:
-                                                // Remove Right: If empty (Neighbor Date is always empty if DS is empty, so we can remove internal line)
-                                                // Remove Bottom: If empty AND neighbor below (Next DS) is also empty (Next DS is empty if !nextRowIsNewDate)
                                                 const removeRight = isEmpty;
                                                 const removeBottom = isEmpty && !nextRowIsNewDate;
 
@@ -569,10 +618,9 @@ const FichaFrequencia: React.FC = () => {
 
                                                 return (
                                                     <td
-                                                        className={`${cellBase} ${getColClass(2)} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass} ${className} ${borderClass} ${showGrayStripes ? lightHatchedBg : ''}`}
+                                                        className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass} ${className} ${borderClass} ${showGrayStripes ? lightHatchedBg : ''}`}
                                                         style={style}
-                                                        onMouseEnter={() => setHoveredCol(2)}
-                                                        onMouseLeave={() => setHoveredCol(null)}
+                                                        onMouseEnter={handleColEnter}
                                                     >
                                                         {showDate ? row.dayOfWeek : ''}
                                                     </td>
@@ -586,8 +634,6 @@ const FichaFrequencia: React.FC = () => {
                                                 const showGrayStripes = isEmpty && row.presence !== 'F';
 
                                                 // Border Logic:
-                                                // Remove Right: NEVER (Separates from Aula)
-                                                // Remove Bottom: If empty AND neighbor below (Next Date) is also empty
                                                 const removeRight = false;
                                                 const removeBottom = isEmpty && !nextRowIsNewDate;
 
@@ -597,10 +643,9 @@ const FichaFrequencia: React.FC = () => {
 
                                                 return (
                                                     <td
-                                                        className={`${cellBase} ${getColClass(3)} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass} ${className} ${borderClass} ${showGrayStripes ? lightHatchedBg : ''}`}
+                                                        className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass} ${className} ${borderClass} ${showGrayStripes ? lightHatchedBg : ''}`}
                                                         style={style}
-                                                        onMouseEnter={() => setHoveredCol(3)}
-                                                        onMouseLeave={() => setHoveredCol(null)}
+                                                        onMouseEnter={handleColEnter}
                                                     >
                                                         {showDate ? row.date : ''}
                                                     </td>
@@ -612,10 +657,9 @@ const FichaFrequencia: React.FC = () => {
                                                 const { className, style } = getWeekStyle(4);
                                                 return (
                                                     <td
-                                                        className={`${cellBase} ${getColClass(4)} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass} ${className} font-medium text-gray-900`}
+                                                        className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass} ${className} font-medium text-gray-900`}
                                                         style={style}
-                                                        onMouseEnter={() => setHoveredCol(4)}
-                                                        onMouseLeave={() => setHoveredCol(null)}
+                                                        onMouseEnter={handleColEnter}
                                                     >
                                                         {row.classNumber}
                                                     </td>
@@ -627,10 +671,9 @@ const FichaFrequencia: React.FC = () => {
                                                 const { className, style } = getWeekStyle(5);
                                                 return (
                                                     <td
-                                                        className={`${cellBase} ${getColClass(5)} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass} ${className}`}
+                                                        className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass} ${className}`}
                                                         style={style}
-                                                        onMouseEnter={() => setHoveredCol(5)}
-                                                        onMouseLeave={() => setHoveredCol(null)}
+                                                        onMouseEnter={handleColEnter}
                                                     >
                                                         {row.presence === 'P' && (
                                                             <div className="flex items-center justify-center gap-1">
@@ -649,10 +692,9 @@ const FichaFrequencia: React.FC = () => {
                                                 const { className, style } = getWeekStyle(6);
                                                 return (
                                                     <td
-                                                        className={`${cellBase} text-[10px] ${getColClass(6)} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass} ${className}`}
+                                                        className={`${cellBase} text-[10px] ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass} ${className}`}
                                                         style={style}
-                                                        onMouseEnter={() => setHoveredCol(6)}
-                                                        onMouseLeave={() => setHoveredCol(null)}
+                                                        onMouseEnter={handleColEnter}
                                                     >
                                                         {row.startTime}
                                                     </td>
@@ -664,17 +706,16 @@ const FichaFrequencia: React.FC = () => {
                                                 const { className, style } = getWeekStyle(7);
                                                 return (
                                                     <td
-                                                        className={`${cellBase} text-[10px] ${getColClass(7)} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass} ${className}`}
+                                                        className={`${cellBase} text-[10px] ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass} ${className}`}
                                                         style={style}
-                                                        onMouseEnter={() => setHoveredCol(7)}
-                                                        onMouseLeave={() => setHoveredCol(null)}
+                                                        onMouseEnter={handleColEnter}
                                                     >
                                                         {row.endTime}
                                                     </td>
                                                 );
                                             })()}
 
-                                            <td className={`${cellBase} ${getColClass(8)} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={() => setHoveredCol(8)} onMouseLeave={() => setHoveredCol(null)}>
+                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
                                                 <input
                                                     type="text"
                                                     className={`${inputBase} text-left px-1`}
@@ -684,7 +725,7 @@ const FichaFrequencia: React.FC = () => {
                                                     disabled={row.presence === 'F'}
                                                 />
                                             </td>
-                                            <td className={`${cellBase} ${getColClass(9)} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={() => setHoveredCol(9)} onMouseLeave={() => setHoveredCol(null)}>
+                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
                                                 <input
                                                     type="text"
                                                     className={`${inputBase} text-left px-1`}
@@ -696,17 +737,17 @@ const FichaFrequencia: React.FC = () => {
                                             </td>
 
                                             {/* Evaluations Inputs */}
-                                            <td className={`${cellBase} ${getColClass(10)} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={() => setHoveredCol(10)} onMouseLeave={() => setHoveredCol(null)}><input type="text" className={inputBase} value={row.evaluations.fala} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.fala', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
-                                            <td className={`${cellBase} ${getColClass(11)} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={() => setHoveredCol(11)} onMouseLeave={() => setHoveredCol(null)}><input type="text" className={inputBase} value={row.evaluations.audicao} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.audicao', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
-                                            <td className={`${cellBase} ${getColClass(12)} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={() => setHoveredCol(12)} onMouseLeave={() => setHoveredCol(null)}><input type="text" className={inputBase} value={row.evaluations.leitura} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.leitura', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
-                                            <td className={`${cellBase} ${getColClass(13)} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={() => setHoveredCol(13)} onMouseLeave={() => setHoveredCol(null)}><input type="text" className={inputBase} value={row.evaluations.escrita} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.escrita', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
-                                            <td className={`${cellBase} ${getColClass(14)} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={() => setHoveredCol(14)} onMouseLeave={() => setHoveredCol(null)}><input type="text" className={inputBase} value={row.evaluations.tarefa} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.tarefa', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
-                                            <td className={`${cellBase} ${getColClass(15)} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={() => setHoveredCol(15)} onMouseLeave={() => setHoveredCol(null)}><input type="text" className={inputBase} value={row.evaluations.situacaoTarefa} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.situacaoTarefa', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
-                                            <td className={`${cellBase} ${getColClass(16)} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={() => setHoveredCol(16)} onMouseLeave={() => setHoveredCol(null)}><input type="text" className={inputBase} value={row.evaluations.checkingSentences} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.checkingSentences', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
-                                            <td className={`${cellBase} ${getColClass(17)} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={() => setHoveredCol(17)} onMouseLeave={() => setHoveredCol(null)}><input type="text" className={inputBase} value={row.evaluations.app} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.app', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
-                                            <td className={`${cellBase} ${getColClass(18)} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={() => setHoveredCol(18)} onMouseLeave={() => setHoveredCol(null)}><input type="text" className={inputBase} value={row.evaluations.engajamento} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.engajamento', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
+                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}><input type="text" className={inputBase} value={row.evaluations.fala} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.fala', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
+                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}><input type="text" className={inputBase} value={row.evaluations.audicao} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.audicao', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
+                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}><input type="text" className={inputBase} value={row.evaluations.leitura} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.leitura', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
+                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}><input type="text" className={inputBase} value={row.evaluations.escrita} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.escrita', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
+                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}><input type="text" className={inputBase} value={row.evaluations.tarefa} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.tarefa', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
+                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}><input type="text" className={inputBase} value={row.evaluations.situacaoTarefa} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.situacaoTarefa', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
+                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}><input type="text" className={inputBase} value={row.evaluations.checkingSentences} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.checkingSentences', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
+                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}><input type="text" className={inputBase} value={row.evaluations.app} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.app', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
+                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}><input type="text" className={inputBase} value={row.evaluations.engajamento} onChange={(e) => handleUpdateRecord(row.id, 'evaluations.engajamento', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} /></td>
 
-                                            <td className={`${cellBase} ${getColClass(19)} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={() => setHoveredCol(19)} onMouseLeave={() => setHoveredCol(null)}>
+                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
                                                 <input
                                                     type="text"
                                                     className={inputBase}
@@ -716,7 +757,7 @@ const FichaFrequencia: React.FC = () => {
                                                     disabled={row.presence === 'F'}
                                                 />
                                             </td>
-                                            <td className={`${cellBase} text-[10px] ${getColClass(20)} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={() => setHoveredCol(20)} onMouseLeave={() => setHoveredCol(null)}>
+                                            <td className={`${cellBase} text-[10px] ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
                                                 {calculateDuration(row.startTime, row.endTime)}
                                             </td>
                                         </tr>
