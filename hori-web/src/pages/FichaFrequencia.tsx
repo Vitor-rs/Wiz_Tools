@@ -266,14 +266,15 @@ const FichaFrequencia: React.FC = () => {
     // Using border-separate model to fix sticky header jitter
     const cellBase = "p-1 border-r border-b border-gray-200 text-center text-xs h-8 align-middle text-gray-700 font-sans";
     const inputBase = "w-full h-full bg-transparent text-center focus:outline-none focus:bg-blue-50 text-gray-700 disabled:text-gray-400 disabled:cursor-not-allowed font-sans";
-    const headerBase = "p-[3px] border-r border-b border-gray-200 font-bold bg-white text-gray-800 text-xs uppercase tracking-wider align-middle font-sans";
-    const subHeaderBase = "p-[3px] border-r border-b border-gray-200 font-bold bg-gray-50 text-gray-600 text-xs uppercase tracking-wider align-middle font-sans";
+    const headerBase = "p-[3px] border-r border-b border-gray-200 font-bold bg-[#F9F5F0] text-gray-800 text-xs uppercase tracking-wider align-middle font-sans";
+    const subHeaderBase = "p-[3px] border-r border-b border-gray-200 font-bold bg-[#FFFDF6] text-gray-600 text-xs uppercase tracking-wider align-middle font-sans";
 
     // Hatched background for absent rows (Red stripes for light mode)
     const hatchedBg = "bg-[linear-gradient(45deg,rgba(255,0,0,0.05)_25%,transparent_25%,transparent_50%,rgba(255,0,0,0.05)_50%,rgba(255,0,0,0.05)_75%,transparent_75%,transparent)] bg-[length:8px_8px]";
 
     // Light Hatched background for empty "staircase" cells (Fine gray stripes, opposite direction)
-    const lightHatchedBg = "bg-[linear-gradient(-45deg,rgba(0,0,0,0.02)_25%,transparent_25%,transparent_50%,rgba(0,0,0,0.02)_50%,rgba(0,0,0,0.02)_75%,transparent_75%,transparent)] bg-[length:4px_4px]";
+    // Using Royal Blue (#3867d6) at 10% opacity: rgba(56, 103, 214, 0.10)
+    const lightHatchedBg = "bg-[linear-gradient(-45deg,rgba(56,103,214,0.1)_25%,transparent_25%,transparent_50%,rgba(56,103,214,0.1)_50%,rgba(56,103,214,0.1)_75%,transparent_75%,transparent)] bg-[length:4px_4px]";
 
     const getColClass = (index: number) => {
         return hoveredCol === index ? 'bg-blue-50' : '';
@@ -294,7 +295,7 @@ const FichaFrequencia: React.FC = () => {
                 <div className="flex flex-col flex-1 bg-white rounded-2xl overflow-hidden shadow-md border border-gray-200 relative">
 
                     {/* Top Controls */}
-                    <div className="bg-white p-4 border-b border-gray-200 flex items-center justify-between shadow-sm z-10">
+                    <div className="bg-[#F9F8F6] p-4 border-b border-gray-200 flex items-center justify-between shadow-sm z-10">
                         <div className="flex items-center gap-4">
                             <div className="flex flex-col">
                                 <label className="text-[10px] font-bold text-gray-500 uppercase">Aluno (a):</label>
@@ -394,7 +395,7 @@ const FichaFrequencia: React.FC = () => {
                                 {/* Sub Header Row */}
                                 <tr>
                                     {/* Datas Sub-columns */}
-                                    <th className={`${subHeaderBase.replace('bg-gray-50', 'bg-[#3867d6]/50 text-blue-900')} w-10 max-w-10`} onMouseEnter={() => setHoveredCol(0)} onMouseLeave={() => setHoveredCol(null)}>Mês</th>
+                                    <th className={`${subHeaderBase.replace('bg-[#FFFDF6]', 'bg-[#3867d6]/50 text-blue-900')} w-10 max-w-10`} onMouseEnter={() => setHoveredCol(0)} onMouseLeave={() => setHoveredCol(null)}>Mês</th>
                                     <th className={`${subHeaderBase} w-10 max-w-10`} onMouseEnter={() => setHoveredCol(1)} onMouseLeave={() => setHoveredCol(null)}>NS</th>
                                     <th className={`${subHeaderBase} w-10 max-w-10`} onMouseEnter={() => setHoveredCol(2)} onMouseLeave={() => setHoveredCol(null)}>DS</th>
                                     <th className={`${subHeaderBase} w-10 max-w-10`} onMouseEnter={() => setHoveredCol(3)} onMouseLeave={() => setHoveredCol(null)}>D/M</th>
