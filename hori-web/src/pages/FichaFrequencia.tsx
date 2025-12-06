@@ -343,11 +343,10 @@ const FichaFrequencia: React.FC = () => {
     const hatchedBg = "bg-[linear-gradient(45deg,rgba(255,0,0,0.05)_12.5%,transparent_12.5%,transparent_50%,rgba(255,0,0,0.05)_50%,rgba(255,0,0,0.05)_62.5%,transparent_62.5%,transparent)] bg-[length:6px_6px]";
     const lightHatchedBg = "bg-[linear-gradient(-45deg,rgba(56,103,214,0.1)_25%,transparent_25%,transparent_50%,rgba(56,103,214,0.1)_50%,rgba(56,103,214,0.1)_75%,transparent_75%,transparent)] bg-[length:4px_4px]";
 
-    // Dotted Textures for Week/Day Grouping
-    // Restored background color (blue-50/fuchsia-50) and increased dot visibility (solid color, no opacity)
-    // Pattern: 1px dot in 2x2 grid (25% density) - creates a "mesh" or "noise" look
-    const blueDottedBg = "bg-blue-50 bg-[url(\"data:image/svg+xml,%3Csvg width='2' height='2' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='1' height='1' fill='%2360a5fa'/%3E%3C/svg%3E\")]";
-    const pinkDottedBg = "bg-fuchsia-50 bg-[url(\"data:image/svg+xml,%3Csvg width='2' height='2' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='1' height='1' fill='%23e879f9'/%3E%3C/svg%3E\")]";
+    // Solid Backgrounds for Week/Day Grouping
+    // User requested solid color (approx 75% opacity feel) and bold text
+    const blueGroupBg = "bg-blue-200 font-bold";
+    const pinkGroupBg = "bg-fuchsia-200 font-bold";
 
     // --- Renderers for Evaluations ---
 
@@ -688,12 +687,12 @@ const FichaFrequencia: React.FC = () => {
 
                                         // 3. Week Column background
                                         if (isFirstOfWeek && colIndex === 1) {
-                                            classes += ` ${blueDottedBg}`;
+                                            classes += ` ${blueGroupBg}`;
                                         }
 
                                         // 4. Other Pink Highlights (Day Start background, internal borders)
                                         if (isMultiClassRow) {
-                                            if (isMultiClassDayStart && colIndex === 2) classes += ` ${pinkDottedBg}`;
+                                            if (isMultiClassDayStart && colIndex === 2) classes += ` ${pinkGroupBg}`;
 
                                             if (isMultiClassDayStart && (colIndex === 2 || colIndex === 3)) shadows.push(`inset 0 -1px 0 0 ${pink}`);
                                             if (isSameDateAsPrev && colIndex === 4) shadows.push(`inset 1px 0 0 0 ${pink}`);
