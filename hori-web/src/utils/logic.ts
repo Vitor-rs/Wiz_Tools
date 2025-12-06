@@ -21,5 +21,3 @@ export interface KPI {
   kpiFuture: number;
   percentage: string;
 }
-
-// --- LOGIC ---
