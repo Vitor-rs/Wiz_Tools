@@ -195,7 +195,7 @@ const CalendarHeader: React.FC<HeaderProps> = ({ year, onYearChange, onSearchDat
                             value={searchQuery}
                             onChange={handleSearchChange}
                             placeholder="Buscar (ex: 27/11, 01/05-05/05)"
-                            className="w-full md:w-64 focus:w-full md:focus:w-[32rem] pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 ease-out shadow-sm origin-right"
+                            className="w-full md:w-64 focus:w-full md:focus:w-lg pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 ease-out shadow-sm origin-right"
                         />
                     </div>
                     <button

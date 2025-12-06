@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, ArrowUp, AlertTriangle, User, ArrowLeft, ArrowRight } from 'lucide-react';
+import { FileText, ArrowUp, AlertTriangle, User, ArrowLeft, ArrowRight, Coffee } from 'lucide-react';
 import Header from '../layouts/Header';
 import PageContainer from '../layouts/PageContainer';
 
@@ -59,6 +59,21 @@ const calculateDuration = (start: string, end: string): string => {
         return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
     } catch {
         return '';
+    }
+};
+
+const calculateMinutesBetween = (start: string, end: string): number => {
+    if (!start || !end || start === 'x' || end === 'x') return 0;
+    try {
+        const [startH, startM] = start.split(':').map(Number);
+        const [endH, endM] = end.split(':').map(Number);
+
+        if (isNaN(startH) || isNaN(startM) || isNaN(endH) || isNaN(endM)) return 0;
+
+        const diff = (endH * 60 + endM) - (startH * 60 + startM);
+        return diff;
+    } catch {
+        return 0;
     }
 };
 
@@ -149,11 +164,11 @@ const FichaFrequencia: React.FC = () => {
             evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' }, teachers: ['Vitor']
         },
         {
-            id: '14', month: 'NOV', weekNumber: 3, dayOfWeek: '4ª', date: '12/11', fullDate: '2025-11-12', classNumber: 13, presence: 'P', isMakeup: true, startTime: '13:00', endTime: '14:00', content: '', notes: 'Reposição',
+            id: '14', month: 'NOV', weekNumber: 3, dayOfWeek: '4ª', date: '12/11', fullDate: '2025-11-12', classNumber: 13, presence: 'P', isMakeup: true, startTime: '13:00', endTime: '13:58', content: '', notes: 'Reposição',
             evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' }, teachers: ['Williams']
         },
         {
-            id: '15', month: 'NOV', weekNumber: 3, dayOfWeek: '4ª', date: '12/11', fullDate: '2025-11-12', classNumber: 14, presence: 'P', startTime: '14:00', endTime: '15:00', content: '', notes: '',
+            id: '15', month: 'NOV', weekNumber: 3, dayOfWeek: '4ª', date: '12/11', fullDate: '2025-11-12', classNumber: 14, presence: 'P', startTime: '14:06', endTime: '15:00', content: '', notes: '',
             evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' }, teachers: ['Vitor']
         },
         {
@@ -427,7 +442,7 @@ const FichaFrequencia: React.FC = () => {
                     const config = TEACHER_CONFIG[t] || { color: 'bg-gray-500', initials: '??' };
                     // Smaller pill: py-[1px] instead of py-0.5, text-[8.5px], reduced avatar
                     return (
-                        <div key={t} className={`${config.color} text-white rounded-full flex items-center gap-1 pr-1.5 py-[1px] shadow-sm`}>
+                        <div key={t} className={`${config.color} text-white rounded-full flex items-center gap-1 pr-1.5 py-px shadow-sm`}>
                             {/* Avatar Circle */}
                             <div className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center text-[7px] font-bold ml-0.5 uppercase">
                                 {config.initials}
@@ -625,21 +640,39 @@ const FichaFrequencia: React.FC = () => {
                                         const blue = '#60a5fa'; // blue-400
                                         const pink = '#e879f9'; // fuchsia-400
                                         let classes = "";
-                                        if (colIndex >= 1 && colIndex <= 7) {
-                                            if (isFirstOfWeek) {
-                                                if (colIndex === 1) classes += " bg-blue-50";
-                                                shadows.push(`inset 0 1px 0 0 ${blue}`);
-                                            }
+
+                                        // 1. Calculate possible Top Borders
+                                        const isPinkTopNeeded = isMultiClassRow && isMultiClassDayStart && colIndex >= 2 && colIndex <= 7 && !isNewMonth;
+                                        const isBlueTopNeeded = isFirstOfWeek && colIndex >= 1 && colIndex <= 7;
+
+                                        // 2. Apply Top Borders
+                                        if (isBlueTopNeeded && isPinkTopNeeded) {
+                                            // Blue on top (1px)
+                                            shadows.push(`inset 0 1px 0 0 ${blue}`);
+                                            // White Gap (1px) - rendered by covering 0-2px with white (under blue)
+                                            shadows.push(`inset 0 2px 0 0 white`);
+                                            // Pink below (1px) - rendered by covering 0-3px with pink (under white)
+                                            shadows.push(`inset 0 3px 0 0 ${pink}`);
+                                        } else if (isBlueTopNeeded) {
+                                            shadows.push(`inset 0 1px 0 0 ${blue}`);
+                                        } else if (isPinkTopNeeded) {
+                                            shadows.push(`inset 0 1px 0 0 ${pink}`);
                                         }
+
+                                        // 3. Week Column background
+                                        if (isFirstOfWeek && colIndex === 1) {
+                                            classes += " bg-blue-50";
+                                        }
+
+                                        // 4. Other Pink Highlights (Day Start background, internal borders)
                                         if (isMultiClassRow) {
                                             if (isMultiClassDayStart && colIndex === 2) classes += " bg-fuchsia-50";
-                                            if (isMultiClassDayStart && colIndex >= 2 && colIndex <= 7) {
-                                                if (!isFirstOfWeek && !isNewMonth) shadows.push(`inset 0 1px 0 0 ${pink}`);
-                                            }
+
                                             if (isMultiClassDayStart && (colIndex === 2 || colIndex === 3)) shadows.push(`inset 0 -1px 0 0 ${pink}`);
                                             if (isSameDateAsPrev && colIndex === 4) shadows.push(`inset 1px 0 0 0 ${pink}`);
                                             if (isMultiClassDayEnd && colIndex >= 4 && colIndex <= 7) shadows.push(`inset 0 -1px 0 0 ${pink}`);
                                         }
+
                                         return { className: classes, style: shadows.length > 0 ? { boxShadow: shadows.join(', ') } : {} };
                                     };
 
@@ -706,7 +739,21 @@ const FichaFrequencia: React.FC = () => {
                                             })()}
                                             {(() => {
                                                 const { className, style } = getWeekStyle(7);
-                                                return <td className={`${cellBase} text-[10px] ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass} ${className}`} style={style} onMouseEnter={handleColEnter}>{row.endTime}</td>;
+                                                const intervalMinutes = isMultiClassDayStart && nextRow ? calculateMinutesBetween(row.endTime, nextRow.startTime) : 0;
+
+                                                return (
+                                                    <td className={`${cellBase} text-[10px] ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass} ${className} relative`} style={style} onMouseEnter={handleColEnter}>
+                                                        {row.endTime}
+                                                        {intervalMinutes > 0 && (
+                                                            <div
+                                                                className="absolute z-50 flex items-center justify-center w-[22px] h-[22px] rounded-full bg-[#fdfbf7] border border-[#d6d3d1] shadow-sm group cursor-help transition-transform hover:scale-110 -translate-x-1/2 translate-y-1/2 left-0 bottom-0"
+                                                                title={`Intervalo: ${intervalMinutes} min`}
+                                                            >
+                                                                <Coffee size={11} className="text-[#854d0e]" strokeWidth={2.5} />
+                                                            </div>
+                                                        )}
+                                                    </td>
+                                                );
                                             })()}
 
                                             <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
@@ -768,8 +815,8 @@ const FichaFrequencia: React.FC = () => {
                         </button>
                     )}
                 </div>
-            </div>
-        </PageContainer>
+            </div >
+        </PageContainer >
     );
 };
 

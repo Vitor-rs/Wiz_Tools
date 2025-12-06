@@ -14,18 +14,18 @@ const Legend: React.FC<LegendProps> = ({
     onRecalculate,
 }) => {
     return (
-        <div className="p-2 bg-gray-50 border-b border-gray-200 flex flex-wrap gap-4 justify-between items-center text-xs flex-shrink-0 z-20">
+        <div className="p-2 bg-gray-50 border-b border-gray-200 flex flex-wrap gap-4 justify-between items-center text-xs shrink-0 z-20">
             <div className="flex flex-wrap gap-4 justify-center items-center">
                 {/* Smart Pills Legenda */}
                 <div className="flex items-center gap-1.5">
                     <span className="w-3 h-1 rounded-full bg-green-500"></span> Normal
                 </div>
                 <div className="flex items-center gap-1.5" title="Atraso (1-45min)">
-                    <span className="w-3 h-1 rounded-full bg-gradient-to-r from-orange-500 to-green-500"></span>{" "}
+                    <span className="w-3 h-1 rounded-full bg-linear-to-r from-orange-500 to-green-500"></span>{" "}
                     Atraso
                 </div>
                 <div className="flex items-center gap-1.5" title="Outro Horário">
-                    <span className="w-3 h-1 rounded-full bg-gradient-to-l from-pink-500 to-green-500"></span>{" "}
+                    <span className="w-3 h-1 rounded-full bg-linear-to-l from-pink-500 to-green-500"></span>{" "}
                     Horário Dif.
                 </div>
 
