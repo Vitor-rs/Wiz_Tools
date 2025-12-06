@@ -31,6 +31,8 @@ interface AttendanceRecord {
     };
     isMakeup?: boolean;
     teachers: string[];
+    isHoliday?: boolean;
+    holidayName?: string;
 }
 
 // --- Constants & Config ---
@@ -180,6 +182,10 @@ const FichaFrequencia: React.FC = () => {
             evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' }, teachers: ['Vitor']
         },
         {
+            id: 'holiday-1', month: 'NOV', weekNumber: 4, dayOfWeek: '5ª', date: '20/11', fullDate: '2025-11-20', classNumber: '', presence: 'X', startTime: '', endTime: '', content: '', notes: '',
+            evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' }, teachers: [], isHoliday: true, holidayName: 'CONSCIÊNCIA NEGRA'
+        },
+        {
             id: '18', month: 'NOV', weekNumber: 4, dayOfWeek: '6ª', date: '21/11', fullDate: '2025-11-21', classNumber: 15, presence: 'P', isMakeup: true, startTime: '13:00', endTime: '14:00', content: '', notes: 'Reposição',
             evaluations: { fala: '', audicao: '', leitura: '', escrita: '', tarefa: '', situacaoTarefa: '', checkingSentences: '', app: '', engajamento: '' }, teachers: ['Maria C.']
         },
@@ -197,8 +203,23 @@ const FichaFrequencia: React.FC = () => {
     const [inputClassNumber, setInputClassNumber] = useState<string>('');
     const [showScrollTop, setShowScrollTop] = useState(false);
     const tableContainerRef = React.useRef<HTMLDivElement>(null);
-    const rowHighlightRef = React.useRef<HTMLDivElement>(null);
-    const colHighlightRef = React.useRef<HTMLDivElement>(null);
+    
+    // Crosshair Refs (4 bars + 1 cell border)
+    const crosshairTopRef = React.useRef<HTMLDivElement>(null);
+    const crosshairBottomRef = React.useRef<HTMLDivElement>(null);
+    const crosshairLeftRef = React.useRef<HTMLDivElement>(null);
+    const crosshairRightRef = React.useRef<HTMLDivElement>(null);
+    const cellBorderRef = React.useRef<HTMLDivElement>(null);
+
+    const cellMetrics = React.useRef({
+        rowTop: 0,
+        rowHeight: 0,
+        rowWidth: 0,
+        colLeft: 0,
+        colWidth: 0,
+        tableHeight: 0,
+        monthColWidth: 0
+    });
 
     const handleScroll = () => {
         if (tableContainerRef.current) {
@@ -207,38 +228,90 @@ const FichaFrequencia: React.FC = () => {
         }
     };
 
+    const updateCrosshair = () => {
+        const { rowTop, rowHeight, rowWidth, colLeft, colWidth, tableHeight, monthColWidth } = cellMetrics.current;
+        
+        // Vertical Top
+        if (crosshairTopRef.current) {
+            crosshairTopRef.current.style.display = 'block';
+            crosshairTopRef.current.style.left = `${colLeft}px`;
+            crosshairTopRef.current.style.width = `${colWidth}px`;
+            crosshairTopRef.current.style.top = '0px';
+            crosshairTopRef.current.style.height = `${rowTop}px`;
+        }
+        // Vertical Bottom
+        if (crosshairBottomRef.current) {
+            crosshairBottomRef.current.style.display = 'block';
+            crosshairBottomRef.current.style.left = `${colLeft}px`;
+            crosshairBottomRef.current.style.width = `${colWidth}px`;
+            crosshairBottomRef.current.style.top = `${rowTop + rowHeight}px`;
+            crosshairBottomRef.current.style.height = `${Math.max(0, tableHeight - (rowTop + rowHeight))}px`;
+        }
+        // Horizontal Left
+        if (crosshairLeftRef.current) {
+            crosshairLeftRef.current.style.display = 'block';
+            crosshairLeftRef.current.style.top = `${rowTop}px`;
+            crosshairLeftRef.current.style.height = `${rowHeight}px`;
+            crosshairLeftRef.current.style.left = `${monthColWidth}px`;
+            crosshairLeftRef.current.style.width = `${Math.max(0, colLeft - monthColWidth)}px`;
+        }
+        // Horizontal Right
+        if (crosshairRightRef.current) {
+            crosshairRightRef.current.style.display = 'block';
+            crosshairRightRef.current.style.top = `${rowTop}px`;
+            crosshairRightRef.current.style.height = `${rowHeight}px`;
+            crosshairRightRef.current.style.left = `${colLeft + colWidth}px`;
+            crosshairRightRef.current.style.width = `${Math.max(0, rowWidth - (colLeft + colWidth))}px`;
+        }
+        // Cell Border
+        if (cellBorderRef.current) {
+            cellBorderRef.current.style.display = 'block';
+            cellBorderRef.current.style.top = `${rowTop}px`;
+            cellBorderRef.current.style.left = `${colLeft}px`;
+            cellBorderRef.current.style.width = `${colWidth}px`;
+            cellBorderRef.current.style.height = `${rowHeight}px`;
+        }
+    };
+
     const handleRowEnter = (e: React.MouseEvent<HTMLTableRowElement>) => {
-        if (rowHighlightRef.current && tableContainerRef.current) {
+        if (tableContainerRef.current) {
             const tr = e.currentTarget;
             const top = tr.offsetTop;
             const height = tr.offsetHeight;
             const width = tr.offsetWidth;
 
-            rowHighlightRef.current.style.display = 'block';
-            rowHighlightRef.current.style.top = `${top}px`;
-            rowHighlightRef.current.style.height = `${height}px`;
-            rowHighlightRef.current.style.width = `${width}px`;
+            // Exclude first column (Month) from crosshair
+            const firstCell = tr.firstElementChild as HTMLElement;
+            const leftOffset = firstCell ? firstCell.offsetWidth : 0;
+
+            cellMetrics.current.rowTop = top;
+            cellMetrics.current.rowHeight = height;
+            cellMetrics.current.rowWidth = width;
+            cellMetrics.current.monthColWidth = leftOffset;
+            
+            updateCrosshair();
         }
     };
 
     const handleColEnter = (e: React.MouseEvent<HTMLTableCellElement>) => {
-        if (colHighlightRef.current) {
+        if (tableContainerRef.current) {
             const td = e.currentTarget;
             const left = td.offsetLeft;
             const width = td.offsetWidth;
-            const tableHeight = tableContainerRef.current?.scrollHeight || 0;
+            const tableHeight = tableContainerRef.current.scrollHeight || 0;
 
-            colHighlightRef.current.style.display = 'block';
-            colHighlightRef.current.style.left = `${left}px`;
-            colHighlightRef.current.style.width = `${width}px`;
-            colHighlightRef.current.style.height = `${tableHeight}px`;
-            colHighlightRef.current.style.top = '0px';
+            cellMetrics.current.colLeft = left;
+            cellMetrics.current.colWidth = width;
+            cellMetrics.current.tableHeight = tableHeight;
+
+            updateCrosshair();
         }
     };
 
     const handleMouseLeave = () => {
-        if (rowHighlightRef.current) rowHighlightRef.current.style.display = 'none';
-        if (colHighlightRef.current) colHighlightRef.current.style.display = 'none';
+        [crosshairTopRef, crosshairBottomRef, crosshairLeftRef, crosshairRightRef, cellBorderRef].forEach(ref => {
+            if (ref.current) ref.current.style.display = 'none';
+        });
     };
 
     const scrollToTop = () => {
@@ -340,13 +413,18 @@ const FichaFrequencia: React.FC = () => {
     const inputBase = "w-full h-full bg-transparent text-center focus:outline-none focus:bg-blue-50 text-gray-700 disabled:text-gray-400 disabled:cursor-not-allowed font-sans";
     const headerBase = "p-[3px] border-r border-b border-gray-200 font-bold bg-[#F9F5F0] text-gray-800 text-xs uppercase tracking-wider align-middle font-sans";
     const subHeaderBase = "p-[3px] border-r border-b border-gray-200 font-bold bg-[#FFFDF6] text-gray-600 text-xs uppercase tracking-wider align-middle font-sans";
-    const hatchedBg = "bg-[linear-gradient(45deg,rgba(255,0,0,0.05)_12.5%,transparent_12.5%,transparent_50%,rgba(255,0,0,0.05)_50%,rgba(255,0,0,0.05)_62.5%,transparent_62.5%,transparent)] bg-[length:6px_6px]";
+    // Hatched Bg: Red (red-500) at 15% opacity (subtle but visible), tight spacing (4px)
+    const hatchedBg = "bg-[linear-gradient(45deg,rgba(239,68,68,0.15)_25%,transparent_25%,transparent_50%,rgba(239,68,68,0.15)_50%,rgba(239,68,68,0.15)_75%,transparent_75%,transparent)] bg-[length:4px_4px]";
     const lightHatchedBg = "bg-[linear-gradient(-45deg,rgba(56,103,214,0.1)_25%,transparent_25%,transparent_50%,rgba(56,103,214,0.1)_50%,rgba(56,103,214,0.1)_75%,transparent_75%,transparent)] bg-[length:4px_4px]";
 
     // Solid Backgrounds for Week/Day Grouping
     // User requested solid color (approx 75% opacity feel) and bold text
     const blueGroupBg = "bg-blue-200 font-bold";
     const pinkGroupBg = "bg-fuchsia-200 font-bold";
+
+    // Holiday Background: Horizontal lines (comb/persiana effect)
+    // 1px transparent, 1px gray-200 (matching table border)
+    const holidayBg = "bg-[repeating-linear-gradient(0deg,transparent,transparent_1px,#e5e7eb_1px,#e5e7eb_2px)]";
 
     // --- Renderers for Evaluations ---
 
@@ -369,7 +447,7 @@ const FichaFrequencia: React.FC = () => {
 
         return (
             <select
-                className={`w-full h-full text-center text-[10px] font-bold focus:outline-none appearance-none cursor-pointer hover:bg-gray-50 ${getBgColor(value)}`}
+                className={`w-full h-full text-center text-[10px] font-bold focus:outline-none appearance-none cursor-pointer hover:bg-gray-50 rounded-sm ${getBgColor(value)}`}
                 value={value}
                 onChange={(e) => handleUpdateRecord(record.id, `evaluations.${field}`, e.target.value)}
                 style={{ textAlignLast: 'center' }}
@@ -444,7 +522,7 @@ const FichaFrequencia: React.FC = () => {
 
         return (
             <select
-                className={`w-full h-full text-center text-[10px] font-bold focus:outline-none appearance-none cursor-pointer hover:bg-gray-50 ${getBgColor(record.evaluations.engajamento)}`}
+                className={`w-full h-full text-center text-[10px] font-bold focus:outline-none appearance-none cursor-pointer hover:bg-gray-50 rounded-sm ${getBgColor(record.evaluations.engajamento)}`}
                 value={record.evaluations.engajamento}
                 onChange={(e) => handleUpdateRecord(record.id, 'evaluations.engajamento', Number(e.target.value))}
                 style={{ textAlignLast: 'center' }}
@@ -568,16 +646,11 @@ const FichaFrequencia: React.FC = () => {
                         className="flex-1 overflow-auto bg-white custom-scrollbar relative t-0"
                     >
                         {/* Crosshair Overlays */}
-                        <div
-                            ref={rowHighlightRef}
-                            className="absolute pointer-events-none z-10 hidden border-t border-b border-gray-400 bg-gray-500/10"
-                            style={{ borderTopWidth: '0.5px', borderBottomWidth: '0.5px' }}
-                        />
-                        <div
-                            ref={colHighlightRef}
-                            className="absolute pointer-events-none z-10 hidden border-l border-r border-gray-400 bg-gray-500/10"
-                            style={{ borderLeftWidth: '0.5px', borderRightWidth: '0.5px' }}
-                        />
+                        <div ref={crosshairTopRef} className="absolute pointer-events-none z-10 hidden bg-gray-500/5" />
+                        <div ref={crosshairBottomRef} className="absolute pointer-events-none z-10 hidden bg-gray-500/5" />
+                        <div ref={crosshairLeftRef} className="absolute pointer-events-none z-10 hidden bg-gray-500/5" />
+                        <div ref={crosshairRightRef} className="absolute pointer-events-none z-10 hidden bg-gray-500/5" />
+                        <div ref={cellBorderRef} className="absolute pointer-events-none z-10 hidden border-2 border-gray-300" />
 
                         <table className="w-full text-sm border-separate border-spacing-0">
                             <thead className="sticky top-0 z-20 shadow-md bg-white">
@@ -702,6 +775,62 @@ const FichaFrequencia: React.FC = () => {
                                         return { className: classes, style: shadows.length > 0 ? { boxShadow: shadows.join(', ') } : {} };
                                     };
 
+                                    if (row.isHoliday) {
+                                        const holidayBorder = "border-t border-b border-gray-400";
+                                        return (
+                                            <tr key={row.id} className="transition-colors" onMouseEnter={handleRowEnter}>
+                                                {/* Month - No holiday border */}
+                                                <td className={`${cellBase.replace('border-b', '')} bg-[#3867d6]/30 font-bold text-blue-900 ${topBorderClass}`} onMouseEnter={handleColEnter}>
+                                                    {showMonth ? (row.month.charAt(0) + row.month.slice(1).toLowerCase()) : ''}
+                                                </td>
+                                                {/* Week - No holiday border */}
+                                                {(() => {
+                                                    const { className, style } = getWeekStyle(1);
+                                                    const isEmpty = !showWeek;
+                                                    const showGrayStripes = isEmpty;
+                                                    const removeRight = isEmpty && !showDate;
+                                                    const removeBottom = isEmpty && !nextRowIsNewWeek;
+                                                    const borderClass = isEmpty
+                                                        ? `${removeRight ? 'border-r-0' : ''} ${removeBottom ? 'border-b-0' : ''}`.trim()
+                                                        : '';
+                                                    return <td className={`${cellBase} ${topBorderClass} ${className} ${borderClass} ${showGrayStripes ? lightHatchedBg : ''}`} style={style} onMouseEnter={handleColEnter}>{showWeek ? row.weekNumber : ''}</td>;
+                                                })()}
+                                                {/* DS - Start of holiday border (add left border) */}
+                                                {(() => {
+                                                    const { className, style } = getWeekStyle(2);
+                                                    return <td className={`${cellBase} ${holidayBg} ${topBorderClass} ${className} border-r-0 ${holidayBorder} border-l border-l-gray-400 font-bold`} style={style} onMouseEnter={handleColEnter}>{row.dayOfWeek}</td>;
+                                                })()}
+                                                {/* Date */}
+                                                {(() => {
+                                                    const { className, style } = getWeekStyle(3);
+                                                    return <td className={`${cellBase} ${holidayBg} ${topBorderClass} ${className} border-r-0 ${holidayBorder} font-bold`} style={style} onMouseEnter={handleColEnter}>{row.date}</td>;
+                                                })()}
+                                                
+                                                {/* Empty Columns (Aula, Presence, Start, End) */}
+                                                <td className={`${cellBase} ${holidayBg} ${topBorderClass} border-r-0 ${holidayBorder}`} onMouseEnter={handleColEnter}></td>
+                                                <td className={`${cellBase} ${holidayBg} ${topBorderClass} border-r-0 ${holidayBorder}`} onMouseEnter={handleColEnter}></td>
+                                                <td className={`${cellBase} ${holidayBg} ${topBorderClass} border-r-0 ${holidayBorder}`} onMouseEnter={handleColEnter}></td>
+                                                <td className={`${cellBase} ${holidayBg} ${topBorderClass} border-r-0 ${holidayBorder}`} onMouseEnter={handleColEnter}></td>
+
+                                                {/* Merged Content/Notes */}
+                                                <td colSpan={2} className={`${cellBase} ${holidayBg} ${topBorderClass} border-r-0 ${holidayBorder} text-center font-bold text-gray-500 uppercase tracking-widest`} onMouseEnter={handleColEnter}>
+                                                    FERIADO NACIONAL: {row.holidayName}
+                                                </td>
+
+                                                {/* Empty Evaluations (9 cols) */}
+                                                {Array.from({ length: 9 }).map((_, i) => (
+                                                    <td key={i} className={`${cellBase} ${holidayBg} ${topBorderClass} border-r-0 ${holidayBorder}`} onMouseEnter={handleColEnter}></td>
+                                                ))}
+
+                                                {/* Teacher */}
+                                                <td className={`${cellBase} ${holidayBg} ${topBorderClass} border-r-0 ${holidayBorder}`} onMouseEnter={handleColEnter}></td>
+                                                
+                                                {/* Duration - End of holiday border (add right border) */}
+                                                <td className={`${cellBase} ${holidayBg} ${topBorderClass} ${holidayBorder} border-r border-r-gray-400`} onMouseEnter={handleColEnter}></td>
+                                            </tr>
+                                        );
+                                    }
+
                                     return (
                                         <tr key={row.id} className="transition-colors" onMouseEnter={handleRowEnter}>
                                             <td className={`${cellBase.replace('border-b', '')} bg-[#3867d6]/30 font-bold text-blue-900 ${topBorderClass}`} onMouseEnter={handleColEnter}>
@@ -710,7 +839,7 @@ const FichaFrequencia: React.FC = () => {
                                             {(() => {
                                                 const { className, style } = getWeekStyle(1);
                                                 const isEmpty = !showWeek;
-                                                const showGrayStripes = isEmpty && row.presence !== 'F';
+                                                const showGrayStripes = isEmpty;
                                                 const removeRight = isEmpty && !showDate;
                                                 const removeBottom = isEmpty && !nextRowIsNewWeek;
                                                 const borderClass = isEmpty
@@ -790,19 +919,19 @@ const FichaFrequencia: React.FC = () => {
                                             </td>
 
                                             {/* EVALUATIONS */}
-                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
+                                            <td className={`${cellBase.replace('p-1', 'p-0.5')} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
                                                 {renderEvaluationSelect(row, 'fala', row.evaluations.fala)}
                                             </td>
-                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
+                                            <td className={`${cellBase.replace('p-1', 'p-0.5')} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
                                                 {renderEvaluationSelect(row, 'audicao', row.evaluations.audicao)}
                                             </td>
-                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
+                                            <td className={`${cellBase.replace('p-1', 'p-0.5')} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
                                                 {renderEvaluationSelect(row, 'leitura', row.evaluations.leitura)}
                                             </td>
-                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
+                                            <td className={`${cellBase.replace('p-1', 'p-0.5')} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
                                                 {renderEvaluationSelect(row, 'escrita', row.evaluations.escrita)}
                                             </td>
-                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
+                                            <td className={`${cellBase.replace('p-1', 'p-0.5')} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
                                                 {renderEvaluationSelect(row, 'tarefa', row.evaluations.tarefa)}
                                             </td>
                                             <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
@@ -814,7 +943,7 @@ const FichaFrequencia: React.FC = () => {
                                             <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
                                                 {renderCheckAlert(row, 'app')}
                                             </td>
-                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
+                                            <td className={`${cellBase.replace('p-1', 'p-0.5')} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
                                                 {renderEngagement(row)}
                                             </td>
 
