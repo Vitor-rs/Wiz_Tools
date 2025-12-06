@@ -340,7 +340,7 @@ const FichaFrequencia: React.FC = () => {
     const inputBase = "w-full h-full bg-transparent text-center focus:outline-none focus:bg-blue-50 text-gray-700 disabled:text-gray-400 disabled:cursor-not-allowed font-sans";
     const headerBase = "p-[3px] border-r border-b border-gray-200 font-bold bg-[#F9F5F0] text-gray-800 text-xs uppercase tracking-wider align-middle font-sans";
     const subHeaderBase = "p-[3px] border-r border-b border-gray-200 font-bold bg-[#FFFDF6] text-gray-600 text-xs uppercase tracking-wider align-middle font-sans";
-    const hatchedBg = "bg-[linear-gradient(45deg,rgba(255,0,0,0.05)_25%,transparent_25%,transparent_50%,rgba(255,0,0,0.05)_50%,rgba(255,0,0,0.05)_75%,transparent_75%,transparent)] bg-[length:8px_8px]";
+    const hatchedBg = "bg-[linear-gradient(45deg,rgba(255,0,0,0.05)_12.5%,transparent_12.5%,transparent_50%,rgba(255,0,0,0.05)_50%,rgba(255,0,0,0.05)_62.5%,transparent_62.5%,transparent)] bg-[length:6px_6px]";
     const lightHatchedBg = "bg-[linear-gradient(-45deg,rgba(56,103,214,0.1)_25%,transparent_25%,transparent_50%,rgba(56,103,214,0.1)_50%,rgba(56,103,214,0.1)_75%,transparent_75%,transparent)] bg-[length:4px_4px]";
 
     // --- Renderers for Evaluations ---
@@ -352,9 +352,19 @@ const FichaFrequencia: React.FC = () => {
     ) => {
         if (record.presence === 'F') return null;
 
+        const getBgColor = (val: string) => {
+            switch (val) {
+                case 'R': return 'bg-red-200/70 text-red-900';
+                case 'B': return 'bg-yellow-200/70 text-yellow-900';
+                case 'MB': return 'bg-blue-200/70 text-blue-900';
+                case 'Ó': return 'bg-green-200/70 text-green-900';
+                default: return 'bg-transparent';
+            }
+        };
+
         return (
             <select
-                className="w-full h-full bg-transparent text-center text-[10px] font-bold focus:outline-none appearance-none cursor-pointer hover:bg-gray-50"
+                className={`w-full h-full text-center text-[10px] font-bold focus:outline-none appearance-none cursor-pointer hover:bg-gray-50 ${getBgColor(value)}`}
                 value={value}
                 onChange={(e) => handleUpdateRecord(record.id, `evaluations.${field}`, e.target.value)}
                 style={{ textAlignLast: 'center' }}
@@ -415,15 +425,26 @@ const FichaFrequencia: React.FC = () => {
     const renderEngagement = (record: AttendanceRecord) => {
         if (record.presence === 'F') return null;
 
+        const getBgColor = (val: number | string) => {
+            const v = Number(val);
+            switch (v) {
+                case 1: return 'bg-gray-600/70 text-white';
+                case 2: return 'bg-red-200/70 text-red-900';
+                case 3: return 'bg-yellow-200/70 text-yellow-900';
+                case 4: return 'bg-blue-200/70 text-blue-900';
+                case 5: return 'bg-green-200/70 text-green-900';
+                default: return 'bg-transparent';
+            }
+        };
+
         return (
             <select
-                className="w-full h-full bg-transparent text-center text-[10px] font-bold focus:outline-none appearance-none cursor-pointer text-gray-700 hover:bg-gray-50"
+                className={`w-full h-full text-center text-[10px] font-bold focus:outline-none appearance-none cursor-pointer hover:bg-gray-50 ${getBgColor(record.evaluations.engajamento)}`}
                 value={record.evaluations.engajamento}
                 onChange={(e) => handleUpdateRecord(record.id, 'evaluations.engajamento', Number(e.target.value))}
                 style={{ textAlignLast: 'center' }}
             >
                 <option value=""></option>
-                <option value="0">0</option>
                 <option value="1">1</option>
                 <option value="2">2</option>
                 <option value="3">3</option>
@@ -690,7 +711,7 @@ const FichaFrequencia: React.FC = () => {
                                                 const borderClass = isEmpty
                                                     ? `${removeRight ? 'border-r-0' : ''} ${removeBottom ? 'border-b-0' : ''}`.trim()
                                                     : '';
-                                                return <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass} ${className} ${borderClass} ${showGrayStripes ? lightHatchedBg : ''}`} style={style} onMouseEnter={handleColEnter}>{showWeek ? row.weekNumber : ''}</td>;
+                                                return <td className={`${cellBase} ${topBorderClass} ${className} ${borderClass} ${showGrayStripes ? lightHatchedBg : ''}`} style={style} onMouseEnter={handleColEnter}>{showWeek ? row.weekNumber : ''}</td>;
                                             })()}
                                             {(() => {
                                                 const { className, style } = getWeekStyle(2);
