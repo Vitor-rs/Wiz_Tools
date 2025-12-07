@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, ArrowUp, AlertTriangle, User, ArrowLeft, ArrowRight, Coffee, Clock } from 'lucide-react';
+import { FileText, ArrowUp, AlertTriangle, User, ArrowLeft, ArrowRight, Coffee, Clock, ChevronDown, ChevronUp, Calendar } from 'lucide-react';
 import Header from '../layouts/Header';
 import PageContainer from '../layouts/PageContainer';
 
@@ -202,6 +202,8 @@ const FichaFrequencia: React.FC = () => {
     const [inputDate, setInputDate] = useState<string>(getFullDate(new Date()));
     const [inputClassNumber, setInputClassNumber] = useState<string>('');
     const [showScrollTop, setShowScrollTop] = useState(false);
+    const [isControlPanelOpen, setIsControlPanelOpen] = useState(true);
+    const [highlightedRowId, setHighlightedRowId] = useState<string | null>(null);
     const tableContainerRef = React.useRef<HTMLDivElement>(null);
     
     // Crosshair Refs (4 bars + 1 cell border)
@@ -227,6 +229,26 @@ const FichaFrequencia: React.FC = () => {
             setShowScrollTop(scrollTop > 300);
         }
     };
+
+    // Clear highlight on click outside or after 3 seconds
+    React.useEffect(() => {
+        if (!highlightedRowId) return;
+
+        // Auto-clear after 3 seconds
+        const timer = setTimeout(() => {
+            setHighlightedRowId(null);
+        }, 3000);
+
+        const handleClickOutside = () => {
+            setHighlightedRowId(null);
+        };
+
+        document.addEventListener('click', handleClickOutside);
+        return () => {
+            clearTimeout(timer);
+            document.removeEventListener('click', handleClickOutside);
+        };
+    }, [highlightedRowId]);
 
     const updateCrosshair = () => {
         const { rowTop, rowHeight, rowWidth, colLeft, colWidth, tableHeight, monthColWidth } = cellMetrics.current;
@@ -408,6 +430,13 @@ const FichaFrequencia: React.FC = () => {
         setRecords(updatedRecords);
     };
 
+    const findOriginalDate = (classNumber: number | '') => {
+        if (!classNumber) return null;
+        // Find a record with same class number but presence 'F'
+        // We search backwards or just find the first one that is 'F'
+        return records.find(r => r.classNumber === classNumber && r.presence === 'F');
+    };
+
     // --- Styling Constants ---
     const cellBase = "p-1 border-r border-b border-gray-200 text-center text-xs h-8 align-middle text-gray-700 font-sans relative";
     const inputBase = "w-full h-full bg-transparent text-center focus:outline-none focus:bg-blue-50 text-gray-700 disabled:text-gray-400 disabled:cursor-not-allowed font-sans";
@@ -572,68 +601,83 @@ const FichaFrequencia: React.FC = () => {
             <div className="flex-1 p-2.5 overflow-hidden font-sans flex flex-col">
                 <div className="flex flex-col flex-1 bg-white rounded-2xl overflow-hidden shadow-md border border-gray-200 relative">
 
-                    {/* Top Controls */}
-                    <div className="bg-[#F9F8F6] p-4 border-b border-gray-200 flex items-center justify-between shadow-sm z-10">
-                        <div className="flex items-center gap-4">
-                            <div className="flex flex-col">
-                                <label className="text-[10px] font-bold text-gray-500 uppercase">Aluno (a):</label>
-                                <select
-                                    className="bg-white border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-700 w-64 focus:ring-1 focus:ring-blue-500 outline-none"
-                                    value={selectedStudent}
-                                    onChange={(e) => setSelectedStudent(e.target.value)}
-                                >
-                                    <option value="Vitor">Vitor</option>
-                                    <option value="Joao">João</option>
-                                    <option value="Maria">Maria</option>
-                                </select>
+                    {/* Top Controls Accordion */}
+                    <div className="border-b border-gray-200 bg-[#F9F8F6] z-10 shadow-sm">
+                        <button 
+                            onClick={() => setIsControlPanelOpen(!isControlPanelOpen)}
+                            className="w-full flex items-center justify-between px-4 py-2 bg-gray-50 hover:bg-gray-100 transition-colors text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-200"
+                        >
+                            <div className="flex items-center gap-2">
+                                <Calendar size={14} />
+                                <span>Controles de Frequência</span>
                             </div>
+                            {isControlPanelOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                        </button>
 
-                            <div className="flex flex-col">
-                                <label className="text-[10px] font-bold text-gray-500 uppercase">Data:</label>
-                                <input
-                                    type="date"
-                                    className="bg-white border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-700 focus:ring-1 focus:ring-blue-500 outline-none"
-                                    value={inputDate}
-                                    onChange={(e) => setInputDate(e.target.value)}
-                                />
-                            </div>
+                        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isControlPanelOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
+                            <div className="p-4 flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <div className="flex flex-col">
+                                        <label className="text-[10px] font-bold text-gray-500 uppercase">Aluno (a):</label>
+                                        <select
+                                            className="bg-white border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-700 w-64 focus:ring-1 focus:ring-blue-500 outline-none"
+                                            value={selectedStudent}
+                                            onChange={(e) => setSelectedStudent(e.target.value)}
+                                        >
+                                            <option value="Vitor">Vitor</option>
+                                            <option value="Joao">João</option>
+                                            <option value="Maria">Maria</option>
+                                        </select>
+                                    </div>
 
-                            <div className="flex flex-col">
-                                <label className="text-[10px] font-bold text-gray-500 uppercase">Aula:</label>
-                                <input
-                                    type="number"
-                                    className="bg-white border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-700 w-20 focus:ring-1 focus:ring-blue-500 outline-none"
-                                    value={inputClassNumber}
-                                    onChange={(e) => setInputClassNumber(e.target.value)}
-                                    placeholder="#"
-                                />
-                            </div>
-                        </div>
+                                    <div className="flex flex-col">
+                                        <label className="text-[10px] font-bold text-gray-500 uppercase">Data:</label>
+                                        <input
+                                            type="date"
+                                            className="bg-white border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-700 focus:ring-1 focus:ring-blue-500 outline-none"
+                                            value={inputDate}
+                                            onChange={(e) => setInputDate(e.target.value)}
+                                        />
+                                    </div>
 
-                        <div className="flex items-center gap-4">
-                            <div className="flex items-end gap-2">
-                                <button
-                                    onClick={handleLaunchPresence}
-                                    disabled={!inputClassNumber}
-                                    className="bg-green-600 hover:bg-green-500 disabled:bg-green-600/50 disabled:cursor-not-allowed text-white px-4 py-1.5 rounded text-sm font-bold transition-colors shadow-sm"
-                                >
-                                    Veio
-                                </button>
-                                <button
-                                    onClick={handleAbsent}
-                                    disabled={!inputClassNumber}
-                                    className="bg-red-600 hover:bg-red-500 disabled:bg-red-600/50 disabled:cursor-not-allowed text-white px-4 py-1.5 rounded text-sm font-bold transition-colors shadow-sm"
-                                >
-                                    Faltou
-                                </button>
-                                <button onClick={handleExitPresence} className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-1.5 rounded text-sm font-bold transition-colors border border-slate-600 ml-2">Saída</button>
-                            </div>
+                                    <div className="flex flex-col">
+                                        <label className="text-[10px] font-bold text-gray-500 uppercase">Aula:</label>
+                                        <input
+                                            type="number"
+                                            className="bg-white border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-700 w-20 focus:ring-1 focus:ring-blue-500 outline-none"
+                                            value={inputClassNumber}
+                                            onChange={(e) => setInputClassNumber(e.target.value)}
+                                            placeholder="#"
+                                        />
+                                    </div>
+                                </div>
 
-                            <div className="flex flex-col items-end text-xs text-gray-500 ml-4 border-l border-gray-200 pl-4 bg-white">
-                                <div>Professor(a): <span className="font-bold text-gray-800">Vitor</span></div>
-                                <div>Livro/Estágio: <span className="font-bold text-gray-800">NEXT GENERATION</span></div>
-                                <div>Idioma: <span className="font-bold text-gray-800">ENGLISH</span></div>
-                                <div className="flex items-center gap-1">Situação: <span className="bg-green-600 text-white px-1 rounded text-[10px] font-bold">ATIVO</span></div>
+                                <div className="flex items-center gap-4">
+                                    <div className="flex items-end gap-2">
+                                        <button
+                                            onClick={handleLaunchPresence}
+                                            disabled={!inputClassNumber}
+                                            className="bg-green-600 hover:bg-green-500 disabled:bg-green-600/50 disabled:cursor-not-allowed text-white px-4 py-1.5 rounded text-sm font-bold transition-colors shadow-sm"
+                                        >
+                                            Veio
+                                        </button>
+                                        <button
+                                            onClick={handleAbsent}
+                                            disabled={!inputClassNumber}
+                                            className="bg-red-600 hover:bg-red-500 disabled:bg-red-600/50 disabled:cursor-not-allowed text-white px-4 py-1.5 rounded text-sm font-bold transition-colors shadow-sm"
+                                        >
+                                            Faltou
+                                        </button>
+                                        <button onClick={handleExitPresence} className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-1.5 rounded text-sm font-bold transition-colors border border-slate-600 ml-2">Saída</button>
+                                    </div>
+
+                                    <div className="flex flex-col items-end text-xs text-gray-500 ml-4 border-l border-gray-200 pl-4 bg-white">
+                                        <div>Professor(a): <span className="font-bold text-gray-800">Vitor</span></div>
+                                        <div>Livro/Estágio: <span className="font-bold text-gray-800">NEXT GENERATION</span></div>
+                                        <div>Idioma: <span className="font-bold text-gray-800">ENGLISH</span></div>
+                                        <div className="flex items-center gap-1">Situação: <span className="bg-green-600 text-white px-1 rounded text-[10px] font-bold">ATIVO</span></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -733,6 +777,7 @@ const FichaFrequencia: React.FC = () => {
                                     const showDate = !prevRow || row.date !== prevRow.date;
                                     const nextRowIsNewWeek = nextRow && (nextRow.weekNumber !== row.weekNumber || nextRow.month !== row.month);
                                     const nextRowIsNewDate = nextRow && (nextRow.date !== row.date);
+                                    const isHighlighted = highlightedRowId === row.id;
 
                                     const getWeekStyle = (colIndex: number) => {
                                         const shadows: string[] = [];
@@ -772,7 +817,36 @@ const FichaFrequencia: React.FC = () => {
                                             if (isMultiClassDayEnd && colIndex >= 4 && colIndex <= 7) shadows.push(`inset 0 -1px 0 0 ${pink}`);
                                         }
 
+                                        // 5. Highlighted Row Logic (Blinking Border)
+                                        if (isHighlighted) {
+                                            // Apply thick border to the whole row range (Week to Duration)
+                                            // We simulate this with inset box-shadow to avoid layout shifts
+                                            // Top
+                                            shadows.push(`inset 0 4px 0 0 rgba(249, 115, 22, 0.65)`);
+                                            // Bottom
+                                            shadows.push(`inset 0 -4px 0 0 rgba(249, 115, 22, 0.65)`);
+                                            
+                                            // Left (only for Week column)
+                                            if (colIndex === 1) shadows.push(`inset 4px 0 0 0 rgba(249, 115, 22, 0.65)`);
+                                            // Right (only for Duration column)
+                                            if (colIndex === 20) shadows.push(`inset -4px 0 0 0 rgba(249, 115, 22, 0.65)`);
+                                        }
+
                                         return { className: classes, style: shadows.length > 0 ? { boxShadow: shadows.join(', ') } : {} };
+                                    };
+
+                                    // Helper to apply highlight to columns that don't use getWeekStyle
+                                    const getHighlightStyle = (colIndex: number) => {
+                                        if (!isHighlighted) return {};
+                                        const shadows: string[] = [];
+                                        // Top
+                                        shadows.push(`inset 0 4px 0 0 rgba(249, 115, 22, 0.65)`);
+                                        // Bottom
+                                        shadows.push(`inset 0 -4px 0 0 rgba(249, 115, 22, 0.65)`);
+                                        // Right (only for Duration column)
+                                        if (colIndex === 20) shadows.push(`inset -4px 0 0 0 rgba(249, 115, 22, 0.65)`);
+                                        
+                                        return { boxShadow: shadows.join(', ') };
                                     };
 
                                     if (row.isHoliday) {
@@ -867,7 +941,47 @@ const FichaFrequencia: React.FC = () => {
                                                 const borderClass = isEmpty
                                                     ? `${removeRight ? 'border-r-0' : ''} ${removeBottom ? 'border-b-0' : ''}`.trim()
                                                     : '';
-                                                return <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass} ${className} ${borderClass} ${showGrayStripes ? lightHatchedBg : ''}`} style={style} onMouseEnter={handleColEnter}>{showDate ? row.date : ''}</td>;
+                                                
+                                                // Planned Date Logic
+                                                const originalRecord = row.isMakeup ? findOriginalDate(row.classNumber) : null;
+                                                const isPlannedDate = !!originalRecord;
+                                                const isPillActive = isPlannedDate && originalRecord?.id === highlightedRowId;
+
+                                                return (
+                                                    <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass} ${className} ${borderClass} ${showGrayStripes ? lightHatchedBg : ''}`} style={style} onMouseEnter={handleColEnter}>
+                                                        {showDate ? (
+                                                            <div className="relative inline-block">
+                                                                {isPlannedDate ? (
+                                                                    <div 
+                                                                        className={`group relative inline-flex items-center justify-center border rounded-full px-1 mx-0 cursor-help transition-all duration-300 ${
+                                                                            isPillActive 
+                                                                                ? 'border-orange-500 ring-1 ring-orange-500 shadow-[0_0_5px_rgba(249,115,22,0.6)] animate-pulse' 
+                                                                                : 'border-gray-400/50'
+                                                                        }`}
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            if (originalRecord) {
+                                                                                setHighlightedRowId(originalRecord.id);
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        <span className={isHighlighted ? 'font-bold text-orange-600 animate-pulse' : ''}>{row.date}</span>
+                                                                        
+                                                                        {/* Tooltip for Planned Date */}
+                                                                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:flex flex-col items-center bg-slate-800 text-white text-[10px] py-1 px-2 rounded shadow-xl whitespace-nowrap z-50">
+                                                                            <span className="font-bold text-slate-300 text-[9px] uppercase">Data Planejada</span>
+                                                                            <span className="font-semibold text-white">{originalRecord?.date}</span>
+                                                                            {/* Arrow */}
+                                                                            <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px border-4 border-transparent border-t-slate-800"></div>
+                                                                        </div>
+                                                                    </div>
+                                                                ) : (
+                                                                    <span className={isHighlighted ? 'font-bold text-orange-600 animate-pulse' : ''}>{row.date}</span>
+                                                                )}
+                                                            </div>
+                                                        ) : ''}
+                                                    </td>
+                                                );
                                             })()}
                                             {(() => {
                                                 const { className, style } = getWeekStyle(4);
@@ -923,46 +1037,46 @@ const FichaFrequencia: React.FC = () => {
                                                 );
                                             })()}
 
-                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
+                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} style={getHighlightStyle(8)} onMouseEnter={handleColEnter}>
                                                 <input type="text" className={`${inputBase} text-left px-1`} value={row.content} onChange={(e) => handleUpdateRecord(row.id, 'content', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} />
                                             </td>
-                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
+                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} style={getHighlightStyle(9)} onMouseEnter={handleColEnter}>
                                                 <input type="text" className={`${inputBase} text-left px-1`} value={row.notes} onChange={(e) => handleUpdateRecord(row.id, 'notes', e.target.value)} readOnly={row.presence === 'F'} disabled={row.presence === 'F'} />
                                             </td>
 
                                             {/* EVALUATIONS */}
-                                            <td className={`${cellBase.replace('p-1', 'p-0.5')} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
+                                            <td className={`${cellBase.replace('p-1', 'p-0.5')} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} style={getHighlightStyle(10)} onMouseEnter={handleColEnter}>
                                                 {renderEvaluationSelect(row, 'fala', row.evaluations.fala)}
                                             </td>
-                                            <td className={`${cellBase.replace('p-1', 'p-0.5')} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
+                                            <td className={`${cellBase.replace('p-1', 'p-0.5')} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} style={getHighlightStyle(11)} onMouseEnter={handleColEnter}>
                                                 {renderEvaluationSelect(row, 'audicao', row.evaluations.audicao)}
                                             </td>
-                                            <td className={`${cellBase.replace('p-1', 'p-0.5')} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
+                                            <td className={`${cellBase.replace('p-1', 'p-0.5')} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} style={getHighlightStyle(12)} onMouseEnter={handleColEnter}>
                                                 {renderEvaluationSelect(row, 'leitura', row.evaluations.leitura)}
                                             </td>
-                                            <td className={`${cellBase.replace('p-1', 'p-0.5')} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
+                                            <td className={`${cellBase.replace('p-1', 'p-0.5')} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} style={getHighlightStyle(13)} onMouseEnter={handleColEnter}>
                                                 {renderEvaluationSelect(row, 'escrita', row.evaluations.escrita)}
                                             </td>
-                                            <td className={`${cellBase.replace('p-1', 'p-0.5')} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
+                                            <td className={`${cellBase.replace('p-1', 'p-0.5')} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} style={getHighlightStyle(14)} onMouseEnter={handleColEnter}>
                                                 {renderEvaluationSelect(row, 'tarefa', row.evaluations.tarefa)}
                                             </td>
-                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
+                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} style={getHighlightStyle(15)} onMouseEnter={handleColEnter}>
                                                 {renderTaskStatus(row)}
                                             </td>
-                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
+                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} style={getHighlightStyle(16)} onMouseEnter={handleColEnter}>
                                                 {renderCheckAlert(row, 'checkingSentences')}
                                             </td>
-                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
+                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} style={getHighlightStyle(17)} onMouseEnter={handleColEnter}>
                                                 {renderCheckAlert(row, 'app')}
                                             </td>
-                                            <td className={`${cellBase.replace('p-1', 'p-0.5')} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
+                                            <td className={`${cellBase.replace('p-1', 'p-0.5')} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} style={getHighlightStyle(18)} onMouseEnter={handleColEnter}>
                                                 {renderEngagement(row)}
                                             </td>
 
-                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
+                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} style={getHighlightStyle(19)} onMouseEnter={handleColEnter}>
                                                 {renderTeachers(row)}
                                             </td>
-                                            <td className={`${cellBase} text-[10px] ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass} relative`} onMouseEnter={handleColEnter}>
+                                            <td className={`${cellBase} text-[10px] ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass} relative`} style={getHighlightStyle(20)} onMouseEnter={handleColEnter}>
                                                 {calculateDuration(row.startTime, row.endTime)}
                                                 {(() => {
                                                     const prevPrevRow = records[index - 2];
