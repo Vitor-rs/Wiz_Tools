@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, ArrowUp, AlertTriangle, User, ArrowLeft, ArrowRight, Coffee } from 'lucide-react';
+import { FileText, ArrowUp, AlertTriangle, User, ArrowLeft, ArrowRight, Coffee, Clock } from 'lucide-react';
 import Header from '../layouts/Header';
 import PageContainer from '../layouts/PageContainer';
 
@@ -902,9 +902,21 @@ const FichaFrequencia: React.FC = () => {
                                                         {intervalMinutes > 0 && (
                                                             <div
                                                                 className="absolute z-50 flex items-center justify-center w-[22px] h-[22px] rounded-full bg-[#fdfbf7] border border-[#d6d3d1] shadow-sm group cursor-help transition-transform hover:scale-110 -translate-x-1/2 translate-y-1/2 left-0 bottom-0"
-                                                                title={`Intervalo: ${intervalMinutes} min`}
                                                             >
                                                                 <Coffee size={11} className="text-[#854d0e]" strokeWidth={2.5} />
+                                                                
+                                                                {/* Custom Tooltip */}
+                                                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:flex flex-col items-center bg-slate-800 text-white text-[10px] py-1.5 px-3 rounded-md shadow-xl whitespace-nowrap z-[60] opacity-0 group-hover:opacity-100 transition-all duration-200 ease-out transform translate-y-1 group-hover:translate-y-0 pointer-events-none">
+                                                                    <span className="font-bold text-slate-400 text-[9px] uppercase tracking-wider mb-0.5">Intervalo</span>
+                                                                    <div className="flex items-center gap-1.5">
+                                                                        <span className="font-semibold text-white">{row.endTime}</span>
+                                                                        <ArrowRight size={10} className="text-slate-400" strokeWidth={2.5} />
+                                                                        <span className="font-semibold text-white">{nextRow?.startTime}</span>
+                                                                        <span className="text-amber-400 font-bold ml-1">({intervalMinutes} min)</span>
+                                                                    </div>
+                                                                    {/* Arrow Tip */}
+                                                                    <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-[1px] border-4 border-transparent border-t-slate-800"></div>
+                                                                </div>
                                                             </div>
                                                         )}
                                                     </td>
@@ -950,8 +962,50 @@ const FichaFrequencia: React.FC = () => {
                                             <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
                                                 {renderTeachers(row)}
                                             </td>
-                                            <td className={`${cellBase} text-[10px] ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} onMouseEnter={handleColEnter}>
+                                            <td className={`${cellBase} text-[10px] ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass} relative`} onMouseEnter={handleColEnter}>
                                                 {calculateDuration(row.startTime, row.endTime)}
+                                                {(() => {
+                                                    const prevPrevRow = records[index - 2];
+                                                    // Show on the second row of a group (first intersection)
+                                                    const isSecondRowOfGroup = isSameDateAsPrev && (!prevPrevRow || prevPrevRow.date !== row.date);
+                                                    
+                                                    if (isSecondRowOfGroup) {
+                                                        const dayRecords = records.filter(r => r.date === row.date && r.presence !== 'F' && r.presence !== 'X');
+                                                        const totalMinutes = dayRecords.reduce((acc, r) => acc + calculateMinutesBetween(r.startTime, r.endTime), 0);
+                                                        
+                                                        if (totalMinutes > 0) {
+                                                            const totalHours = Math.floor(totalMinutes / 60);
+                                                            const totalMins = totalMinutes % 60;
+                                                            // Format: 02:00 (Hours:Minutes)
+                                                            const totalDurationStr = `${totalHours.toString().padStart(2, '0')}:${totalMins.toString().padStart(2, '0')}`;
+
+                                                            return (
+                                                                <div className="absolute z-50 flex items-center justify-center group cursor-help left-0 top-0 -translate-x-1/2 -translate-y-1/2">
+                                                                    {/* Key Tail (The "Bit") */}
+                                                                    <div className="absolute left-1/2 top-1/2 -translate-y-1/2 w-3.5 h-2.5 bg-[#f0f9ff] border-t border-b border-r border-[#bae6fd] rounded-r-[2px] z-10"></div>
+                                                                    
+                                                                    {/* Key Head (The Circle) */}
+                                                                    <div className="relative flex items-center justify-center w-[18px] h-[18px] rounded-full bg-[#f0f9ff] border border-[#bae6fd] shadow-sm z-20 transition-transform group-hover:scale-110">
+                                                                        <Clock size={10} className="text-[#0284c7]" strokeWidth={2.5} />
+                                                                    </div>
+
+                                                                    {/* Custom Tooltip (Left Side) */}
+                                                                    <div className="absolute right-full top-1/2 -translate-y-1/2 mr-3 hidden group-hover:flex flex-col items-center bg-slate-800 text-white text-[10px] py-1.5 px-3 rounded-md shadow-xl whitespace-nowrap z-[60] opacity-0 group-hover:opacity-100 transition-all duration-200 ease-out transform translate-x-2 group-hover:translate-x-0 pointer-events-none">
+                                                                        <span className="font-bold text-slate-400 text-[9px] uppercase tracking-wider mb-0.5">Tempo Total</span>
+                                                                        <div className="flex items-center gap-1.5">
+                                                                            <Clock size={10} className="text-sky-400" strokeWidth={2.5} />
+                                                                            <span className="font-bold text-white text-xs">{totalDurationStr}</span>
+                                                                            <span className="text-slate-400 text-[9px] font-normal">({totalMinutes} min)</span>
+                                                                        </div>
+                                                                        {/* Arrow Tip (Pointing Right) */}
+                                                                        <div className="absolute left-full top-1/2 -translate-y-1/2 -ml-[1px] border-4 border-transparent border-l-slate-800"></div>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        }
+                                                    }
+                                                    return null;
+                                                })()}
                                             </td>
                                         </tr>
                                     );
