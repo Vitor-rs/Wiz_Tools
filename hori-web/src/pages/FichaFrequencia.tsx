@@ -43,6 +43,14 @@ const TEACHER_CONFIG: Record<string, { color: string; initials: string; }> = {
     'Maria C.': { color: 'bg-pink-500', initials: 'MC' },
 };
 
+const EVALUATION_COLORS: Record<string, string> = {
+    'R': 'rgba(254, 202, 202, 0.7)', // red-200
+    'B': 'rgba(254, 240, 138, 0.7)', // yellow-200
+    'MB': 'rgba(191, 219, 254, 0.7)', // blue-200
+    'Ó': 'rgba(187, 247, 208, 0.7)', // green-200
+    '': 'transparent'
+};
+
 // --- Helper Functions ---
 
 const calculateDuration = (start: string, end: string): string => {
@@ -457,6 +465,57 @@ const FichaFrequencia: React.FC = () => {
 
     // --- Renderers for Evaluations ---
 
+    const renderMergedEvaluation = (record: AttendanceRecord) => {
+        if (record.presence === 'F') return null;
+
+        const val1 = record.evaluations.escrita || '';
+        const val2 = record.evaluations.tarefa || '';
+        
+        const color1 = EVALUATION_COLORS[val1] || 'transparent';
+        const color2 = EVALUATION_COLORS[val2] || 'transparent';
+
+        const gradientStyle = {
+            background: `linear-gradient(to right, ${color1}, ${color2})`
+        };
+
+        return (
+            <div className="relative w-full h-full flex items-center justify-center rounded-sm" style={gradientStyle}>
+                {/* Left Select (Escrita) */}
+                <select 
+                    className="absolute left-0 top-0 w-1/2 h-full opacity-0 cursor-pointer z-10 appearance-none"
+                    value={val1}
+                    onChange={(e) => handleUpdateRecord(record.id, 'evaluations.escrita', e.target.value)}
+                >
+                    <option value="">-</option>
+                    <option value="R">R</option>
+                    <option value="B">B</option>
+                    <option value="MB">MB</option>
+                    <option value="Ó">Ó</option>
+                </select>
+
+                {/* Right Select (Tarefa) */}
+                <select 
+                    className="absolute right-0 top-0 w-1/2 h-full opacity-0 cursor-pointer z-10 appearance-none"
+                    value={val2}
+                    onChange={(e) => handleUpdateRecord(record.id, 'evaluations.tarefa', e.target.value)}
+                >
+                    <option value="">-</option>
+                    <option value="R">R</option>
+                    <option value="B">B</option>
+                    <option value="MB">MB</option>
+                    <option value="Ó">Ó</option>
+                </select>
+
+                {/* Visual Display */}
+                <div className="flex items-center justify-center w-full h-full pointer-events-none font-bold text-[10px] text-gray-700">
+                    <span className="w-1/2 text-center pr-0.5">{val1}</span>
+                    <span className="text-gray-400">/</span>
+                    <span className="w-1/2 text-center pl-0.5">{val2}</span>
+                </div>
+            </div>
+        );
+    };
+
     const renderEvaluationSelect = (
         record: AttendanceRecord,
         field: keyof typeof record.evaluations,
@@ -752,8 +811,7 @@ const FichaFrequencia: React.FC = () => {
                                     <th className={`${subHeaderBase} w-8 min-w-8`}>F</th>
                                     <th className={`${subHeaderBase} w-8 min-w-8`}>A</th>
                                     <th className={`${subHeaderBase} w-8 min-w-8`}>L</th>
-                                    <th className={`${subHeaderBase} w-8 min-w-8`}>E</th>
-                                    <th className={`${subHeaderBase} w-8 min-w-8`}>TRF</th>
+                                    <th className={`${subHeaderBase} w-14 min-w-14`}>E / Trf</th>
                                     <th className={`${subHeaderBase} w-8 min-w-8`}>S.T</th>
                                     <th className={`${subHeaderBase} w-8 min-w-8`}>CS</th>
                                     <th className={`${subHeaderBase} w-8 min-w-8`}>APP</th>
@@ -829,7 +887,7 @@ const FichaFrequencia: React.FC = () => {
                                             // Left (only for Week column)
                                             if (colIndex === 1) shadows.push(`inset 4px 0 0 0 rgba(249, 115, 22, 0.65)`);
                                             // Right (only for Duration column)
-                                            if (colIndex === 20) shadows.push(`inset -4px 0 0 0 rgba(249, 115, 22, 0.65)`);
+                                            if (colIndex === 19) shadows.push(`inset -4px 0 0 0 rgba(249, 115, 22, 0.65)`);
                                         }
 
                                         return { className: classes, style: shadows.length > 0 ? { boxShadow: shadows.join(', ') } : {} };
@@ -844,7 +902,7 @@ const FichaFrequencia: React.FC = () => {
                                         // Bottom
                                         shadows.push(`inset 0 -4px 0 0 rgba(249, 115, 22, 0.65)`);
                                         // Right (only for Duration column)
-                                        if (colIndex === 20) shadows.push(`inset -4px 0 0 0 rgba(249, 115, 22, 0.65)`);
+                                        if (colIndex === 19) shadows.push(`inset -4px 0 0 0 rgba(249, 115, 22, 0.65)`);
                                         
                                         return { boxShadow: shadows.join(', ') };
                                     };
@@ -1055,28 +1113,25 @@ const FichaFrequencia: React.FC = () => {
                                                 {renderEvaluationSelect(row, 'leitura', row.evaluations.leitura)}
                                             </td>
                                             <td className={`${cellBase.replace('p-1', 'p-0.5')} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} style={getHighlightStyle(13)} onMouseEnter={handleColEnter}>
-                                                {renderEvaluationSelect(row, 'escrita', row.evaluations.escrita)}
+                                                {renderMergedEvaluation(row)}
                                             </td>
-                                            <td className={`${cellBase.replace('p-1', 'p-0.5')} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} style={getHighlightStyle(14)} onMouseEnter={handleColEnter}>
-                                                {renderEvaluationSelect(row, 'tarefa', row.evaluations.tarefa)}
-                                            </td>
-                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} style={getHighlightStyle(15)} onMouseEnter={handleColEnter}>
+                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} style={getHighlightStyle(14)} onMouseEnter={handleColEnter}>
                                                 {renderTaskStatus(row)}
                                             </td>
-                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} style={getHighlightStyle(16)} onMouseEnter={handleColEnter}>
+                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} style={getHighlightStyle(15)} onMouseEnter={handleColEnter}>
                                                 {renderCheckAlert(row, 'checkingSentences')}
                                             </td>
-                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} style={getHighlightStyle(17)} onMouseEnter={handleColEnter}>
+                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} style={getHighlightStyle(16)} onMouseEnter={handleColEnter}>
                                                 {renderCheckAlert(row, 'app')}
                                             </td>
-                                            <td className={`${cellBase.replace('p-1', 'p-0.5')} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} style={getHighlightStyle(18)} onMouseEnter={handleColEnter}>
+                                            <td className={`${cellBase.replace('p-1', 'p-0.5')} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} style={getHighlightStyle(17)} onMouseEnter={handleColEnter}>
                                                 {renderEngagement(row)}
                                             </td>
 
-                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} style={getHighlightStyle(19)} onMouseEnter={handleColEnter}>
+                                            <td className={`${cellBase} ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass}`} style={getHighlightStyle(18)} onMouseEnter={handleColEnter}>
                                                 {renderTeachers(row)}
                                             </td>
-                                            <td className={`${cellBase} text-[10px] ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass} relative`} style={getHighlightStyle(20)} onMouseEnter={handleColEnter}>
+                                            <td className={`${cellBase} text-[10px] ${row.presence === 'F' ? hatchedBg : ''} ${topBorderClass} relative`} style={getHighlightStyle(19)} onMouseEnter={handleColEnter}>
                                                 {calculateDuration(row.startTime, row.endTime)}
                                                 {(() => {
                                                     const prevPrevRow = records[index - 2];
