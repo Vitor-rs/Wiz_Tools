@@ -479,10 +479,11 @@ const FichaFrequencia: React.FC = () => {
         };
 
         return (
-            <div className="relative w-full h-full flex items-center justify-center rounded-sm" style={gradientStyle}>
+            <div className="relative w-full h-full flex items-center justify-center rounded-sm overflow-hidden" style={gradientStyle}>
                 {/* Left Select (Escrita) */}
                 <select 
-                    className="absolute left-0 top-0 w-1/2 h-full opacity-0 cursor-pointer z-10 appearance-none"
+                    className="absolute left-0 top-0 w-1/2 h-full opacity-0 cursor-pointer z-10 appearance-none border-none outline-none m-0 p-0"
+                    style={{ lineHeight: '1' }}
                     value={val1}
                     onChange={(e) => handleUpdateRecord(record.id, 'evaluations.escrita', e.target.value)}
                 >
@@ -495,7 +496,8 @@ const FichaFrequencia: React.FC = () => {
 
                 {/* Right Select (Tarefa) */}
                 <select 
-                    className="absolute right-0 top-0 w-1/2 h-full opacity-0 cursor-pointer z-10 appearance-none"
+                    className="absolute right-0 top-0 w-1/2 h-full opacity-0 cursor-pointer z-10 appearance-none border-none outline-none m-0 p-0"
+                    style={{ lineHeight: '1' }}
                     value={val2}
                     onChange={(e) => handleUpdateRecord(record.id, 'evaluations.tarefa', e.target.value)}
                 >
@@ -507,7 +509,7 @@ const FichaFrequencia: React.FC = () => {
                 </select>
 
                 {/* Visual Display */}
-                <div className="flex items-center justify-center w-full h-full pointer-events-none font-bold text-[10px] text-gray-700">
+                <div className="flex items-center justify-center w-full h-full pointer-events-none font-bold text-[10px] text-gray-700 whitespace-nowrap leading-none">
                     <span className="w-1/2 text-center pr-0.5">{val1}</span>
                     <span className="text-gray-400">/</span>
                     <span className="w-1/2 text-center pl-0.5">{val2}</span>
@@ -756,7 +758,7 @@ const FichaFrequencia: React.FC = () => {
                         <div ref={cellBorderRef} className="absolute pointer-events-none z-10 hidden border-2 border-gray-300" />
 
                         <table className="w-full text-sm border-separate border-spacing-0">
-                            <thead className="sticky top-0 z-20 shadow-md bg-white">
+                            <thead className="sticky top-0 z-40 shadow-md bg-white">
                                 <tr>
                                     <th colSpan={4} className={`${headerBase}`}>DATAS</th>
                                     <th rowSpan={2} className={`${headerBase} w-10 max-w-10`}>
@@ -772,7 +774,7 @@ const FichaFrequencia: React.FC = () => {
                                     <th colSpan={2} className={`${headerBase}`}>HORÁRIO</th>
                                     <th rowSpan={2} className={`${headerBase} min-w-[150px]`}>Lição / Conteúdo</th>
                                     <th rowSpan={2} className={`${headerBase} min-w-[150px]`}>Observações / Anotações</th>
-                                    <th colSpan={9} className={`${headerBase}`}>AVALIAÇÕES</th>
+                                    <th colSpan={8} className={`${headerBase}`}>AVALIAÇÕES</th>
                                     <th rowSpan={2} className={`${headerBase} min-w-20`}>Professor(a)</th>
                                     <th rowSpan={2} className={`${headerBase} w-10 max-w-10`}>
                                         <div className="flex items-center justify-center h-20 w-full">
@@ -949,8 +951,8 @@ const FichaFrequencia: React.FC = () => {
                                                     FERIADO NACIONAL: {row.holidayName}
                                                 </td>
 
-                                                {/* Empty Evaluations (9 cols) */}
-                                                {Array.from({ length: 9 }).map((_, i) => (
+                                                {/* Empty Evaluations (8 cols) */}
+                                                {Array.from({ length: 8 }).map((_, i) => (
                                                     <td key={i} className={`${cellBase} ${holidayBg} ${topBorderClass} border-r-0 ${holidayBorder}`} onMouseEnter={handleColEnter}></td>
                                                 ))}
 
@@ -1073,7 +1075,7 @@ const FichaFrequencia: React.FC = () => {
                                                         {row.endTime}
                                                         {intervalMinutes > 0 && (
                                                             <div
-                                                                className="absolute z-50 flex items-center justify-center w-[22px] h-[22px] rounded-full bg-[#fdfbf7] border border-[#d6d3d1] shadow-sm group cursor-help transition-transform hover:scale-110 -translate-x-1/2 translate-y-1/2 left-0 bottom-0"
+                                                                className="absolute z-30 flex items-center justify-center w-[22px] h-[22px] rounded-full bg-[#fdfbf7] border border-[#d6d3d1] shadow-sm group cursor-help transition-transform hover:scale-110 -translate-x-1/2 translate-y-1/2 left-0 bottom-0"
                                                             >
                                                                 <Coffee size={11} className="text-[#854d0e]" strokeWidth={2.5} />
                                                                 
@@ -1149,7 +1151,7 @@ const FichaFrequencia: React.FC = () => {
                                                             const totalDurationStr = `${totalHours.toString().padStart(2, '0')}:${totalMins.toString().padStart(2, '0')}`;
 
                                                             return (
-                                                                <div className="absolute z-50 flex items-center justify-center group cursor-help left-0 top-0 -translate-x-1/2 -translate-y-1/2">
+                                                                <div className="absolute z-30 flex items-center justify-center group cursor-help left-0 top-0 -translate-x-1/2 -translate-y-1/2">
                                                                     {/* Key Tail (The "Bit") */}
                                                                     <div className="absolute left-1/2 top-1/2 -translate-y-1/2 w-3.5 h-2.5 bg-[#f0f9ff] border-t border-b border-r border-[#bae6fd] rounded-r-[2px] z-10"></div>
                                                                     
