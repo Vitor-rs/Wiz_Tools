@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+
+<html class="light" lang="pt-br"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary-container": "#2170e4",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "surface": "#f7f9fb",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-secondary-fixed-variant": "#004395",
+                        "tertiary-fixed": "#ffdad7",
+                        "outline": "#6e7b6c",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#62df7d",
+                        "tertiary-container": "#da3437",
+                        "error-container": "#ffdad6",
+                        "inverse-surface": "#2d3133",
+                        "inverse-primary": "#62df7d",
+                        "on-surface-variant": "#3e4a3d",
+                        "surface-container-low": "#f2f4f6",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "surface-variant": "#e0e3e5",
+                        "outline-variant": "#bdcaba",
+                        "secondary-fixed": "#d8e2ff",
+                        "on-primary-container": "#f7fff2",
+                        "inverse-on-surface": "#eff1f3",
+                        "on-surface": "#191c1e",
+                        "surface-tint": "#006e2d",
+                        "on-tertiary-container": "#fffbff",
+                        "on-primary-fixed": "#002109",
+                        "primary": "#006b2c",
+                        "primary-fixed": "#7ffc97",
+                        "secondary": "#0058be",
+                        "surface-bright": "#f7f9fb",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#005320",
+                        "on-primary": "#ffffff",
+                        "tertiary": "#b61722",
+                        "on-secondary-container": "#fefcff",
+                        "on-tertiary-fixed": "#410004",
+                        "on-tertiary-fixed-variant": "#930013",
+                        "error": "#ba1a1a",
+                        "surface-dim": "#d8dadc",
+                        "surface-container-high": "#e6e8ea",
+                        "on-background": "#191c1e",
+                        "tertiary-fixed-dim": "#ffb3ad",
+                        "on-secondary-fixed": "#001a42",
+                        "background": "#f7f9fb",
+                        "on-error-container": "#93000a",
+                        "primary-container": "#00873a",
+                        "surface-container": "#eceef0"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+            vertical-align: middle;
+            font-size: 18px;
+        }
+        .custom-diagonal-pattern {
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(0,0,0,0.03) 5px, rgba(0,0,0,0.03) 10px);
+        }
+        /* No-border rule implementation */
+        .no-border-sections > * { border: none !important; }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased overflow-hidden">
+<!-- SideNavBar (from JSON) -->
+<aside class="fixed left-0 top-0 h-full flex flex-col pt-6 w-64 bg-slate-100 dark:bg-slate-900 font-inter text-sm antialiased z-50">
+<div class="px-6 mb-8 flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined">admin_panel_settings</span>
+</div>
+<div>
+<h2 class="text-lg font-bold text-slate-800 dark:text-slate-100 leading-tight">Admin Panel</h2>
+<p class="text-xs text-slate-500">Reception Desk</p>
+</div>
+</div>
+<nav class="flex-1 px-3 space-y-1">
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 bg-white dark:bg-slate-800 text-green-700 dark:text-green-400 font-semibold rounded-md" href="#">
+<span class="material-symbols-outlined" data-icon="how_to_reg">how_to_reg</span>
+<span>Check-in</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span>Presenças</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span>Alunos</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Configurações</span>
+</a>
+</nav>
+<div class="p-4 mt-auto">
+<div class="flex items-center gap-3 p-2 rounded-lg bg-slate-200/50 dark:bg-slate-800/50">
+<img alt="User Profile" class="w-8 h-8 rounded-full bg-white" data-alt="User profile avatar circle" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPEvljjr3kXEJIqyN9ihtJgJCMWbA15YFkwaflLhfkmP1Zty_qsgcerinxUijDaXlu4lDoUWUGr5fXxaJgU3Od64qEnRfiUl2r4uOi4jePb5PchiIXPU2O8fFFpEYxWqbGc2O_ZYLQSpspHyw6m-ocuXGwGuZsX1oTqy17_yQYkVBrV36udmsznMLml52y9EnkzLSn9BzYmVxmiL88zBC0Dp7F-SB7_ETrZblb3cRDMIBGaIVDGMzyekUe5bdZNoXPQ5WfnK-z8Ac"/>
+<div class="overflow-hidden">
+<p class="text-xs font-bold truncate">Operador 01</p>
+<p class="text-[10px] text-slate-500">Online</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 bg-surface-container-lowest min-h-screen flex flex-col">
+<!-- Header Section (Top Center Date) -->
+<header class="w-full flex flex-col items-center pt-8 pb-4">
+<h1 class="text-[2.5rem] font-black tracking-tighter text-on-surface leading-none">08 / 11 / 2022</h1>
+</header>
+<!-- Page Content -->
+<div class="px-8 flex-1 flex flex-col">
+<h2 class="text-3xl font-extrabold text-on-surface mb-6 text-left">Novembro</h2>
+<!-- Integrated Table Container -->
+<div class="flex flex-col bg-white overflow-hidden shadow-sm">
+<!-- SUPER-HEADER (Top Bar) -->
+<div class="flex items-center justify-between h-12 px-4 bg-[#f0f9ff] border-none">
+<!-- Tabs -->
+<div class="flex items-center gap-6 h-full">
+<button class="h-full flex items-center text-[#16a34a] font-bold border-b-[3px] border-[#16a34a] text-sm">
+                            Check - In
+                        </button>
+<button class="h-full flex items-center text-slate-500 font-medium text-sm">
+                            Presenças Hoje
+                        </button>
+</div>
+<!-- Time & Pill Selector -->
+<div class="flex items-center gap-4">
+<span class="text-xl font-bold text-slate-800">15:32</span>
+<div class="flex items-center bg-white rounded-full px-3 py-1 border border-slate-200 shadow-sm gap-2">
+<span class="material-symbols-outlined text-slate-400 cursor-pointer text-xs">chevron_left</span>
+<span class="text-xs font-bold px-2">15:00</span>
+<span class="material-symbols-outlined text-slate-400 cursor-pointer text-xs">chevron_right</span>
+</div>
+</div>
+<!-- Search Box -->
+<div class="relative w-64">
+<input class="w-full h-8 pl-8 pr-4 bg-white border border-slate-200 rounded-full text-xs focus:outline-none focus:ring-1 focus:ring-secondary/30" placeholder="pesquisar aluno" type="text"/>
+<span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+</div>
+</div>
+<!-- TABLE HEADERS -->
+<div class="grid grid-cols-[200px_160px_160px_100px_repeat(6,1fr)] bg-slate-50 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant border-none">
+<!-- Primary Data Headers -->
+<div class="py-1 px-3 flex items-center border-none">Aluno</div>
+<div class="py-1 px-3 flex items-center border-none">Estágio / Modalidade</div>
+<div class="py-1 px-3 flex items-center border-none">Sala / Professor</div>
+<div class="py-1 px-3 flex items-center border-none">Dias</div>
+<!-- Calendar Columns -->
+<div class="py-1 flex flex-col items-center justify-center border-none border-l border-white">
+<span>2ª</span>
+<div class="w-full h-[1px] bg-slate-200 my-0.5"></div>
+<span>07</span>
+</div>
+<div class="py-1 flex flex-col items-center justify-center border-none border-l border-white bg-[#dcfce7]">
+<span>3ª</span>
+<div class="w-full h-[1px] bg-slate-300 my-0.5"></div>
+<span>08</span>
+</div>
+<div class="py-1 flex flex-col items-center justify-center border-none border-l border-white">
+<span>4ª</span>
+<div class="w-full h-[1px] bg-slate-200 my-0.5"></div>
+<span>09</span>
+</div>
+<div class="py-1 flex flex-col items-center justify-center border-none border-l border-white">
+<span>5ª</span>
+<div class="w-full h-[1px] bg-slate-200 my-0.5"></div>
+<span>10</span>
+</div>
+<div class="py-1 flex flex-col items-center justify-center border-none border-l border-white bg-[#9ca3af] text-white">
+<span>6ª</span>
+<div class="w-full h-[1px] bg-white/30 my-0.5"></div>
+<span>11</span>
+</div>
+<div class="py-1 flex flex-col items-center justify-center border-none border-l border-white">
+<span>Sáb</span>
+<div class="w-full h-[1px] bg-slate-200 my-0.5"></div>
+<span>12</span>
+</div>
+</div>
+<!-- TABLE ROW (SINGLE ROW - HIGHLY COMPACT) -->
+<div class="grid grid-cols-[200px_160px_160px_100px_repeat(6,1fr)] border-t border-slate-100 group">
+<!-- Aluno -->
+<div class="py-1.5 px-3 flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-secondary-fixed flex items-center justify-center overflow-hidden">
+<img alt="Avatar" class="w-full h-full object-cover" data-alt="Small circular profile avatar of a student" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBeG2Qn1LfzDILTfEZXlYmQAU-u7rRn70JCmhhTeA7EpGhSzFri7_N4n31nmZxmNe-qi5Z3vHZrWnszK6HiM6B0PXsB-MP3zbVJlJ26oBrUtLMzd6MlXqJaLDO2RzAj2o8L2ehOHwxlfQTM8FA2_13mJyiRL98ez8ib4J2qgYNN4kRiA-_UaI6TLp9cmHj7fd4Vdql2HomxD6AHEXWZFjnOPcP8HwT5CFdpM3cs6V4AqVo5-pMILKGg34_x8KkqaH1WiKmIt9VbUDg"/>
+</div>
+<span class="text-[11px] font-semibold text-on-surface truncate">Vitor Ricardo Santos</span>
+</div>
+<!-- Estágio / Modalidade -->
+<div class="py-1.5 px-3 flex flex-col justify-center gap-0.5">
+<span class="bg-orange-500 text-white text-[9px] px-1.5 py-0.5 rounded-sm font-bold w-fit uppercase">Next Generation</span>
+<span class="text-[9px] text-on-surface-variant italic">Interactive</span>
+</div>
+<!-- Sala / Professor -->
+<div class="py-1.5 px-3 flex flex-col justify-center gap-0.5">
+<span class="bg-blue-600 text-white text-[9px] px-1.5 py-0.5 rounded-sm font-bold w-fit uppercase">Berlim</span>
+<span class="text-[9px] text-on-surface-variant">Vitor, Willians</span>
+</div>
+<!-- Dias -->
+<div class="py-1.5 px-3 flex items-center gap-1">
+<span class="w-5 h-4 flex items-center justify-center bg-blue-600 text-white text-[8px] font-bold rounded-sm">2ª</span>
+<span class="w-5 h-4 flex items-center justify-center bg-blue-600 text-white text-[8px] font-bold rounded-sm">3ª</span>
+<span class="w-5 h-4 flex items-center justify-center bg-blue-600 text-white text-[8px] font-bold rounded-sm">4ª</span>
+</div>
+<!-- Cell 2ª | 07 -->
+<div class="py-1 px-1 flex flex-col gap-0.5 border-l border-slate-50">
+<div class="bg-[#16a34a] text-white flex items-center justify-center gap-0.5 rounded-[1px] py-0.5 px-1 cursor-pointer">
+<span class="material-symbols-outlined text-[10px]" style="font-variation-settings: 'FILL' 1;">arrow_back</span>
+<span class="text-[9px] font-bold">13:04</span>
+</div>
+<div class="bg-[#ef4444] text-white flex items-center justify-center gap-0.5 rounded-[1px] py-0.5 px-1 cursor-pointer">
+<span class="material-symbols-outlined text-[10px]" style="font-variation-settings: 'FILL' 1;">arrow_forward</span>
+<span class="text-[9px] font-bold">14:02</span>
+</div>
+</div>
+<!-- Cell 3ª | 08 (Tinted Green) -->
+<div class="py-1 px-1 flex items-center justify-center bg-[#dcfce7] border-l border-slate-50">
+<button class="bg-[#bbf7d0] w-full h-8 flex items-center justify-center rounded-[1px] hover:brightness-95 transition-all">
+<span class="material-symbols-outlined text-[#16a34a] text-sm" style="font-variation-settings: 'FILL' 1;">arrow_back</span>
+</button>
+</div>
+<!-- Cell 4ª | 09 (Empty) -->
+<div class="bg-white border-l border-slate-50"></div>
+<!-- Cell 5ª | 10 (Empty) -->
+<div class="bg-white border-l border-slate-50"></div>
+<!-- Cell 6ª | 11 (Solid Gray) -->
+<div class="bg-[#9ca3af] border-l border-slate-50"></div>
+<!-- Cell Sáb | 12 (Empty) -->
+<div class="bg-white border-l border-slate-50"></div>
+</div>
+<!-- REPEATED EMPTY ROWS FOR DENSITY (SIMULATED) -->
+<div class="grid grid-cols-[200px_160px_160px_100px_repeat(6,1fr)] border-t border-slate-50">
+<div class="py-1.5 px-3 flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-slate-100"></div>
+<div class="h-2 w-24 bg-slate-100 rounded-full"></div>
+</div>
+<div class="py-1.5 px-3 flex flex-col justify-center gap-0.5">
+<div class="h-2.5 w-16 bg-slate-100 rounded-sm"></div>
+</div>
+<div class="py-1.5 px-3 flex flex-col justify-center gap-0.5">
+<div class="h-2.5 w-12 bg-slate-100 rounded-sm"></div>
+</div>
+<div class="py-1.5 px-3 flex gap-1">
+<div class="w-5 h-4 bg-slate-50 rounded-sm"></div>
+<div class="w-5 h-4 bg-slate-50 rounded-sm"></div>
+</div>
+<div class="bg-white border-l border-slate-50"></div>
+<div class="bg-[#dcfce7] border-l border-slate-50"></div>
+<div class="bg-white border-l border-slate-50"></div>
+<div class="bg-white border-l border-slate-50"></div>
+<div class="bg-[#9ca3af] border-l border-slate-50"></div>
+<div class="bg-white border-l border-slate-50"></div>
+</div>
+</div>
+<!-- Footer Meta Info -->
+<div class="mt-4 flex justify-between items-center text-[10px] text-slate-400 font-medium">
+<div class="flex items-center gap-4">
+<span>REGISTROS: 1 / 48</span>
+<div class="flex gap-2">
+<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-[#16a34a]"></span> Presente</span>
+<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-[#ef4444]"></span> Saída</span>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">info</span>
+<span>Sistema de Recepção v2.4.1</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Contextual FAB (Suppressed based on rules for Dashboard/Admin screens) -->
+</body></html>

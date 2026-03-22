@@ -1,0 +1,49 @@
+/* ===================================================
+   Calendar Styles — Extracted from hori-web/src/index.css
+   
+   Required for the "carnival-pulse" flashing animation
+   used when searching/navigating to specific dates.
+   
+   Import this CSS in your project's main stylesheet
+   or in the CalendarPage component.
+   =================================================== */
+
+@keyframes carnival-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+        transform: scale(1);
+        border-color: #ef4444;
+        /* Red */
+    }
+
+    25% {
+        border-color: #f59e0b;
+        /* Amber */
+    }
+
+    50% {
+        box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+        transform: scale(1.15);
+        border-color: #3b82f6;
+        /* Blue */
+    }
+
+    75% {
+        border-color: #10b981;
+        /* Green */
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+        transform: scale(1);
+        border-color: #ef4444;
+    }
+}
+
+.animate-carnival {
+    animation: carnival-pulse 1.5s infinite;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-width: 3px;
+    border-style: solid;
+    z-index: 50;
+}

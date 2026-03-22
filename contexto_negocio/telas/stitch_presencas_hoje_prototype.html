@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+
+<html class="light" lang="pt-br"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "secondary-fixed": "#7ffc97",
+              "surface-dim": "#cfdce3",
+              "primary-fixed-dim": "#b7deb8",
+              "on-primary-container": "#37593c",
+              "primary-dim": "#385a3c",
+              "surface-tint": "#446648",
+              "tertiary-dim": "#49536b",
+              "surface-variant": "#d9e4ea",
+              "error-container": "#fe8983",
+              "outline": "#717c82",
+              "background": "#f7f9fb",
+              "on-secondary-fixed-variant": "#006a2c",
+              "on-secondary-fixed": "#004a1c",
+              "on-error-container": "#752121",
+              "on-primary-fixed": "#25462b",
+              "inverse-on-surface": "#9a9d9f",
+              "on-background": "#2a3439",
+              "on-tertiary-fixed": "#353f56",
+              "secondary-fixed-dim": "#70ed8a",
+              "on-primary-fixed-variant": "#416345",
+              "tertiary-fixed-dim": "#cad4f1",
+              "surface-container-highest": "#d9e4ea",
+              "primary-container": "#c5edc6",
+              "on-tertiary": "#f9f8ff",
+              "error": "#9f403d",
+              "surface-container-low": "#f0f4f7",
+              "surface-container-lowest": "#ffffff",
+              "surface-container-high": "#e1e9ee",
+              "inverse-surface": "#0b0f10",
+              "tertiary-container": "#d8e2ff",
+              "primary": "#446648",
+              "on-surface": "#2a3439",
+              "surface-bright": "#f7f9fb",
+              "on-secondary": "#e9ffe6",
+              "surface-container": "#e8eff3",
+              "primary-fixed": "#c5edc6",
+              "tertiary-fixed": "#d8e2ff",
+              "on-tertiary-container": "#485269",
+              "error-dim": "#4e0309",
+              "tertiary": "#555f77",
+              "on-tertiary-fixed-variant": "#515b73",
+              "on-surface-variant": "#566166",
+              "inverse-primary": "#d6fed6",
+              "surface": "#f7f9fb",
+              "secondary-container": "#7ffc97",
+              "on-error": "#fff7f6",
+              "outline-variant": "#a9b4b9",
+              "on-primary": "#e4ffe2",
+              "secondary-dim": "#006127",
+              "on-secondary-container": "#005f27",
+              "secondary": "#006e2e"
+            },
+            fontFamily: {
+              "headline": ["Inter"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+            font-size: 20px;
+        }
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background selection:bg-primary-container">
+<!-- NavigationDrawer (The Anchor) -->
+<aside class="w-64 h-full fixed left-0 top-0 bg-slate-100 dark:bg-slate-900 flex flex-col py-4 px-2 z-50">
+<div class="px-4 mb-8">
+<h1 class="text-lg font-semibold text-slate-800 dark:text-slate-100">Admin Panel</h1>
+<p class="text-[0.65rem] font-bold uppercase tracking-widest text-slate-500">Reception Desk</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center px-4 py-2.5 text-slate-500 dark:text-slate-400 font-inter text-[0.75rem] font-bold uppercase tracking-wider hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors duration-150" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="dashboard">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center px-4 py-2.5 text-slate-500 dark:text-slate-400 font-inter text-[0.75rem] font-bold uppercase tracking-wider hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors duration-150" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="how_to_reg">how_to_reg</span>
+                Check-in active
+            </a>
+<a class="flex items-center px-4 py-2.5 bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-400 font-bold font-inter text-[0.75rem] font-bold uppercase tracking-wider transition-colors duration-150" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="group">group</span>
+                Presenças
+            </a>
+<a class="flex items-center px-4 py-2.5 text-slate-500 dark:text-slate-400 font-inter text-[0.75rem] font-bold uppercase tracking-wider hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors duration-150" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="person_search">person_search</span>
+                Alunos
+            </a>
+<a class="flex items-center px-4 py-2.5 text-slate-500 dark:text-slate-400 font-inter text-[0.75rem] font-bold uppercase tracking-wider hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors duration-150" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="settings">settings</span>
+                Configurações
+            </a>
+</nav>
+<div class="mt-auto px-4 py-4 flex items-center space-x-3 bg-slate-200 dark:bg-slate-800 rounded-lg mx-2">
+<img alt="Operador 01" class="w-8 h-8 rounded-full bg-slate-300" data-alt="Professional avatar of a male receptionist" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBg082mzr_esIBMsDRYTHKGjieJ0cJxOyh8JFHJ6_ugZ4dzyQ7Wg9LYhIDu7N7-p2fHXUVp315HSTHNnjt8uX1QyHVEvMHb4kpWPYXN_8IavrQUDC70COUwPlTrFkX25jTqhJ_QFJLn-ivJmKNKGpYNb9Zaoqsk59UFk8_StRenpGuLskIauKNnBl006hx_tuzU1IEO9l8W11DtF1DQQTnhMJrBLEXC33Dsuw7h1B8G3i3jQ07tiGWvk8abOnNAobqFX7FmnEJrFAke"/>
+<div class="overflow-hidden">
+<p class="text-[0.75rem] font-bold text-slate-800 dark:text-slate-100 truncate">Operador 01</p>
+<p class="text-[0.65rem] text-slate-500">Meta: 100%</p>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 min-h-screen flex flex-col">
+<!-- TopAppBar (Precision Header) -->
+<header class="flex justify-between items-center h-16 px-8 bg-slate-50 dark:bg-slate-950">
+<div class="flex items-center space-x-3">
+<span class="material-symbols-outlined text-emerald-700 dark:text-emerald-400" data-icon="calendar_month">calendar_month</span>
+<h2 class="text-xl font-bold text-slate-900 dark:text-slate-50">Novembro</h2>
+</div>
+<div class="text-[1.5rem] font-semibold text-slate-900 dark:text-slate-50 tracking-tight">
+                08 / 11 / 2022
+            </div>
+<div class="w-24"></div> <!-- Spacer for symmetry -->
+</header>
+<!-- Super-Header Toolbar (The HUD) -->
+<section class="px-8 py-4 bg-surface-container-lowest">
+<div class="flex items-center justify-between">
+<div class="flex space-x-1 p-1 bg-surface-container-low rounded-lg">
+<button class="px-6 py-1.5 text-[0.75rem] font-bold uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors">
+                        Check - In
+                    </button>
+<button class="px-6 py-1.5 text-[0.75rem] font-bold uppercase tracking-wider bg-secondary-container text-on-secondary-fixed rounded-md">
+                        Presenças Hoje
+                    </button>
+</div>
+<div class="flex items-center space-x-6">
+<div class="flex items-center space-x-2 text-primary font-bold">
+<span class="material-symbols-outlined" data-icon="schedule">schedule</span>
+<span class="text-lg">15:32</span>
+</div>
+<div class="flex items-center bg-surface-container-highest px-3 py-1.5 rounded-sm">
+<label class="text-[0.65rem] font-bold uppercase text-on-surface-variant mr-3">Horário:</label>
+<select class="bg-transparent border-none text-[0.75rem] font-semibold focus:ring-0 p-0 pr-8">
+<option>15:00</option>
+<option>16:00</option>
+<option>17:00</option>
+</select>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" data-icon="search">search</span>
+<input class="bg-surface-container-highest border-none rounded-sm pl-10 pr-4 py-1.5 text-[0.75rem] font-bold uppercase tracking-wider w-64 focus:bg-white focus:ring-1 focus:ring-primary transition-all" placeholder="PESQUISAR ALUNO" type="text"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Canvas (The Surgical Workspace) -->
+<section class="flex-1 p-8 space-y-4">
+<!-- Accordion 1 (Expanded) -->
+<div class="overflow-hidden">
+<button class="w-full flex items-center justify-between px-4 py-3 bg-tertiary-container rounded-t-lg">
+<div class="flex items-center space-x-3">
+<span class="material-symbols-outlined text-on-tertiary-container" data-icon="expand_more">expand_more</span>
+<span class="text-[0.75rem] font-bold uppercase tracking-widest text-on-tertiary-container">13:00 - 14:00</span>
+</div>
+<span class="text-[0.65rem] font-bold bg-white/50 px-2 py-0.5 rounded-full text-on-tertiary-container">12 ALUNOS</span>
+</button>
+<div class="bg-surface-container-lowest">
+<div class="grid grid-cols-12 px-4 py-2 text-[0.65rem] font-bold uppercase tracking-wider text-on-surface-variant border-b border-surface-container-low">
+<div class="col-span-4">Aluno</div>
+<div class="col-span-2">Estágio</div>
+<div class="col-span-2">Sala</div>
+<div class="col-span-2">Dias</div>
+<div class="col-span-1 text-center">Data</div>
+<div class="col-span-1 text-right">Status</div>
+</div>
+<!-- Row 1 -->
+<div class="grid grid-cols-12 px-4 h-8 items-center text-[0.75rem] hover:bg-surface-container-low transition-colors group">
+<div class="col-span-4 flex items-center space-x-3">
+<img alt="Student avatar" class="w-5 h-5 rounded-full" data-alt="Student profile photo small circle" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCeyHnKBzqPf67wAk7KbJTUmPsjMpqR4ly8y2kTm2Gfxp2VhPFf1E_twRTrdPGopAhZG9onWN-8P_V_d54Cjo_J61FwABGwgQ_J0d-ESex48YPT_fKdHFwZS9yRiNgmrobv84fhQKDpHk_Z0rcHHHYZ5aa5BsUadU-lnNGQVwPIVOKIE9CZUXDWyFWm1SNrEOvRoLfLWK4LhUZRaQXMuZwcZM_r6D8QNkmOVVxlA2oeFfR5cfhWs1h-PF9VZl9FRYXgae7hbJADZF4g"/>
+<span class="font-medium text-on-surface">Felix Hernandez</span>
+</div>
+<div class="col-span-2 flex flex-col leading-tight">
+<span class="text-[0.65rem] font-bold text-primary">NEXT GEN</span>
+</div>
+<div class="col-span-2 flex items-center space-x-2">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="text-on-surface-variant">Berlim</span>
+</div>
+<div class="col-span-2 flex space-x-1">
+<span class="px-1.5 py-0.5 bg-tertiary-container text-[0.6rem] font-bold text-on-tertiary-container rounded-sm">2ª</span>
+<span class="px-1.5 py-0.5 bg-tertiary-container text-[0.6rem] font-bold text-on-tertiary-container rounded-sm">4ª</span>
+</div>
+<div class="col-span-1 text-center font-mono text-on-surface-variant">13:04</div>
+<div class="col-span-1 text-right">
+<span class="bg-secondary-container text-on-secondary-fixed text-[0.65rem] font-bold px-2 py-0.5 rounded-full">Presente</span>
+</div>
+</div>
+<!-- Row 2 -->
+<div class="grid grid-cols-12 px-4 h-8 items-center text-[0.75rem] bg-surface-container-low/30 hover:bg-surface-container-low transition-colors">
+<div class="col-span-4 flex items-center space-x-3">
+<img alt="Student avatar" class="w-5 h-5 rounded-full" data-alt="Student profile photo small circle" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8BzpAg7l8x-6UTN0lkPWT9y9dDs2f7REHtIpKeqBMZtrW-V1k9mkT0XVEKZzWXft-fO_lVSzoyhd9GUkno7fndGot1KIXwDIFt8ImP6Aph7aGdh1Cq64J-1Bd-bUtlGnMLGbQnPw5GUMtaZtKLF_Y_ARvGOH4sFtBHI0smh7GKmi-t3BkNR2Fl8rIJrnCRcshFohxrA6JRJbwEcOcNvgfotcxpDr5HOQAIsr9phIw1oondLKgxQl9jWM0S3PxFB7IYR5JXmEOfxGm"/>
+<span class="font-medium text-on-surface">Sarah Connor</span>
+</div>
+<div class="col-span-2">
+<span class="text-[0.65rem] font-bold text-primary">NEXT GEN</span>
+</div>
+<div class="col-span-2 flex items-center space-x-2">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="text-on-surface-variant">Berlim</span>
+</div>
+<div class="col-span-2 flex space-x-1">
+<span class="px-1.5 py-0.5 bg-tertiary-container text-[0.6rem] font-bold text-on-tertiary-container rounded-sm">3ª</span>
+<span class="px-1.5 py-0.5 bg-tertiary-container text-[0.6rem] font-bold text-on-tertiary-container rounded-sm">5ª</span>
+</div>
+<div class="col-span-1 text-center font-mono text-on-surface-variant">13:15</div>
+<div class="col-span-1 text-right">
+<span class="bg-secondary-container text-on-secondary-fixed text-[0.65rem] font-bold px-2 py-0.5 rounded-full">Presente</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Accordion 2 (Expanded) -->
+<div class="overflow-hidden">
+<button class="w-full flex items-center justify-between px-4 py-3 bg-surface-container-low border-b border-surface-container-high rounded-t-lg">
+<div class="flex items-center space-x-3">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="expand_more">expand_more</span>
+<span class="text-[0.75rem] font-bold uppercase tracking-widest text-on-surface">14:00 - 15:00</span>
+</div>
+<span class="text-[0.65rem] font-bold bg-white px-2 py-0.5 rounded-full text-on-surface-variant">08 ALUNOS</span>
+</button>
+<div class="bg-surface-container-lowest">
+<!-- Row 1 -->
+<div class="grid grid-cols-12 px-4 h-8 items-center text-[0.75rem] hover:bg-surface-container-low transition-colors group">
+<div class="col-span-4 flex items-center space-x-3">
+<img alt="Student avatar" class="w-5 h-5 rounded-full" data-alt="Student profile photo small circle" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9oM7D-PxV_tex1PhroO9l9WehxjsPRpDzXR4sqGZlHfQ3ztPN2aSGPCObpuVJHFEu7VxY30MqIVVV8wxq7nVMnwg4ujNRnNAw4NSBS2E114UX9LMWsXQtKHvSriBeQ9ktSOs2wEkh3v9QIp5Psz5-11nnPmZPWxCOmo3dhTZ1YMRP30Uh8dF6xYW5014KyM6nN4ZmcGFjVBR-iGjclT5HpJg03lFr0M-cfJVK0nKfUSw9UYixztsiCbsOB-nFMb0vmt89XEhVtCUw"/>
+<span class="font-medium text-on-surface">Marcus Wright</span>
+</div>
+<div class="col-span-2">
+<span class="text-[0.65rem] font-bold text-primary">NEXT GEN</span>
+</div>
+<div class="col-span-2 flex items-center space-x-2">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="text-on-surface-variant">Berlim</span>
+</div>
+<div class="col-span-2 flex space-x-1">
+<span class="px-1.5 py-0.5 bg-tertiary-container text-[0.6rem] font-bold text-on-tertiary-container rounded-sm">2ª</span>
+<span class="px-1.5 py-0.5 bg-tertiary-container text-[0.6rem] font-bold text-on-tertiary-container rounded-sm">3ª</span>
+</div>
+<div class="col-span-1 text-center font-mono text-on-surface-variant">14:15</div>
+<div class="col-span-1 text-right">
+<span class="bg-secondary-container text-on-secondary-fixed text-[0.65rem] font-bold px-2 py-0.5 rounded-full">Presente</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Accordion 3 (Collapsed) -->
+<div class="overflow-hidden">
+<button class="w-full flex items-center justify-between px-4 py-3 bg-surface-container-low rounded-lg">
+<div class="flex items-center space-x-3">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="chevron_right">chevron_right</span>
+<span class="text-[0.75rem] font-bold uppercase tracking-widest text-on-surface">15:00 - 16:00</span>
+</div>
+<span class="text-[0.65rem] font-bold bg-white px-2 py-0.5 rounded-full text-on-surface-variant">15 ALUNOS</span>
+</button>
+</div>
+</section>
+<!-- Footer (Status Bar) -->
+<footer class="flex justify-between items-center px-8 py-2 bg-slate-50 dark:bg-slate-950 border-t border-slate-100 dark:border-slate-800 text-slate-500 dark:text-slate-400">
+<div class="flex items-center space-x-4">
+<span class="text-[0.75rem] font-normal Inter">REGISTROS: 4 / 48</span>
+<span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+<span class="text-[0.75rem] font-normal Inter">STATUS: ONLINE</span>
+</div>
+<div class="flex items-center space-x-4">
+<span class="text-[0.75rem] font-normal Inter">Sistema de Recepção v2.4.1</span>
+</div>
+</footer>
+</main>
+<!-- Floating Action Indicator (Status Light) -->
+<div class="fixed bottom-6 right-8 flex items-center space-x-2 bg-surface-container-lowest shadow-lg px-4 py-2 rounded-full border border-surface-container-high">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="text-[0.65rem] font-bold uppercase tracking-widest text-on-surface-variant">Terminal Pronto</span>
+</div>
+</body></html>
